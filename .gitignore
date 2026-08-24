@@ -1,0 +1,9 @@
+node_modules/
+.env
+.spotify-token.json
+*.log
+alarms.json
+.DS_Store
+.frame-hidden-assets.json
+*.tmp
+.frame-state.json
