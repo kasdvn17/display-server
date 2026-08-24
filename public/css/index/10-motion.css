@@ -1,0 +1,209 @@
+/* ===== Unified motion layer ===== */
+:root {
+  --motion-standard: cubic-bezier(0.2, 0.78, 0.2, 1);
+  --motion-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.top-bar {
+  animation: motionTopBarIn 0.52s var(--motion-emphasized) both;
+}
+
+.nav-tab.active svg,
+.nav-tab.active .tab-icon {
+  animation: motionNavPop 0.34s var(--motion-emphasized) both;
+}
+
+#view-media.view-entering .lyrics-stage {
+  animation: motionMediaStageIn 0.48s var(--motion-emphasized) both;
+}
+
+#view-media.view-entering .lyrics-main {
+  animation: motionContentIn 0.42s 0.06s var(--motion-standard) both;
+}
+
+#view-media.view-entering .player-dock {
+  animation: motionDockIn 0.48s 0.04s var(--motion-emphasized) both;
+}
+
+#spotify-art.art-reveal {
+  animation: motionArtworkIn 0.55s var(--motion-emphasized) both;
+}
+
+.lyric-line {
+  transition:
+    color 0.24s ease,
+    opacity 0.24s ease,
+    transform 0.32s var(--motion-standard);
+}
+
+.lyric-line.active {
+  transform: translate3d(5px, 0, 0);
+}
+
+.quick-settings.open,
+.spotify-device-menu.show,
+.spotify-sleep-menu.show,
+.music-search-results.show {
+  animation: motionPopoverIn 0.24s var(--motion-emphasized) both;
+  transform-origin: top center;
+}
+
+.morning-brief.show .morning-brief-card,
+.alarm-editor-backdrop.show .alarm-editor {
+  animation: motionSheetIn 0.38s var(--motion-emphasized) both;
+}
+
+.assistant-page.show #assistant-page-content {
+  animation: motionContentIn 0.42s 0.06s var(--motion-standard) both;
+}
+
+.notification-item.unread .notification-icon {
+  animation: motionUnreadPulse 2.8s ease-in-out infinite;
+}
+
+.idle-screen.show .idle-time,
+.idle-screen.show .idle-date,
+.idle-screen.show .idle-now-playing {
+  animation: motionContentIn 0.5s var(--motion-emphasized) both;
+}
+
+.idle-screen.show .idle-date {
+  animation-delay: 0.05s;
+}
+
+.idle-screen.show .idle-now-playing {
+  animation-delay: 0.1s;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-tab:hover,
+  .icon-btn:hover,
+  .spotify-mode-btn:hover,
+  .player-btn:hover {
+    transform: translate3d(0, -1px, 0);
+  }
+
+  .routine-card:hover,
+  .alarm-card:hover,
+  .notification-item:hover,
+  .dynamic-widget:hover {
+    transform: translate3d(0, -3px, 0);
+    border-color: rgba(var(--theme-rgb), 0.24);
+  }
+
+  .spotify-device-option:hover,
+  .spotify-sleep-option:hover,
+  .music-result-row:hover {
+    transform: translate3d(3px, 0, 0);
+  }
+}
+
+@keyframes motionTopBarIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -14px, 0) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes motionNavPop {
+  0% {
+    transform: scale(0.82);
+  }
+  62% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes motionMediaStageIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes motionDockIn {
+  from {
+    opacity: 0;
+    transform: translate3d(14px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes motionContentIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes motionArtworkIn {
+  from {
+    opacity: 0.25;
+    transform: scale(1.045);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes motionPopoverIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -7px, 0) scale(0.975);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes motionSheetIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes motionUnreadPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.055);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

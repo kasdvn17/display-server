@@ -1,0 +1,557 @@
+/* ===== Spotify Premium Web Playback SDK + bottom photo timer ===== */
+.ambient-frame {
+  transition: opacity 0.28s ease;
+}
+.screen.media-mode .ambient-frame {
+  opacity: 1;
+}
+.screen.media-mode {
+  background: transparent;
+}
+.screen.media-mode .ambient-vignette {
+  background: linear-gradient(
+    180deg,
+    rgba(3, 7, 12, 0.42) 0%,
+    rgba(3, 7, 12, 0.18) 36%,
+    rgba(3, 7, 12, 0.28) 62%,
+    rgba(3, 7, 12, 0.72) 100%
+  );
+}
+
+#view-media {
+  display: block !important;
+  visibility: hidden;
+  pointer-events: none;
+  opacity: 0;
+}
+#view-media.active {
+  visibility: visible;
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.spotify-art-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 24px;
+  overflow: hidden;
+  background: linear-gradient(145deg, #1d2527, #0d1215);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.3);
+}
+.spotify-art-card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition:
+    opacity 0.24s ease,
+    transform 0.35s ease;
+}
+.spotify-art-card.has-art img {
+  opacity: 1;
+}
+.spotify-art-card.playing img {
+  transform: scale(1.018);
+}
+.spotify-art-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(
+      circle at 30% 25%,
+      rgba(29, 185, 84, 0.25),
+      transparent 38%
+    ),
+    linear-gradient(145deg, #17211b, #0d1210);
+}
+.spotify-art-card.has-art .spotify-art-fallback {
+  opacity: 0;
+}
+.spotify-logo-mark {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1ed760;
+  color: #07130b;
+  box-shadow: 0 12px 30px rgba(30, 215, 96, 0.2);
+}
+.spotify-logo-mark svg {
+  width: 34px;
+  height: 34px;
+}
+
+.spotify-connect-card {
+  display: none;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+  text-align: center;
+}
+.spotify-connect-card.show {
+  display: block;
+}
+.spotify-connect-card strong {
+  display: block;
+  color: #fff;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+.spotify-connect-card span {
+  display: block;
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 10px;
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+.spotify-connect-btn {
+  height: 42px;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 21px;
+  background: #1ed760;
+  color: #07130b;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.spotify-connect-btn:active {
+  transform: scale(0.97);
+}
+
+.spotify-device-wrap {
+  position: relative;
+  z-index: 5;
+}
+.spotify-device-btn {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-align: left;
+  cursor: pointer;
+}
+.spotify-device-btn:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+.spotify-device-icon {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(30, 215, 96, 0.12);
+  color: #6cf29b;
+}
+.spotify-device-icon svg {
+  width: 16px;
+  height: 16px;
+}
+.spotify-device-copy {
+  min-width: 0;
+  flex: 1;
+}
+.spotify-device-copy small {
+  display: block;
+  font-size: 8px;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.42);
+  font-weight: 800;
+  margin-bottom: 2px;
+}
+.spotify-device-copy strong {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 11px;
+  font-weight: 700;
+  color: #eef5ff;
+}
+.spotify-device-caret {
+  width: 14px;
+  height: 14px;
+  opacity: 0.55;
+}
+.spotify-device-menu {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 50px;
+  max-height: 230px;
+  overflow: auto;
+  padding: 6px;
+  border-radius: 16px;
+  background: rgba(14, 19, 23, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.42);
+  -webkit-overflow-scrolling: touch;
+}
+.spotify-device-menu.show {
+  display: block;
+}
+.spotify-device-option {
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  color: #fff;
+  padding: 7px 9px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-align: left;
+  cursor: pointer;
+}
+.spotify-device-option:active,
+.spotify-device-option.active {
+  background: rgba(30, 215, 96, 0.1);
+}
+.spotify-device-option .device-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.28);
+  flex: 0 0 8px;
+}
+.spotify-device-option.active .device-dot {
+  background: #1ed760;
+  box-shadow: 0 0 10px rgba(30, 215, 96, 0.38);
+}
+.spotify-device-option strong {
+  display: block;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.spotify-device-option small {
+  display: block;
+  font-size: 8px;
+  color: rgba(255, 255, 255, 0.45);
+  margin-top: 2px;
+}
+
+.spotify-extra-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: -2px;
+}
+.spotify-volume-row {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) 34px;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 8px;
+  padding: 0 2px;
+  color: rgba(255, 255, 255, 0.62);
+}
+.spotify-volume-row svg {
+  width: 17px;
+  height: 17px;
+  opacity: 0.72;
+}
+.spotify-volume-row input {
+  width: 100%;
+  height: 4px !important;
+  background: rgba(255, 255, 255, 0.14) !important;
+}
+.spotify-volume-row input::-webkit-slider-thumb {
+  width: 16px !important;
+  height: 16px !important;
+  border: 2px solid #1a1f24 !important;
+}
+.spotify-volume-value {
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: rgba(255, 255, 255, 0.48);
+}
+.spotify-mode-btn {
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.52);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.spotify-mode-btn.active {
+  color: #1ed760;
+  background: rgba(30, 215, 96, 0.1);
+}
+.spotify-mode-btn:active {
+  transform: scale(0.91);
+}
+.spotify-mode-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.spotify-sleep-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.spotify-sleep-btn {
+  position: relative;
+}
+.spotify-sleep-btn.active {
+  color: var(--theme-primary);
+  background: rgba(var(--theme-rgb), 0.12);
+}
+.spotify-sleep-badge {
+  position: absolute;
+  right: -6px;
+  top: -5px;
+  min-width: 24px;
+  height: 15px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--theme-primary);
+  color: var(--theme-on-primary);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 7px;
+  font-weight: 900;
+  line-height: 15px;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.28);
+}
+.spotify-sleep-btn.active .spotify-sleep-badge {
+  display: flex;
+}
+.spotify-sleep-menu {
+  display: none;
+  position: absolute;
+  left: 50%;
+  bottom: 46px;
+  transform: translateX(-50%);
+  width: 210px;
+  padding: 8px;
+  border-radius: 18px;
+  background: rgba(14, 19, 25, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 18px 52px rgba(0, 0, 0, 0.46);
+  z-index: 12;
+}
+.spotify-sleep-menu.show {
+  display: block;
+}
+.spotify-sleep-title {
+  padding: 6px 8px 8px;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  color: rgba(255, 255, 255, 0.42);
+}
+.spotify-sleep-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.spotify-sleep-option {
+  height: 38px;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.065);
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.spotify-sleep-option:active {
+  transform: scale(0.96);
+  background: rgba(255, 255, 255, 0.12);
+}
+.spotify-sleep-option.active {
+  background: rgba(var(--theme-rgb), 0.16);
+  color: #ffe4e6;
+  box-shadow: inset 0 0 0 1px rgba(var(--theme-rgb), 0.14);
+}
+.spotify-sleep-option.off {
+  grid-column: 1/-1;
+  color: rgba(255, 255, 255, 0.58);
+}
+.spotify-sdk-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 30px;
+  padding: 7px 9px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.045);
+  color: rgba(255, 255, 255, 0.47);
+  font-size: 9px;
+  line-height: 1.25;
+  text-align: center;
+}
+.spotify-sdk-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: #1ed760;
+  box-shadow: 0 0 10px rgba(30, 215, 96, 0.32);
+}
+
+.music-result.spotify-result .music-result-thumb {
+  border-radius: 10px;
+}
+.music-search-results .spotify-section-label {
+  padding: 8px 10px 5px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+/* A GPU-composited edge-to-edge countdown. Fixed positioning avoids WebKit clipping at the Home view bottom. */
+#view-home .next-photo-indicator {
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  top: auto !important;
+  z-index: 999 !important;
+  width: 100% !important;
+  height: 4px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+  pointer-events: none !important;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+#view-home .next-photo-track {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: 0 !important;
+  height: 4px !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  overflow: hidden !important;
+}
+#view-home .next-photo-track span {
+  display: block !important;
+  width: 100% !important;
+  height: 4px !important;
+  transform-origin: 0 50% !important;
+  -webkit-transform-origin: 0 50% !important;
+  transform: scaleX(1);
+  -webkit-transform: scaleX(1);
+  transition: transform 0.26s linear !important;
+  -webkit-transition: -webkit-transform 0.26s linear !important;
+  background: linear-gradient(
+    90deg,
+    var(--theme-secondary),
+    var(--theme-primary) 55%,
+    var(--theme-tertiary)
+  ) !important;
+  box-shadow: 0 0 12px rgba(var(--theme-rgb), 0.3) !important;
+  will-change: transform;
+}
+
+@media (min-width: 900px) and (max-width: 1100px) and (orientation: landscape) {
+  .spotify-art-card {
+    border-radius: 20px;
+  }
+  .spotify-device-btn {
+    min-height: 42px;
+  }
+}
+@media (max-width: 720px) {
+  .spotify-art-card {
+    width: min(190px, 48vw);
+    margin: 0 auto;
+  }
+  .spotify-device-menu {
+    bottom: 48px;
+  }
+}
+
+/* ===== Background polish: Immich stays visible on Media + News ===== */
+/* Media: use the live Immich frame directly. No album-art backdrop, no extra
+     blur, and no Media-specific dimming layer. */
+#view-media {
+  background: transparent !important;
+}
+#view-media .media-album-bg {
+  display: none !important;
+}
+.screen.media-mode .ambient-frame {
+  opacity: 1 !important;
+}
+.screen.media-mode .ambient-photo-layer {
+  -webkit-filter: none !important;
+  filter: none !important;
+}
+.screen.media-mode .ambient-vignette {
+  background: linear-gradient(
+    180deg,
+    rgba(4, 8, 16, 0.16) 0%,
+    rgba(4, 8, 16, 0.02) 32%,
+    rgba(4, 8, 16, 0.06) 58%,
+    rgba(4, 8, 16, 0.58) 100%
+  ) !important;
+}
+/* Keep the content readable without painting/blur-processing the photo itself. */
+#view-media .lyrics-stage {
+  background: rgba(7, 11, 16, 0.58) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* News: remove the opaque/rectangular page background that created a black
+     band below the top bar. Cards float over the same continuous slideshow. */
+#view-news {
+  background: transparent !important;
+}
+#view-news .view-inner {
+  background: transparent !important;
+}
+#view-news .news-feed-card,
+#view-news .news-feed-empty,
+#view-news .news-refresh-btn {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+#view-news .news-feed-card {
+  background: rgba(9, 14, 20, 0.66);
+}
+#view-news .news-feed-empty {
+  background: rgba(9, 14, 20, 0.58);
+}
+#view-news .news-refresh-btn {
+  background: rgba(9, 14, 20, 0.58);
+}

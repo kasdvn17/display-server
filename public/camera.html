@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#071019" />
+    <title>Camera Nest Frame</title>
+    <link rel="stylesheet" href="/css/camera.css?v=20260824-2" />
+  </head>
+  <body>
+    <main class="stage" id="stage">
+      <video
+        class="remote-video"
+        id="remote-video"
+        autoplay
+        playsinline
+      ></video>
+      <video
+        class="local-video"
+        id="local-video"
+        autoplay
+        playsinline
+        muted
+      ></video>
+      <div class="shade"></div>
+      <section class="panel">
+        <div class="brand">
+          <div class="mark">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path
+                d="M4 7.8A2.8 2.8 0 0 1 6.8 5h7.4A2.8 2.8 0 0 1 17 7.8v8.4a2.8 2.8 0 0 1-2.8 2.8H6.8A2.8 2.8 0 0 1 4 16.2V7.8Z"
+                stroke="currentColor"
+                stroke-width="1.7"
+              />
+              <path
+                d="m17 10 3-2v8l-3-2"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+          <div>
+            <strong>Camera Nest Frame</strong
+            ><span>Liên lạc riêng tư ngang hàng</span>
+          </div>
+        </div>
+        <div class="error" id="error"></div>
+        <form class="form" id="form">
+          <label
+            ><span class="label">Token camera</span
+            ><input
+              class="field"
+              id="token"
+              type="password"
+              autocomplete="current-password"
+              required
+              placeholder="CAMERA_REMOTE_TOKEN"
+          /></label>
+          <label
+            ><span class="label">Tên của bạn</span
+            ><input
+              class="field"
+              id="name"
+              maxlength="60"
+              autocomplete="name"
+              value="Người xem từ xa"
+          /></label>
+          <label class="share"
+            ><input id="share-video" type="checkbox" /> Chia sẻ camera của
+            thiết bị này với màn hình</label
+          >
+          <button class="button" id="start" type="submit">
+            Bắt đầu cuộc gọi
+          </button>
+        </form>
+        <div class="callbar">
+          <div class="call-state">
+            <strong
+              ><span class="dot"></span
+              ><span id="state-title">Đang gọi màn hình…</span></strong
+            ><span id="state-detail">Đang chờ màn hình phản hồi</span>
+          </div>
+          <button class="button end" id="end" type="button">Kết thúc</button>
+        </div>
+        <div class="hint">
+          Cần sử dụng HTTPS. Hình ảnh và âm thanh truyền trực tiếp giữa các
+          thiết bị; server chỉ trao đổi thông tin kết nối.
+        </div>
+      </section>
+    </main>
+    <script src="/js/camera.js"></script>
+  </body>
+</html>

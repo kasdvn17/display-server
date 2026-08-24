@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#071019" />
+    <title>Điều khiển Nest Frame</title>
+    <link rel="stylesheet" href="/css/remote.css?v=20260824-3" />
+  </head>
+  <body>
+    <main class="shell">
+      <div class="top">
+        <div class="brand">
+          <small>Nest Frame</small>
+          <h1>Trung tâm điều khiển</h1>
+        </div>
+        <div class="status" id="status">Chưa kết nối</div>
+      </div>
+
+      <section class="card auth" id="auth-card">
+        <div style="font-weight: 700">Kết nối tới màn hình</div>
+        <div style="font-size: 13px; color: var(--muted)">
+          Nhập <code>REMOTE_CONTROL_TOKEN</code> đã cấu hình trên server. Token
+          chỉ được lưu trong trình duyệt này.
+        </div>
+        <div class="auth-row">
+          <input
+            class="field"
+            id="token"
+            type="password"
+            autocomplete="current-password"
+            placeholder="Token điều khiển từ xa"
+          /><button class="btn primary" id="connect">Kết nối</button>
+        </div>
+      </section>
+
+      <div id="controls" hidden>
+        <section class="card overview">
+          <div class="overview-main">
+            <span class="live-dot" id="frame-dot"></span>
+            <div><small>Màn hình</small><strong id="frame-online">Ngoại tuyến</strong></div>
+          </div>
+          <div class="overview-grid">
+            <div><span>Đang ở</span><strong id="frame-view">—</strong></div>
+            <div><span>Trợ lý</span><strong id="frame-assistant">—</strong></div>
+            <div><span>Trang thông tin</span><strong id="frame-page">Không mở</strong></div>
+            <div><span>Máy ảnh</span><strong id="frame-camera">—</strong></div>
+          </div>
+          <div class="last-seen" id="frame-seen">Chưa nhận tín hiệu trạng thái</div>
+        </section>
+
+        <div class="section-head"><h2>Khôi phục nhanh</h2><span>Khi màn hình bị kẹt</span></div>
+        <div class="action-grid recovery-grid">
+          <button class="action danger" data-command="stop_assistant"><b>■</b><span>Dừng trợ lý</span></button>
+          <button class="action" data-command="close_page"><b>×</b><span>Đóng trang</span></button>
+          <button class="action" data-command="back"><b>←</b><span>Quay lại</span></button>
+          <button class="action" data-command="idle"><b>◐</b><span>Chế độ chờ</span></button>
+          <button class="action" data-command="reload"><b>↻</b><span>Tải lại</span></button>
+          <button class="action danger" id="dismiss"><b>■</b><span>Dừng báo thức</span></button>
+        </div>
+
+        <div class="section-head"><h2>Điều hướng</h2><span>Chuyển tab trên màn hình</span></div>
+        <div class="nav-grid" id="nav-grid">
+          <button class="nav-command" data-view="home">Trang chủ</button>
+          <button class="nav-command" data-view="today">Hôm nay</button>
+          <button class="nav-command" data-view="media">Giải trí</button>
+          <button class="nav-command" data-view="news">Tin tức</button>
+          <button class="nav-command" data-view="alarm">Báo thức</button>
+        </div>
+
+        <div class="section-head"><h2>Thói quen</h2><span>Chạy trên màn hình</span></div>
+        <div class="routine-grid" id="routines"></div>
+
+        <div class="section-head"><h2>Gửi tới màn hình</h2><span>Không cần micro</span></div>
+        <form class="card compose" id="compose-form">
+          <div class="compose-mode" id="compose-mode">
+            <button type="button" class="chip active" data-mode="message">Thông báo</button>
+            <button type="button" class="chip" data-mode="assistant">Hỏi Gemini</button>
+          </div>
+          <input class="field" id="message-title" maxlength="160" placeholder="Tiêu đề (không bắt buộc)" />
+          <textarea class="field" id="message-text" maxlength="2000" rows="4" placeholder="Nhập nội dung gửi tới màn hình…" required></textarea>
+          <button class="btn primary" type="submit" id="message-send">Gửi tới màn hình</button>
+        </form>
+
+        <div class="section-head"><h2>Thông báo</h2><button class="text-button" id="read-all">Đánh dấu đã đọc</button></div>
+        <div class="notification-list" id="notifications"></div>
+
+        <div class="section-head"><h2>Chẩn đoán</h2><span id="diagnostic-summary">—</span></div>
+        <div class="diagnostic-list" id="diagnostics"></div>
+
+        <div class="section-head">
+          <h2>Báo thức</h2>
+          <button class="text-button" id="add">＋ Thêm</button>
+        </div>
+        <div class="subcount" id="count">0 báo thức</div>
+        <div class="alarms" id="alarms"></div>
+        <div class="card last">
+          <span>Lệnh gần nhất</span><strong id="last">—</strong>
+        </div>
+      </div>
+    </main>
+
+    <div class="modal-backdrop" id="modal-bg">
+      <form class="modal" id="form">
+        <h3>Thêm báo thức</h3>
+        <div class="grid">
+          <label
+            ><span class="label">Thời gian</span
+            ><input class="field" id="time" type="time" required
+          /></label>
+          <label
+            ><span class="label">Nhãn</span
+            ><input
+              class="field"
+              id="label"
+              maxlength="80"
+              placeholder="Thức dậy"
+          /></label>
+          <div class="full">
+            <span class="label">Lặp lại</span>
+            <div class="chips" id="days"></div>
+          </div>
+          <div class="full">
+            <span class="label">Số lần cần xác nhận</span>
+            <div class="confirm-row" id="confirms"></div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn ghost" type="button" id="cancel">Hủy</button
+          ><button class="btn primary" type="submit">Lưu báo thức</button>
+        </div>
+      </form>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <script src="/js/remote.js?v=20260824-2"></script>
+  </body>
+</html>
