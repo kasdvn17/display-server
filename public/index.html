@@ -1010,7 +1010,11 @@
                     aria-label="Đổi chế độ lặp"
                     data-i18n-aria-label="SPOTIFY_REPEAT"
                   >
-                    <svg viewBox="0 0 24 24" fill="none">
+                    <svg
+                      class="spotify-repeat-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                    >
                       <path
                         d="M17 2l3 3-3 3M20 5H8a4 4 0 0 0-4 4v1M7 22l-3-3 3-3M4 19h12a4 4 0 0 0 4-4v-1"
                         stroke="currentColor"
@@ -1019,6 +1023,11 @@
                         stroke-linejoin="round"
                       />
                     </svg>
+                    <span class="spotify-repeat-one" aria-hidden="true">1</span>
+                    <span
+                      class="spotify-repeat-off-mark"
+                      aria-hidden="true"
+                    ></span>
                   </button>
                   <div class="spotify-sleep-wrap" id="spotify-sleep-wrap">
                     <button

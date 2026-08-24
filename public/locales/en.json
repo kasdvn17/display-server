@@ -170,7 +170,7 @@
   "SPOTIFY_DEVICE_TV": "TV",
   "SPOTIFY_DEVICE_TABLET": "Tablet",
   "SPOTIFY_REPEAT_OFF": "Repeat off",
-  "SPOTIFY_REPEAT_CONTEXT": "Repeat all",
+  "SPOTIFY_REPEAT_CONTEXT": "Repeat forever",
   "SPOTIFY_REPEAT_TRACK": "Repeat one",
   "MINUTES_SHORT": "min",
   "HOURS_SHORT": "hr",

@@ -81,7 +81,7 @@
   var spotifySleepBadge = document.getElementById("spotify-sleep-badge");
   var spotifySleepTimer = 0;
   var spotifySleepUntil = 0;
-  var SPOTIFY_SLEEP_STORAGE_KEY = "nestframe-spotify-sleep-until";
+  var spotifySleepInitialized = false;
   var spotifyVolume = document.getElementById("spotify-volume");
   var spotifyVolumeValue = document.getElementById("spotify-volume-value");
   var spotifyVolumeTimer = 0,
@@ -100,8 +100,20 @@
     if (mode === "track")
       return spotifyT("SPOTIFY_REPEAT_TRACK", "Lặp lại một bài");
     if (mode === "context")
-      return spotifyT("SPOTIFY_REPEAT_CONTEXT", "Lặp lại tất cả");
+      return spotifyT("SPOTIFY_REPEAT_CONTEXT", "Lặp vô hạn");
     return spotifyT("SPOTIFY_REPEAT_OFF", "Tắt lặp lại");
+  }
+  function syncSpotifyRepeatButton(mode) {
+    mode = ["off", "context", "track"].indexOf(mode) >= 0 ? mode : "off";
+    spotifyState.repeat = mode;
+    if (!repeatBtn) return;
+    repeatBtn.classList.toggle("active", mode !== "off");
+    repeatBtn.classList.toggle("repeat-off", mode === "off");
+    repeatBtn.classList.toggle("repeat-context", mode === "context");
+    repeatBtn.classList.toggle("repeat-track", mode === "track");
+    repeatBtn.setAttribute("data-repeat", mode);
+    repeatBtn.setAttribute("aria-label", spotifyRepeatLabel(mode));
+    repeatBtn.setAttribute("title", spotifyRepeatLabel(mode));
   }
   function spotifyDeviceType(type) {
     var normalized = String(type || "").toLowerCase();
@@ -144,9 +156,8 @@
   function spotifyFetch(url, options) {
     options = options || {};
     var path = String(url || ""),
-      cooldownExempt = /^\/spotify\/(?:status|token|logout)(?:[/?]|$)/.test(
-        path,
-      );
+      cooldownExempt =
+        /^\/spotify\/(?:status|token|logout|sleep-timer)(?:[/?]|$)/.test(path);
     if (!cooldownExempt && Date.now() < spotifyCooldownUntil) {
       var blocked = new Error(
         spotifyT(
@@ -589,13 +600,7 @@
     );
     if (shuffleBtn)
       shuffleBtn.classList.toggle("active", spotifyState.shuffle);
-    if (repeatBtn) {
-      repeatBtn.classList.toggle("active", spotifyState.repeat !== "off");
-      repeatBtn.setAttribute(
-        "aria-label",
-        spotifyRepeatLabel(spotifyState.repeat),
-      );
-    }
+    syncSpotifyRepeatButton(spotifyState.repeat);
     updateSpotifyProgress();
     return true;
   }
@@ -734,13 +739,7 @@
           : spotifyT("SPOTIFY_PAUSED", "Tạm dừng"),
       );
     if (shuffleBtn) shuffleBtn.classList.toggle("active", spotifyState.shuffle);
-    if (repeatBtn) {
-      repeatBtn.classList.toggle("active", spotifyState.repeat !== "off");
-      repeatBtn.setAttribute(
-        "aria-label",
-        spotifyRepeatLabel(spotifyState.repeat),
-      );
-    }
+    syncSpotifyRepeatButton(spotifyState.repeat);
     updateSpotifyProgress();
   }
   function refreshSpotifyPlayer() {
@@ -1432,12 +1431,7 @@
         body: { deviceId: targetDeviceId(), state: next },
       })
         .then(function () {
-          spotifyState.repeat = next;
-          repeatBtn.classList.toggle("active", next !== "off");
-          repeatBtn.setAttribute(
-            "aria-label",
-            spotifyRepeatLabel(next),
-          );
+          syncSpotifyRepeatButton(next);
         })
         .catch(function () {});
     });
@@ -1456,16 +1450,27 @@
     if (spotifySleepMenu) spotifySleepMenu.classList.remove("show");
     if (spotifySleepBtn) spotifySleepBtn.setAttribute("aria-expanded", "false");
   }
-  function saveSpotifySleepUntil(value) {
-    spotifySleepUntil = Math.max(0, Number(value) || 0);
-    try {
-      if (spotifySleepUntil)
-        localStorage.setItem(
-          SPOTIFY_SLEEP_STORAGE_KEY,
-          String(spotifySleepUntil),
-        );
-      else localStorage.removeItem(SPOTIFY_SLEEP_STORAGE_KEY);
-    } catch (_) {}
+  function positionSpotifySleepMenu() {
+    if (!spotifySleepMenu || !spotifySleepBtn) return;
+    var rect = spotifySleepBtn.getBoundingClientRect();
+    var menuWidth = Math.min(210, Math.max(160, window.innerWidth - 20));
+    var left = Math.max(
+      10,
+      Math.min(
+        window.innerWidth - menuWidth - 10,
+        rect.left + rect.width / 2 - menuWidth / 2,
+      ),
+    );
+    spotifySleepMenu.style.width = menuWidth + "px";
+    spotifySleepMenu.style.left = left + "px";
+    spotifySleepMenu.style.bottom =
+      Math.max(10, window.innerHeight - rect.top + 8) + "px";
+  }
+  function applySpotifySleepTimerStatus(data) {
+    spotifySleepUntil =
+      data && data.active ? Math.max(0, Number(data.sleepUntil) || 0) : 0;
+    renderSpotifySleepTimer();
+    scheduleSpotifySleepTick();
   }
   function formatSleepRemaining(ms) {
     var total = Math.max(0, Math.ceil(ms / 60000));
@@ -1496,27 +1501,43 @@
         : "";
     if (spotifySleepMenu) {
       var nodes = spotifySleepMenu.querySelectorAll("[data-sleep-minutes]");
-      for (var i = 0; i < nodes.length; i++)
-        nodes[i].classList.remove("active");
+      var selectedMinutes = active ? Math.round(remaining / 60000) : 0;
+      for (var i = 0; i < nodes.length; i++) {
+        var optionMinutes =
+          Number(nodes[i].getAttribute("data-sleep-minutes")) || 0;
+        nodes[i].classList.toggle("active", optionMinutes === selectedMinutes);
+      }
     }
   }
-  function stopSpotifySleepTimer(clearOnly) {
+  function stopSpotifySleepTimer(closeMenu) {
     clearTimeout(spotifySleepTimer);
     spotifySleepTimer = 0;
-    saveSpotifySleepUntil(0);
-    renderSpotifySleepTimer();
-    if (!clearOnly) closeSpotifySleepMenu();
+    return spotifyFetch("/spotify/sleep-timer", { method: "DELETE" })
+      .then(function (data) {
+        applySpotifySleepTimerStatus(data);
+        if (closeMenu !== false) closeSpotifySleepMenu();
+        return data;
+      })
+      .catch(function () {
+        renderSpotifySleepTimer();
+        scheduleSpotifySleepTick();
+      });
   }
   function setSpotifySleepTimer(minutes) {
     minutes = Math.max(0, Number(minutes) || 0);
-    if (!minutes) {
-      stopSpotifySleepTimer(false);
-      return;
-    }
-    saveSpotifySleepUntil(Date.now() + Math.round(minutes * 60000));
-    renderSpotifySleepTimer();
-    scheduleSpotifySleepTick();
-    closeSpotifySleepMenu();
+    if (!minutes) return stopSpotifySleepTimer(true);
+    return spotifyFetch("/spotify/sleep-timer", {
+      method: "PUT",
+      body: { minutes: minutes },
+    })
+      .then(function (data) {
+        applySpotifySleepTimerStatus(data);
+        closeSpotifySleepMenu();
+        return data;
+      })
+      .catch(function () {
+        renderSpotifySleepTimer();
+      });
   }
   function tickSpotifySleepTimer() {
     if (!spotifySleepUntil) {
@@ -1525,10 +1546,11 @@
     }
     var remaining = spotifySleepUntil - Date.now();
     if (remaining <= 0) {
-      saveSpotifySleepUntil(0);
+      spotifySleepUntil = 0;
       renderSpotifySleepTimer();
-      if (spotifyConnected)
-        Promise.resolve(pauseSpotify()).catch(function () {});
+      spotifyFetch("/spotify/sleep-timer", { cache: "no-store" })
+        .then(applySpotifySleepTimerStatus)
+        .catch(function () {});
       return;
     }
     renderSpotifySleepTimer();
@@ -1547,24 +1569,21 @@
     }, delay);
   }
   function initSpotifySleepTimer() {
-    try {
-      spotifySleepUntil = Math.max(
-        0,
-        Number(localStorage.getItem(SPOTIFY_SLEEP_STORAGE_KEY)) || 0,
-      );
-    } catch (_) {
-      spotifySleepUntil = 0;
-    }
-    if (spotifySleepUntil && spotifySleepUntil <= Date.now()) {
-      spotifySleepUntil = Date.now() - 1;
-    }
+    if (spotifySleepInitialized) return;
+    spotifySleepInitialized = true;
+    if (spotifySleepMenu && spotifySleepMenu.parentNode !== document.body)
+      document.body.appendChild(spotifySleepMenu);
     if (spotifySleepBtn)
       spotifySleepBtn.addEventListener("click", function (e) {
         e.stopPropagation();
         if (!spotifySleepMenu) return;
         var show = !spotifySleepMenu.classList.contains("show");
         spotifySleepMenu.classList.toggle("show", show);
-        spotifySleepBtn.setAttribute("aria-expanded", show ? "true" : "false");
+        spotifySleepBtn.setAttribute(
+          "aria-expanded",
+          show ? "true" : "false",
+        );
+        if (show) positionSpotifySleepMenu();
       });
     if (spotifySleepMenu)
       spotifySleepMenu.addEventListener("click", function (e) {
@@ -1573,14 +1592,34 @@
           ? e.target.closest("[data-sleep-minutes]")
           : null;
         if (!b) return;
-        setSpotifySleepTimer(Number(b.getAttribute("data-sleep-minutes")) || 0);
+        setSpotifySleepTimer(
+          Number(b.getAttribute("data-sleep-minutes")) || 0,
+        );
       });
     document.addEventListener("click", function (e) {
-      if (spotifySleepWrap && !spotifySleepWrap.contains(e.target))
+      if (
+        spotifySleepWrap &&
+        !spotifySleepWrap.contains(e.target) &&
+        spotifySleepMenu &&
+        !spotifySleepMenu.contains(e.target)
+      )
         closeSpotifySleepMenu();
     });
-    tickSpotifySleepTimer();
-    scheduleSpotifySleepTick();
+    window.addEventListener("resize", function () {
+      if (spotifySleepMenu && spotifySleepMenu.classList.contains("show"))
+        positionSpotifySleepMenu();
+    });
+    spotifyFetch("/spotify/sleep-timer", { cache: "no-store" })
+      .then(applySpotifySleepTimerStatus)
+      .catch(function () {
+        renderSpotifySleepTimer();
+      });
+    setInterval(function () {
+      if (document.hidden) return;
+      spotifyFetch("/spotify/sleep-timer", { cache: "no-store" })
+        .then(applySpotifySleepTimerStatus)
+        .catch(function () {});
+    }, 15000);
   }
 
   function deviceLabel(d) {
@@ -1760,6 +1799,8 @@
   });
 
   function initSpotify() {
+    syncSpotifyRepeatButton(spotifyState.repeat);
+    initSpotifySleepTimer();
     spotifyFetch("/spotify/status", { cache: "no-store" })
       .then(function (status) {
         spotifyConfigured = !!status.configured;
@@ -1837,11 +1878,7 @@
     }
     if (spotifyState.device && spotifyDeviceName)
       spotifyDeviceName.textContent = deviceLabel(spotifyState.device);
-    if (repeatBtn)
-      repeatBtn.setAttribute(
-        "aria-label",
-        spotifyRepeatLabel(spotifyState.repeat),
-      );
+    syncSpotifyRepeatButton(spotifyState.repeat);
     if (spotifyArt && currentTrack)
       spotifyArt.alt = spotifyT(
         "SPOTIFY_ARTWORK_NAMED",

@@ -194,6 +194,7 @@ function emptyFrameState() {
     version: 1,
     notifications: [],
     morningBrief: { presentedDate: "", dismissedDate: "" },
+    spotifySleepUntil: 0,
   };
 }
 
@@ -210,6 +211,10 @@ function readFrameState() {
         parsed && parsed.morningBrief && typeof parsed.morningBrief === "object"
           ? { ...fallback.morningBrief, ...parsed.morningBrief }
           : fallback.morningBrief,
+      spotifySleepUntil: Math.max(
+        0,
+        Number(parsed && parsed.spotifySleepUntil) || 0,
+      ),
     };
   } catch (_) {
     return emptyFrameState();

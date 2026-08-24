@@ -224,7 +224,7 @@ function voiceToolDefinitions() {
       type: "function",
       name: "spotify_control",
       description:
-        "Control Spotify playback and volume on the active Spotify Connect device.",
+        "Control Spotify playback, repeat mode, volume, and the server-side sleep timer.",
       parameters: {
         type: "object",
         properties: {
@@ -244,6 +244,9 @@ function voiceToolDefinitions() {
               "repeat_off",
               "repeat_context",
               "repeat_track",
+              "sleep_timer_set",
+              "sleep_timer_off",
+              "sleep_timer_status",
             ],
             description:
               "Use volume for an absolute level; use volume_up or volume_down for relative changes.",
@@ -266,6 +269,13 @@ function voiceToolDefinitions() {
             type: "number",
             minimum: 0,
             description: "Playback position to seek to, in seconds.",
+          },
+          minutes: {
+            type: "number",
+            minimum: 1,
+            maximum: 1440,
+            description:
+              "Sleep timer duration in minutes, required for sleep_timer_set.",
           },
         },
         required: ["action"],
@@ -646,7 +656,7 @@ function voiceInstructions() {
     "For web research or information that may change, call web_search. For a public figure, use lookup_person. If only a ROLE is given, call web_search first to identify the current officeholder, then call lookup_person with the full name. search_news may verify recent leadership changes.",
     "Only make claims supported by search sources. Keep speech concise and place details and sources in Dynamic UI. Never invent missing facts.",
     "Every Dynamic UI link must copy an absolute HTTP(S) URL exactly from a tool result. Never use #, relative paths, or invented URLs. If no real source URL exists, omit the link and do not create an Open details button.",
-    "For alarms or Spotify, use the appropriate tool. Call manage_alarms with action list when an ID is needed; edit or delete only when explicitly requested. ALWAYS call spotify_now_playing when asked what is playing. Use spotify_search to search, spotify_play_search to find and play, spotify_queue_search to queue, and spotify_library for top, recent, or saved music. Use spotify_control for volume, seek, shuffle, and repeat. Use spotify_devices to list players. To select or switch players, call spotify_select_player with deviceId or deviceName; if missing or ambiguous, call spotify_devices then request_followup instead of guessing. For relative alarms such as five minutes from now, pass relativeMinutes and never calculate HH:MM yourself. Pass time only for an explicit clock time. Confirm briefly after the tool completes.",
+    "For alarms or Spotify, use the appropriate tool. Call manage_alarms with action list when an ID is needed; edit or delete only when explicitly requested. ALWAYS call spotify_now_playing when asked what is playing. Use spotify_search to search, spotify_play_search to find and play, spotify_queue_search to queue, and spotify_library for top, recent, or saved music. Use spotify_control for volume, seek, shuffle, repeat, and sleep timers. Use spotify_devices to list players. To select or switch players, call spotify_select_player with deviceId or deviceName; if missing or ambiguous, call spotify_devices then request_followup instead of guessing. For relative alarms such as five minutes from now, pass relativeMinutes and never calculate HH:MM yourself. Pass time only for an explicit clock time. Confirm briefly after the tool completes.",
     "Use get_frame_status for display, camera, and service status. Use control_frame only for an explicitly requested display action. When the user explicitly says announce, announcement, broadcast, or asks the frame to say something aloud, use send_broadcast. A broadcast opens the full-screen broadcast presentation and reads only its required title aloud; its description is optional. For any ordinary request to notify, remind, or send a message that does not explicitly ask for an announcement or broadcast, use manage_notifications with action create so it appears in the Notification Center instead. Never call both send_broadcast and manage_notifications for the same request. For broadcasts and created notifications, choose the most semantically appropriate allowed icon; do not ask the user to choose an icon unless they explicitly care. Use manage_notifications for other Notification Center actions and mutate notifications only when explicitly requested. Use get_news_feed for the default RSS feed and search_news for topical searches. Use get_lyrics for a specific song; if the current track is unknown, call spotify_now_playing first. Never request, read, or expose tokens, API keys, OAuth credentials, or WebRTC signaling.",
     "If a tool returns an error, state it briefly instead of pretending the action succeeded.",
     "The default frame timezone is " +
@@ -1873,6 +1883,38 @@ async function executeVoiceTool(name, args, context) {
   }
   if (name === "spotify_control") {
     const action = String(args.action || "");
+    if (action === "sleep_timer_status") {
+      const status = getSpotifySleepTimerStatus();
+      return {
+        kind: "info",
+        ok: true,
+        spotify: true,
+        sleepTimer: status,
+        message: status.active
+          ? `Spotify sleep timer has ${Math.ceil(status.remainingMs / 60_000)} minutes remaining`
+          : "Spotify sleep timer is off",
+      };
+    }
+    if (action === "sleep_timer_set") {
+      const status = setSpotifySleepTimer(args.minutes);
+      return {
+        kind: "action",
+        ok: true,
+        spotify: true,
+        sleepTimer: status,
+        message: `Spotify sleep timer set for ${Math.round(Number(args.minutes))} minutes`,
+      };
+    }
+    if (action === "sleep_timer_off") {
+      const status = cancelSpotifySleepTimer();
+      return {
+        kind: "action",
+        ok: true,
+        spotify: true,
+        sleepTimer: status,
+        message: "Spotify sleep timer cancelled",
+      };
+    }
     if (action === "seek") {
       const positionSeconds = Number(args.positionSeconds);
       if (!Number.isFinite(positionSeconds) || positionSeconds < 0)

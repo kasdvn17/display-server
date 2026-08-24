@@ -69,6 +69,111 @@ function spotifyConfigured() {
   return !!(SPOTIFY_CLIENT_ID && SPOTIFY_CLIENT_SECRET && SPOTIFY_REDIRECT_URI);
 }
 
+let spotifySleepTimerHandle = null;
+
+function getSpotifySleepTimerStatus() {
+  const sleepUntil = Math.max(
+    0,
+    Number(readFrameState().spotifySleepUntil) || 0,
+  );
+  const remainingMs = Math.max(0, sleepUntil - Date.now());
+  return {
+    active: remainingMs > 0,
+    sleepUntil: remainingMs > 0 ? sleepUntil : 0,
+    remainingMs,
+  };
+}
+
+function persistSpotifySleepUntil(sleepUntil) {
+  const state = readFrameState();
+  state.spotifySleepUntil = Math.max(0, Number(sleepUntil) || 0);
+  writeFrameState(state);
+  return state.spotifySleepUntil;
+}
+
+async function expireSpotifySleepTimer(expectedUntil) {
+  const currentUntil = Math.max(
+    0,
+    Number(readFrameState().spotifySleepUntil) || 0,
+  );
+  if (!currentUntil || currentUntil !== expectedUntil) return;
+
+  spotifySleepTimerHandle = null;
+  try {
+    await spotifyApi("/me/player/pause", { method: "PUT" });
+    spotifyPlayerCacheVersion++;
+    spotifyPlayerCache.expires = 0;
+    if (Number(readFrameState().spotifySleepUntil) === expectedUntil)
+      persistSpotifySleepUntil(0);
+  } catch (err) {
+    const status = Number(err && err.status) || 0;
+    const currentStateUntil = Number(readFrameState().spotifySleepUntil) || 0;
+    const canRetry = status === 429 || status >= 500 || !status;
+    if (canRetry && currentStateUntil === expectedUntil) {
+      const retryAt = Math.max(
+        Date.now() + 15_000,
+        Number(err && err.rateLimitedUntil) || 0,
+      );
+      persistSpotifySleepUntil(retryAt);
+      scheduleSpotifySleepTimer();
+      console.warn(
+        "Spotify sleep timer will retry after a temporary playback error:",
+        err && err.message ? err.message : err,
+      );
+      return;
+    }
+    if (currentStateUntil === expectedUntil) persistSpotifySleepUntil(0);
+    console.error(
+      "Spotify sleep timer could not pause playback:",
+      err && err.message ? err.message : err,
+    );
+  }
+}
+
+function scheduleSpotifySleepTimer() {
+  if (spotifySleepTimerHandle) clearTimeout(spotifySleepTimerHandle);
+  spotifySleepTimerHandle = null;
+
+  const sleepUntil = Math.max(
+    0,
+    Number(readFrameState().spotifySleepUntil) || 0,
+  );
+  if (!sleepUntil) return getSpotifySleepTimerStatus();
+
+  const remainingMs = sleepUntil - Date.now();
+  if (remainingMs <= 0) {
+    setImmediate(() => expireSpotifySleepTimer(sleepUntil));
+    return { active: false, sleepUntil: 0, remainingMs: 0 };
+  }
+
+  spotifySleepTimerHandle = setTimeout(
+    () => expireSpotifySleepTimer(sleepUntil),
+    Math.min(remainingMs, 2_147_483_647),
+  );
+  spotifySleepTimerHandle.unref?.();
+  return { active: true, sleepUntil, remainingMs };
+}
+
+function setSpotifySleepTimer(minutes) {
+  const value = Number(minutes);
+  if (!Number.isFinite(value) || value <= 0 || value > 1440) {
+    const err = new Error("Sleep timer minutes must be between 1 and 1440");
+    err.status = 400;
+    throw err;
+  }
+  persistSpotifySleepUntil(Date.now() + Math.round(value * 60_000));
+  return scheduleSpotifySleepTimer();
+}
+
+function cancelSpotifySleepTimer() {
+  if (spotifySleepTimerHandle) clearTimeout(spotifySleepTimerHandle);
+  spotifySleepTimerHandle = null;
+  persistSpotifySleepUntil(0);
+  return getSpotifySleepTimerStatus();
+}
+
+setImmediate(() => scheduleSpotifySleepTimer()).unref?.();
+
 async function spotifyTokenRequest(params) {
   if (!spotifyConfigured()) {
     const err = new Error("Spotify is not configured");
@@ -852,6 +957,26 @@ app.post("/spotify/pause", async (req, res) => {
     return res.json({ ok: true });
   } catch (err) {
     return spotifyRouteError(res, err, "Unable to pause Spotify");
+  }
+});
+
+app.get("/spotify/sleep-timer", (_req, res) => {
+  return res.json(getSpotifySleepTimerStatus());
+});
+
+app.put("/spotify/sleep-timer", (req, res) => {
+  try {
+    return res.json(setSpotifySleepTimer(req.body && req.body.minutes));
+  } catch (err) {
+    return spotifyRouteError(res, err, "Unable to set Spotify sleep timer");
+  }
+});
+
+app.delete("/spotify/sleep-timer", (_req, res) => {
+  try {
+    return res.json(cancelSpotifySleepTimer());
+  } catch (err) {
+    return spotifyRouteError(res, err, "Unable to cancel Spotify sleep timer");
   }
 });
 
