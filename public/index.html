@@ -1,12 +1,16 @@
 <!doctype html>
-<html lang="vi">
+<html lang="en" class="i18n-loading">
   <head>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no"
     />
-    <title>Màn hình thông minh — Nest Frame</title>
+    <title data-i18n="DOCUMENT_TITLE">Màn hình thông minh — Nest Frame</title>
+    <style>
+      #locale-loader{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;background:#080b10;transition:opacity .28s ease,visibility .28s ease}#locale-loader::before{content:"";width:42px;height:42px;border-radius:50%;border:3px solid rgba(255,255,255,.14);border-top-color:#ef5358;animation:locale-spin .8s linear infinite}@keyframes locale-spin{to{transform:rotate(360deg)}}html.i18n-ready #locale-loader{opacity:0;visibility:hidden;pointer-events:none}@media(prefers-reduced-motion:reduce){#locale-loader::before{animation-duration:1.8s}}
+    </style>
+    <script src="/js/i18n.js?v=20260825-2"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -21,6 +25,7 @@
     <link rel="stylesheet" href="/css/index.css?v=20260824-6" />
   </head>
   <body>
+    <div id="locale-loader" aria-hidden="false"></div>
     <div class="screen">
       <div class="ambient-frame" aria-hidden="true">
         <div class="ambient-photo-layer active" id="ambient-photo-a"></div>
@@ -33,7 +38,7 @@
           <span></span><span></span><span></span><span></span>
         </div>
         <div class="brand-copy">
-          <strong>Nest Frame</strong><span>Màn hình thông minh</span>
+          <strong>Nest Frame</strong><span data-i18n="APP_SUBTITLE">Màn hình thông minh</span>
         </div>
         <div class="nav-tabs" id="nav-tabs">
           <button class="nav-tab active" data-view="home" type="button">
@@ -45,7 +50,7 @@
                 stroke-linejoin="round"
               />
             </svg>
-            <span>Trang chủ</span>
+            <span data-i18n="HOME_PAGE">Trang chủ</span>
           </button>
           <button class="nav-tab" data-view="today" type="button">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -63,11 +68,12 @@
                 stroke-linecap="round"
               />
             </svg>
-            <span>Hôm nay</span>
+            <span data-i18n="TODAY_PAGE">Hôm nay</span>
             <span
               class="today-tab-badge"
               id="today-tab-badge"
               aria-label="Thông báo chưa đọc"
+              data-i18n-aria-label="UNREAD_NOTIFICATIONS"
             ></span>
           </button>
           <button class="nav-tab" data-view="media" type="button">
@@ -93,7 +99,7 @@
                 stroke-width="1.8"
               />
             </svg>
-            <span>Giải trí</span>
+            <span data-i18n="MEDIA_PAGE">Giải trí</span>
           </button>
           <button class="nav-tab" data-view="news" type="button">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -115,7 +121,7 @@
                 stroke-linecap="round"
               />
             </svg>
-            <span>Tin tức</span>
+            <span data-i18n="NEWS_PAGE">Tin tức</span>
           </button>
           <button class="nav-tab" data-view="alarm" type="button">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -132,7 +138,7 @@
                 stroke-linecap="round"
               />
             </svg>
-            <span>Báo thức</span>
+            <span data-i18n="ALARMS_PAGE">Báo thức</span>
           </button>
         </div>
         <button
@@ -141,6 +147,8 @@
           type="button"
           aria-label="Trợ lý giọng nói"
           title="Trợ lý giọng nói"
+          data-i18n-aria-label="VOICE_ASSISTANT"
+          data-i18n-title="VOICE_ASSISTANT"
         >
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <rect
@@ -166,6 +174,8 @@
           type="button"
           aria-label="Mở màn hình chờ"
           title="Làm tối / màn hình chờ"
+          data-i18n-aria-label="OPEN_IDLE_SCREEN"
+          data-i18n-title="OPEN_IDLE_SCREEN"
         >
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path
@@ -183,6 +193,8 @@
           type="button"
           aria-label="Tải lại màn hình"
           title="Tải lại màn hình"
+          data-i18n-aria-label="RELOAD_SCREEN"
+          data-i18n-title="RELOAD_SCREEN"
         >
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path
@@ -202,7 +214,7 @@
           </svg>
         </button>
         <div class="top-status">
-          <span class="live-dot"></span><span id="top-status-text">Trực tuyến</span>
+          <span class="live-dot"></span><span id="top-status-text" data-i18n="ONLINE">Trực tuyến</span>
         </div>
       </div>
 
@@ -211,9 +223,9 @@
         <div class="view-inner today-page">
           <header class="today-page-head">
             <div>
-              <div class="today-page-kicker">Ngày của bạn</div>
-              <h1 class="today-page-title">Hôm nay</h1>
-              <div class="today-page-subtitle">
+              <div class="today-page-kicker" data-i18n="YOUR_DAY">Ngày của bạn</div>
+              <h1 class="today-page-title" data-i18n="TODAY_PAGE">Hôm nay</h1>
+              <div class="today-page-subtitle" data-i18n="TODAY_SUBTITLE">
                 Thói quen, bản tóm tắt và thông báo được chuẩn bị trên server
               </div>
             </div>
@@ -221,6 +233,7 @@
               class="today-refresh-btn"
               id="today-refresh-btn"
               type="button"
+              data-i18n="REFRESH"
             >
               Làm mới
             </button>
@@ -229,25 +242,26 @@
           <section class="today-section" aria-labelledby="routine-title">
             <div class="today-section-head">
               <div>
-                <small>Theo ngữ cảnh</small>
-                <h2 id="routine-title">Thói quen</h2>
+                <small data-i18n="CONTEXTUAL">Theo ngữ cảnh</small>
+                <h2 id="routine-title" data-i18n="ROUTINES">Thói quen</h2>
               </div>
             </div>
             <div class="routine-grid" id="routine-grid" aria-live="polite">
-              <div class="today-empty">Đang tải routine…</div>
+              <div class="today-empty" data-i18n="LOADING_ROUTINES">Đang tải routine…</div>
             </div>
           </section>
 
           <section class="today-section" aria-labelledby="notification-title">
             <div class="today-section-head">
               <div>
-                <small>Hoạt động</small>
-                <h2 id="notification-title">Thông báo</h2>
+                <small data-i18n="ACTIVITY">Hoạt động</small>
+                <h2 id="notification-title" data-i18n="NOTIFICATIONS">Thông báo</h2>
               </div>
               <button
                 class="notification-read-all"
                 id="notification-read-all"
                 type="button"
+                data-i18n="MARK_ALL_READ"
               >
                 Đánh dấu đã đọc
               </button>
@@ -257,7 +271,7 @@
               id="notification-list"
               aria-live="polite"
             >
-              <div class="today-empty">Đang tải thông báo…</div>
+              <div class="today-empty" data-i18n="LOADING_NOTIFICATIONS">Đang tải thông báo…</div>
             </div>
           </section>
         </div>
@@ -277,6 +291,7 @@
                 id="home-weather"
                 type="button"
                 aria-label="Chi tiết thời tiết và môi trường"
+                data-i18n-aria-label="WEATHER_ENV_DETAILS"
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -293,7 +308,7 @@
                 <span class="home-weather-copy"
                   ><span class="home-weather-temp" id="temp">--°</span
                   ><span class="home-weather-detail" id="weather-detail"
-                    >Thời tiết</span
+                    data-i18n="WEATHER">Thời tiết</span
                   ></span
                 >
               </button>
@@ -304,6 +319,7 @@
                 type="button"
                 aria-live="polite"
                 aria-label="Thiết lập camera và liên lạc"
+                data-i18n-aria-label="CAMERA_SETUP"
               >
                 <span class="camera-live-dot" aria-hidden="true"></span>
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -320,11 +336,11 @@
                   />
                 </svg>
                 <span class="camera-chip-copy" id="camera-chip-copy"
-                  >Bật camera liên lạc</span
+                  data-i18n="ENABLE_CAMERA">Bật camera liên lạc</span
                 >
               </button>
             </div>
-            <div class="photo-source" id="photo-source">Khung ảnh</div>
+            <div class="photo-source" id="photo-source" data-i18n="PHOTO_FRAME">Khung ảnh</div>
           </div>
 
           <div
@@ -339,7 +355,7 @@
               <span>UV</span><strong id="uv-value">--</strong>
             </div>
             <div class="context-metric" id="rain-metric">
-              <span>Mưa</span><strong id="rain-value">--</strong>
+              <span data-i18n="RAIN">Mưa</span><strong id="rain-value">--</strong>
             </div>
           </div>
 
@@ -348,6 +364,7 @@
             id="home-calendar-glance"
             type="button"
             aria-label="Sự kiện lịch tiếp theo"
+            data-i18n-aria-label="NEXT_EVENT"
           >
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <rect
@@ -367,7 +384,7 @@
               />
             </svg>
             <span class="home-calendar-copy"
-              ><strong id="home-calendar-title">Sự kiện tiếp theo</strong
+              ><strong id="home-calendar-title" data-i18n="NEXT_EVENT">Sự kiện tiếp theo</strong
               ><span id="home-calendar-time">--</span></span
             >
           </button>
@@ -380,9 +397,9 @@
           >
             <div class="ambient-notice-top">
               <span class="ambient-notice-dot"></span
-              ><span id="ambient-notice-kind">Cập nhật xung quanh</span>
+              ><span id="ambient-notice-kind" data-i18n="AMBIENT_UPDATE">Cập nhật xung quanh</span>
             </div>
-            <div class="ambient-notice-title" id="ambient-notice-title">
+            <div class="ambient-notice-title" id="ambient-notice-title" data-i18n="WEATHER_UPDATE">
               Cập nhật thời tiết
             </div>
             <div class="ambient-notice-body" id="ambient-notice-body"></div>
@@ -398,28 +415,29 @@
             aria-hidden="true"
           >
             <div class="morning-brief-card">
-              <div class="morning-brief-kicker">Chào buổi sáng</div>
-              <div class="morning-brief-title">Tổng quan ngày của bạn</div>
+              <div class="morning-brief-kicker" data-i18n="GOOD_MORNING">Chào buổi sáng</div>
+              <div class="morning-brief-title" data-i18n="YOUR_DAY_OVERVIEW">Tổng quan ngày của bạn</div>
               <div class="morning-brief-grid">
                 <div class="morning-brief-item">
-                  <small>Thời tiết</small><strong id="morning-weather">--</strong
-                  ><span id="morning-weather-sub">Đang tải điều kiện thời tiết</span>
+                  <small data-i18n="WEATHER">Thời tiết</small><strong id="morning-weather">--</strong
+                  ><span id="morning-weather-sub" data-i18n="LOADING_WEATHER">Đang tải điều kiện thời tiết</span>
                 </div>
                 <div class="morning-brief-item">
-                  <small>Tiếp theo</small
-                  ><strong id="morning-event">Không có sự kiện sắp tới</strong
-                  ><span id="morning-event-sub">Lịch</span>
+                  <small data-i18n="NEXT">Tiếp theo</small
+                  ><strong id="morning-event" data-i18n="NO_UPCOMING_EVENTS">Không có sự kiện sắp tới</strong
+                  ><span id="morning-event-sub" data-i18n="CALENDAR">Lịch</span>
                 </div>
                 <div class="morning-brief-item">
-                  <small>Di chuyển</small
-                  ><strong id="morning-commute">Không có chuyến đi sắp tới</strong
-                  ><span id="morning-commute-sub">Hiện chưa có việc cần đi</span>
+                  <small data-i18n="COMMUTE">Di chuyển</small
+                  ><strong id="morning-commute" data-i18n="NO_UPCOMING_TRIPS">Không có chuyến đi sắp tới</strong
+                  ><span id="morning-commute-sub" data-i18n="NO_TRAVEL_NEEDED">Hiện chưa có việc cần đi</span>
                 </div>
               </div>
               <button
                 class="morning-brief-dismiss"
                 id="morning-brief-dismiss"
                 type="button"
+                data-i18n="DISMISS"
               >
                 Dismiss
               </button>
@@ -431,16 +449,16 @@
             <div class="news-card">
               <div class="news-topline">
                 <span class="news-badge"
-                  ><span class="news-badge-dot"></span>Tin tức</span
+                  ><span class="news-badge-dot"></span><span data-i18n="NEWS_PAGE">Tin tức</span></span
                 >
                 <span class="news-time" id="news-time"></span>
               </div>
-              <h2 class="news-headline" id="news-headline">
+              <h2 class="news-headline" id="news-headline" data-i18n="LATEST_NEWS_PLACEHOLDER">
                 Tin mới nhất sẽ xuất hiện tại đây
               </h2>
               <div class="news-footer">
-                <span class="news-source" id="news-source">Tin tức</span>
-                <span class="news-hint">Chạm để mở</span>
+                <span class="news-source" id="news-source" data-i18n="NEWS_PAGE">Tin tức</span>
+                <span class="news-hint" data-i18n="TAP_TO_OPEN">Chạm để mở</span>
               </div>
               <div class="news-progress"><span id="news-progress"></span></div>
             </div>
@@ -457,12 +475,13 @@
             rel="noopener"
             aria-live="polite"
             aria-label="Thông tin ảnh hiện tại"
+            data-i18n-aria-label="CURRENT_PHOTO_INFO"
           >
             <div class="photo-info-copy">
-              <div class="photo-info-place" id="photo-info-place">
+              <div class="photo-info-place" id="photo-info-place" data-i18n="YOUR_PHOTO_LIBRARY">
                 Thư viện ảnh của bạn
               </div>
-              <div class="photo-info-details" id="photo-info-details">
+              <div class="photo-info-details" id="photo-info-details" data-i18n="IMMICH_PHOTO_FRAME">
                 Khung ảnh Immich
               </div>
             </div>
@@ -477,10 +496,11 @@
               class="photo-action-panel"
               role="dialog"
               aria-label="Thao tác với ảnh"
+              data-i18n-aria-label="PHOTO_ACTIONS"
             >
               <div class="photo-action-head">
-                <strong id="photo-action-title">Thao tác với ảnh</strong
-                ><span>Nhấn giữ thẻ ảnh để mở trình đơn này.</span>
+                <strong id="photo-action-title" data-i18n="PHOTO_ACTIONS">Thao tác với ảnh</strong
+                ><span data-i18n="PHOTO_ACTION_HINT">Nhấn giữ thẻ ảnh để mở trình đơn này.</span>
               </div>
               <button
                 class="photo-action-btn"
@@ -494,7 +514,7 @@
                     stroke-width="1.7"
                     stroke-linejoin="round"
                   /></svg
-                ><span id="photo-favorite-label">Yêu thích trong Immich</span>
+                ><span id="photo-favorite-label" data-i18n="FAVORITE_IN_IMMICH">Yêu thích trong Immich</span>
               </button>
               <button
                 class="photo-action-btn danger"
@@ -509,7 +529,7 @@
                     stroke-linecap="round"
                     stroke-linejoin="round"
                   /></svg
-                ><span>Ẩn khỏi khung ảnh</span>
+                ><span data-i18n="HIDE_FROM_FRAME">Ẩn khỏi khung ảnh</span>
               </button>
               <button
                 class="photo-action-btn"
@@ -524,7 +544,7 @@
                     stroke-linecap="round"
                     stroke-linejoin="round"
                   /></svg
-                ><span>Mở trong Immich</span>
+                ><span data-i18n="OPEN_IN_IMMICH">Mở trong Immich</span>
               </button>
             </div>
           </div>
@@ -533,12 +553,13 @@
             class="next-photo-indicator"
             id="next-photo-indicator"
             aria-label="Thời gian tới ảnh tiếp theo"
+            data-i18n-aria-label="NEXT_PHOTO_TIMER"
           >
             <div class="next-photo-track">
               <span id="next-photo-progress"></span>
             </div>
             <div class="next-photo-label">
-              <span id="next-photo-label">Ảnh tiếp theo</span
+              <span id="next-photo-label" data-i18n="NEXT_PHOTO">Ảnh tiếp theo</span
               ><span id="next-photo-seconds">--s</span>
             </div>
           </div>
@@ -558,8 +579,8 @@
           ></video>
           <div class="call-no-video">
             <div>
-              <strong>Đã kết nối liên lạc</strong
-              ><span>Người xem từ xa không chia sẻ video.</span>
+              <strong data-i18n="INTERCOM_CONNECTED">Đã kết nối liên lạc</strong
+              ><span data-i18n="VIEWER_NO_VIDEO">Người xem từ xa không chia sẻ video.</span>
             </div>
           </div>
           <div class="call-screen-shade"></div>
@@ -567,8 +588,8 @@
             <div class="call-person">
               <span class="call-person-dot"></span>
               <div class="call-person-copy">
-                <strong id="call-viewer-name">Người xem từ xa</strong
-                ><span>Liên lạc trực tiếp</span>
+                <strong id="call-viewer-name" data-i18n="REMOTE_VIEWER">Người xem từ xa</strong
+                ><span data-i18n="DIRECT_CALL">Liên lạc trực tiếp</span>
               </div>
             </div>
           </div>
@@ -578,6 +599,7 @@
               id="call-home-btn"
               type="button"
               aria-label="Trở về Trang chủ"
+              data-i18n-aria-label="RETURN_HOME"
             >
               <svg viewBox="0 0 24 24" fill="none">
                 <path
@@ -586,13 +608,14 @@
                   stroke-width="1.8"
                   stroke-linejoin="round"
                 /></svg
-              ><span>Trang chủ</span>
+              ><span data-i18n="HOME_PAGE">Trang chủ</span>
             </button>
             <button
               class="call-screen-btn end"
               id="call-end-btn"
               type="button"
               aria-label="Kết thúc cuộc gọi"
+              data-i18n-aria-label="END_CALL"
             >
               <svg viewBox="0 0 24 24" fill="none">
                 <path
@@ -601,7 +624,7 @@
                   stroke-width="1.7"
                   stroke-linejoin="round"
                 /></svg
-              ><span>Kết thúc</span>
+              ><span data-i18n="END_CALL">Kết thúc</span>
             </button>
           </div>
         </div>
@@ -612,9 +635,9 @@
         <div class="view-inner">
           <header class="news-page-head">
             <div>
-              <div class="news-page-kicker">Tiêu điểm</div>
-              <h1 class="news-page-title">Tin mới nhất</h1>
-              <div class="news-page-subtitle" id="news-page-subtitle">
+              <div class="news-page-kicker" data-i18n="FEATURED">Tiêu điểm</div>
+              <h1 class="news-page-title" data-i18n="LATEST_NEWS">Tin mới nhất</h1>
+              <div class="news-page-subtitle" id="news-page-subtitle" data-i18n="RSS_ARTICLES_SUBTITLE">
                 Tất cả bài viết từ nguồn RSS đã cấu hình
               </div>
             </div>
@@ -623,6 +646,7 @@
               id="news-refresh-btn"
               type="button"
               aria-label="Làm mới tin tức"
+              data-i18n-aria-label="REFRESH_NEWS"
             >
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path
@@ -639,12 +663,12 @@
                   stroke-linecap="round"
                   stroke-linejoin="round"
                 /></svg
-              ><span>Làm mới</span>
+              ><span data-i18n="REFRESH">Làm mới</span>
             </button>
           </header>
           <section class="news-feed" id="news-feed" aria-live="polite">
             <div class="news-feed-empty">
-              <strong>Đang tải tin…</strong>Đang lấy các tiêu đề mới nhất.
+              <strong data-i18n="LOADING_NEWS">Đang tải tin…</strong><span data-i18n="LOADING_HEADLINES">Đang lấy các tiêu đề mới nhất.</span>
             </div>
           </section>
         </div>
@@ -655,9 +679,9 @@
         <div class="view-inner">
           <header class="alarm-page-head">
             <div>
-              <div class="alarm-page-kicker">Báo thức và nhắc nhở</div>
-              <h1 class="alarm-page-title">Báo thức</h1>
-              <div class="alarm-page-subtitle">
+              <div class="alarm-page-kicker" data-i18n="ALARM_AND_REMINDERS">Báo thức và nhắc nhở</div>
+              <h1 class="alarm-page-title" data-i18n="ALARMS_PAGE">Báo thức</h1>
+              <div class="alarm-page-subtitle" data-i18n="ALARM_PAGE_SUBTITLE">
                 Lưu trên server · lặp theo ngày · hỗ trợ nhiều lần xác nhận
               </div>
             </div>
@@ -667,6 +691,7 @@
                 id="alarm-test-sound"
                 type="button"
                 aria-label="Thử âm thanh báo thức"
+                data-i18n-aria-label="TEST_ALARM_SOUND"
               >
                 <svg viewBox="0 0 24 24" fill="none">
                   <path
@@ -681,7 +706,7 @@
                     stroke-width="1.7"
                     stroke-linecap="round"
                   /></svg
-                ><span class="alarm-btn-label">Thử âm thanh</span>
+                ><span class="alarm-btn-label" data-i18n="TEST_SOUND">Thử âm thanh</span>
               </button>
               <button
                 class="alarm-btn primary"
@@ -695,14 +720,14 @@
                     stroke-width="2"
                     stroke-linecap="round"
                   /></svg
-                ><span class="alarm-btn-label">Thêm báo thức</span>
+                ><span class="alarm-btn-label" data-i18n="ADD_ALARM">Thêm báo thức</span>
               </button>
             </div>
           </header>
           <section class="alarm-list" id="alarm-list" aria-live="polite">
             <div class="alarm-empty">
-              <strong>Đang tải báo thức…</strong
-              ><span>Đang lấy báo thức đã bật và đã tắt từ server.</span>
+              <strong data-i18n="LOADING_ALARMS">Đang tải báo thức…</strong
+              ><span data-i18n="LOADING_ALARMS_HELP">Đang lấy báo thức đã bật và đã tắt từ server.</span>
             </div>
           </section>
         </div>
@@ -716,17 +741,17 @@
           aria-hidden="true"
         ></div>
         <div class="view-inner">
-          <section class="lyrics-stage" aria-label="Trình phát Spotify Premium">
+          <section class="lyrics-stage" aria-label="Trình phát Spotify Premium" data-i18n-aria-label="SPOTIFY_PLAYER_LABEL">
             <div class="lyrics-main">
               <div class="lyrics-head">
                 <div style="min-width: 0">
-                  <div class="lyrics-kicker">Đang phát · Spotify Premium</div>
-                  <div class="media-title" id="yt-title">Kết nối Spotify</div>
-                  <div class="media-artist" id="yt-author">
+                  <div class="lyrics-kicker" data-i18n="SPOTIFY_NOW_PLAYING">Đang phát · Spotify Premium</div>
+                  <div class="media-title" id="yt-title" data-i18n="SPOTIFY_CONNECT">Kết nối Spotify</div>
+                  <div class="media-artist" id="yt-author" data-i18n="SPOTIFY_MEDIA_SUBTITLE">
                     Thư viện, tìm kiếm và Spotify Connect
                   </div>
                 </div>
-                <div class="yt-state-pill" id="yt-state">NGOẠI TUYẾN</div>
+                <div class="yt-state-pill" id="yt-state" data-i18n="SPOTIFY_OFFLINE">Ngoại tuyến</div>
               </div>
               <div class="music-search-wrap" id="music-search-wrap">
                 <form
@@ -764,12 +789,15 @@
                     spellcheck="false"
                     placeholder="Tìm trên Spotify"
                     aria-label="Tìm trên Spotify"
+                    data-i18n-placeholder="SPOTIFY_SEARCH"
+                    data-i18n-aria-label="SPOTIFY_SEARCH"
                   />
                   <button
                     class="music-search-clear"
                     id="music-search-clear"
                     type="button"
                     aria-label="Xóa nội dung tìm kiếm"
+                    data-i18n-aria-label="SPOTIFY_CLEAR_SEARCH"
                   >
                     <svg viewBox="0 0 24 24" fill="none">
                       <path
@@ -786,6 +814,7 @@
                   id="music-search-results"
                   role="listbox"
                   aria-label="Kết quả tìm kiếm Spotify"
+                  data-i18n-aria-label="SPOTIFY_SEARCH_RESULTS"
                 ></div>
               </div>
               <div
@@ -796,9 +825,9 @@
               ></div>
               <div class="lyrics-scroll" id="lyrics-scroll" aria-live="polite">
                 <div class="lyrics-empty" id="lyrics-empty">
-                  <strong>Chế độ lời bài hát Spotify</strong>
-                  Phát một bài hát để hệ thống tự tìm và đồng bộ lời bài hát.
-                  <div class="lyrics-file" id="lyrics-source">
+                  <strong data-i18n="SPOTIFY_LYRICS_MODE">Chế độ lời bài hát Spotify</strong>
+                  <span data-i18n="SPOTIFY_LYRICS_MODE_HELP">Phát một bài hát để hệ thống tự tìm và đồng bộ lời bài hát.</span>
+                  <div class="lyrics-file" id="lyrics-source" data-i18n="SPOTIFY_LYRICS_FALLBACK">
                     Nguồn dự phòng LRCLIB · lyrics.ovh
                   </div>
                 </div>
@@ -820,12 +849,12 @@
                     </svg>
                   </div>
                 </div>
-                <img id="spotify-art" alt="Ảnh bìa album Spotify hiện tại" />
+                <img id="spotify-art" alt="Ảnh bìa album Spotify hiện tại" data-i18n-alt="SPOTIFY_ALBUM_ART" />
               </div>
 
               <div class="spotify-connect-card" id="spotify-connect-card">
-                <strong>Kết nối Spotify Premium</strong>
-                <span
+                <strong data-i18n="SPOTIFY_CONNECT_PREMIUM">Kết nối Spotify Premium</strong>
+                <span data-i18n="SPOTIFY_CONNECT_HELP"
                   >Chỉ cần cấp quyền một lần, iPad này sẽ trở thành thiết bị phát
                   Spotify Connect.</span
                 >
@@ -834,7 +863,7 @@
                   id="spotify-connect-btn"
                   type="button"
                 >
-                  Kết nối Spotify
+                  <span data-i18n="SPOTIFY_CONNECT">Kết nối Spotify</span>
                 </button>
               </div>
 
@@ -845,6 +874,7 @@
                     id="spotify-device-btn"
                     type="button"
                     aria-label="Chọn thiết bị phát Spotify"
+                    data-i18n-aria-label="SPOTIFY_SELECT_DEVICE"
                   >
                     <span class="spotify-device-icon"
                       ><svg viewBox="0 0 24 24" fill="none">
@@ -866,7 +896,7 @@
                     ></span>
                     <span class="spotify-device-copy"
                       ><small>Spotify Connect</small
-                      ><strong id="spotify-device-name"
+                      ><strong id="spotify-device-name" data-i18n="SPOTIFY_NO_ACTIVE_DEVICE"
                         >Không có thiết bị đang hoạt động</strong
                       ></span
                     >
@@ -899,6 +929,7 @@
                     value="0"
                     id="yt-seek"
                     aria-label="Vị trí phát"
+                    data-i18n-aria-label="SPOTIFY_PLAYBACK_POSITION"
                   />
                   <div class="progress-time">
                     <span id="progress-current">0:00</span
@@ -912,6 +943,7 @@
                     id="prev-btn"
                     type="button"
                     aria-label="Bài trước"
+                    data-i18n-aria-label="SPOTIFY_PREVIOUS"
                   >
                     <svg viewBox="0 0 24 24" fill="none">
                       <path
@@ -928,6 +960,7 @@
                     id="play-btn"
                     type="button"
                     aria-label="Phát hoặc tạm dừng"
+                    data-i18n-aria-label="SPOTIFY_PLAY_PAUSE"
                   >
                     <svg id="play-icon" viewBox="0 0 24 24" fill="none">
                       <path d="M7 5v14l12-7L7 5Z" fill="currentColor" />
@@ -938,6 +971,7 @@
                     id="next-btn"
                     type="button"
                     aria-label="Bài tiếp theo"
+                    data-i18n-aria-label="SPOTIFY_NEXT"
                   >
                     <svg viewBox="0 0 24 24" fill="none">
                       <path
@@ -957,6 +991,7 @@
                     id="shuffle-btn"
                     type="button"
                     aria-label="Bật hoặc tắt phát ngẫu nhiên"
+                    data-i18n-aria-label="SPOTIFY_SHUFFLE"
                   >
                     <svg viewBox="0 0 24 24" fill="none">
                       <path
@@ -973,6 +1008,7 @@
                     id="repeat-btn"
                     type="button"
                     aria-label="Đổi chế độ lặp"
+                    data-i18n-aria-label="SPOTIFY_REPEAT"
                   >
                     <svg viewBox="0 0 24 24" fill="none">
                       <path
@@ -990,6 +1026,7 @@
                       id="spotify-sleep-btn"
                       type="button"
                       aria-label="Hẹn giờ tắt Spotify"
+                      data-i18n-aria-label="SPOTIFY_SLEEP_TIMER"
                       aria-expanded="false"
                     >
                       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -1017,64 +1054,65 @@
                       id="spotify-sleep-menu"
                       role="menu"
                       aria-label="Hẹn giờ tắt"
+                      data-i18n-aria-label="SPOTIFY_SLEEP_MENU"
                     >
-                      <div class="spotify-sleep-title">Dừng Spotify sau</div>
+                      <div class="spotify-sleep-title" data-i18n="SPOTIFY_STOP_AFTER">Dừng Spotify sau</div>
                       <div class="spotify-sleep-grid">
                         <button
                           class="spotify-sleep-option"
                           type="button"
                           data-sleep-minutes="15"
                         >
-                          15 min
+                          15 <span data-i18n="MINUTES_SHORT">phút</span>
                         </button>
                         <button
                           class="spotify-sleep-option"
                           type="button"
                           data-sleep-minutes="30"
                         >
-                          30 min
+                          30 <span data-i18n="MINUTES_SHORT">phút</span>
                         </button>
                         <button
                           class="spotify-sleep-option"
                           type="button"
                           data-sleep-minutes="45"
                         >
-                          45 min
+                          45 <span data-i18n="MINUTES_SHORT">phút</span>
                         </button>
                         <button
                           class="spotify-sleep-option"
                           type="button"
                           data-sleep-minutes="60"
                         >
-                          60 min
+                          60 <span data-i18n="MINUTES_SHORT">phút</span>
                         </button>
                         <button
                           class="spotify-sleep-option"
                           type="button"
                           data-sleep-minutes="90"
                         >
-                          90 min
+                          90 <span data-i18n="MINUTES_SHORT">phút</span>
                         </button>
                         <button
                           class="spotify-sleep-option"
                           type="button"
                           data-sleep-minutes="120"
                         >
-                          2 hr
+                          2 <span data-i18n="HOURS_SHORT">giờ</span>
                         </button>
                         <button
                           class="spotify-sleep-option off"
                           type="button"
                           data-sleep-minutes="0"
                         >
-                          Tắt hẹn giờ
+                          <span data-i18n="SPOTIFY_DISABLE_TIMER">Tắt hẹn giờ</span>
                         </button>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div class="spotify-volume-row" aria-label="Âm lượng Spotify">
+                <div class="spotify-volume-row" aria-label="Âm lượng Spotify" data-i18n-aria-label="SPOTIFY_VOLUME">
                   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path
                       d="M5 9v6h4l5 4V5L9 9H5Z"
@@ -1097,6 +1135,7 @@
                     value="65"
                     step="1"
                     aria-label="Âm lượng Spotify"
+                    data-i18n-aria-label="SPOTIFY_VOLUME"
                   />
                   <span class="spotify-volume-value" id="spotify-volume-value"
                     >65%</span
@@ -1120,10 +1159,10 @@
       <div class="assistant-page-inner">
         <header class="assistant-page-head">
           <div>
-            <div class="assistant-page-kicker" id="assistant-page-kicker">
+            <div class="assistant-page-kicker" id="assistant-page-kicker" data-i18n="NEST_ASSISTANT">
               Trợ lý Nest
             </div>
-            <div class="assistant-page-title" id="assistant-page-title">
+            <div class="assistant-page-title" id="assistant-page-title" data-i18n="INFORMATION">
               Thông tin
             </div>
             <div class="assistant-page-sub" id="assistant-page-sub"></div>
@@ -1139,15 +1178,15 @@
       aria-hidden="true"
     >
       <div class="voice-backdrop" id="voice-backdrop"></div>
-      <div class="voice-panel" role="dialog" aria-label="Trợ lý giọng nói Nest">
+      <div class="voice-panel" role="dialog" aria-label="Trợ lý giọng nói Nest" data-i18n-aria-label="VOICE_ASSISTANT">
         <div class="voice-orb" aria-hidden="true"></div>
         <div class="voice-copy">
-          <div class="voice-state" id="voice-state">Đang chuẩn bị</div>
+          <div class="voice-state" id="voice-state" data-i18n="PREPARING">Đang chuẩn bị</div>
           <div class="voice-transcript" id="voice-transcript">
-            Đang kết nối trợ lý…
+            <span data-i18n="CONNECTING_ASSISTANT">Đang kết nối trợ lý…</span>
           </div>
           <div class="voice-hint" id="voice-hint">
-            Nói tự nhiên bằng tiếng Việt
+            <span data-i18n="SPEAK_NATURALLY">Nói tự nhiên bằng tiếng Việt</span>
           </div>
         </div>
         <button
@@ -1155,6 +1194,7 @@
           id="voice-close"
           type="button"
           aria-label="Đóng trợ lý"
+          data-i18n-aria-label="CLOSE_ASSISTANT"
         >
           ×
         </button>
@@ -1166,24 +1206,24 @@
       <div class="idle-grain" aria-hidden="true"></div>
       <div class="idle-shell">
         <div class="idle-kicker">
-          <span class="idle-kicker-dot"></span><span>Nest Frame · Chờ</span>
+          <span class="idle-kicker-dot"></span><span><span>Nest Frame · </span><span data-i18n="IDLE">Chờ</span></span>
         </div>
         <div class="idle-time" id="idle-time">--:--</div>
         <div class="idle-status-row">
           <div class="idle-camera" id="idle-camera" data-state="setup">
             <span class="idle-camera-dot"></span
-            ><span id="idle-camera-text">Camera chưa kết nối</span>
+            ><span id="idle-camera-text" data-i18n="CAMERA_NOT_CONNECTED">Camera chưa kết nối</span>
           </div>
         </div>
         <div class="idle-now-playing" id="idle-now-playing">
           <img class="idle-art" id="idle-art" alt="" />
           <div class="idle-music-copy">
-            <div class="idle-music-label"><span></span>Đang phát</div>
+            <div class="idle-music-label"><span></span><span data-i18n="SPOTIFY_PLAYING">Đang phát</span></div>
             <div class="idle-song" id="idle-song">Spotify</div>
             <div class="idle-artist" id="idle-artist"></div>
           </div>
         </div>
-        <div class="idle-hint">Chạm vào màn hình để đánh thức</div>
+        <div class="idle-hint" data-i18n="IDLE_HINT">Chạm vào màn hình để đánh thức</div>
       </div>
     </div>
 
@@ -1194,7 +1234,7 @@
     >
       <form class="alarm-editor" id="alarm-editor-form">
         <div class="alarm-editor-head">
-          <div class="alarm-editor-title" id="alarm-editor-title">
+          <div class="alarm-editor-title" id="alarm-editor-title" data-i18n="ADD_ALARM">
             Thêm báo thức
           </div>
           <button
@@ -1202,13 +1242,14 @@
             id="alarm-editor-close"
             type="button"
             aria-label="Đóng"
+            data-i18n-aria-label="CLOSE"
           >
             ×
           </button>
         </div>
         <div class="alarm-form-grid">
           <div class="alarm-field">
-            <label for="alarm-time-input">Thời gian</label
+            <label for="alarm-time-input" data-i18n="TIME">Thời gian</label
             ><input
               class="alarm-input"
               id="alarm-time-input"
@@ -1217,13 +1258,14 @@
             />
           </div>
           <div class="alarm-field">
-            <label>Số lần cần xác nhận</label
+            <label data-i18n="CONFIRMATION_COUNT">Số lần cần xác nhận</label
             ><input id="alarm-confirm-input" type="hidden" value="1" />
             <div
               class="alarm-confirm-control"
               id="alarm-confirm-control"
               role="group"
               aria-label="Số lần xác nhận bắt buộc"
+              data-i18n-aria-label="CONFIRMATION_COUNT"
             >
               <button
                 class="alarm-confirm-chip active"
@@ -1257,50 +1299,51 @@
                 5
               </button>
             </div>
-            <div class="alarm-confirm-caption" id="alarm-confirm-caption">
+            <div class="alarm-confirm-caption" id="alarm-confirm-caption" data-i18n="CONFIRM_ONCE_TO_COMPLETE">
               Xác nhận một lần để hoàn tất
             </div>
           </div>
           <div class="alarm-field full">
-            <label for="alarm-label-input">Nhãn</label
+            <label for="alarm-label-input" data-i18n="LABEL">Nhãn</label
             ><input
               class="alarm-input"
               id="alarm-label-input"
               type="text"
               maxlength="80"
               placeholder="Thức dậy"
+              data-i18n-placeholder="WAKE_UP_PLACEHOLDER"
             />
           </div>
           <div class="alarm-field full">
-            <label>Lặp lại</label>
+            <label data-i18n="REPEAT">Lặp lại</label>
             <div class="alarm-days" id="alarm-days">
               <label class="alarm-day"
-                ><input type="checkbox" value="1" /><span>T2</span></label
+                ><input type="checkbox" value="1" /><span data-i18n="MON_SHORT">T2</span></label
               ><label class="alarm-day"
-                ><input type="checkbox" value="2" /><span>T3</span></label
+                ><input type="checkbox" value="2" /><span data-i18n="TUE_SHORT">T3</span></label
               ><label class="alarm-day"
-                ><input type="checkbox" value="3" /><span>T4</span></label
+                ><input type="checkbox" value="3" /><span data-i18n="WED_SHORT">T4</span></label
               ><label class="alarm-day"
-                ><input type="checkbox" value="4" /><span>T5</span></label
+                ><input type="checkbox" value="4" /><span data-i18n="THU_SHORT">T5</span></label
               ><label class="alarm-day"
-                ><input type="checkbox" value="5" /><span>T6</span></label
+                ><input type="checkbox" value="5" /><span data-i18n="FRI_SHORT">T6</span></label
               ><label class="alarm-day"
-                ><input type="checkbox" value="6" /><span>T7</span></label
+                ><input type="checkbox" value="6" /><span data-i18n="SAT_SHORT">T7</span></label
               ><label class="alarm-day"
-                ><input type="checkbox" value="0" /><span>CN</span></label
+                ><input type="checkbox" value="0" /><span data-i18n="SUN_SHORT">CN</span></label
               >
             </div>
-            <div class="alarm-editor-note">
+            <div class="alarm-editor-note" data-i18n="ALARM_REPEAT_NOTE">
               Không chọn ngày = báo thức một lần. Báo thức nhiều lần xác nhận sẽ
               reo lại sau mỗi 5 phút cho tới khi đủ số lần xác nhận.
             </div>
           </div>
           <div class="alarm-field full">
-            <label>Trạng thái</label
+            <label data-i18n="STATUS">Trạng thái</label
             ><label class="alarm-enabled-row"
               ><span class="alarm-enabled-copy"
-                ><span>Bật báo thức</span
-                ><small>Chạy đúng thời gian đã đặt</small></span
+                ><span data-i18n="ALARM_ENABLED">Bật báo thức</span
+                ><small data-i18n="ALARM_RUN_ON_TIME">Chạy đúng thời gian đã đặt</small></span
               ><input id="alarm-enabled-input" type="checkbox" checked /><span
                 class="alarm-state-switch"
                 aria-hidden="true"
@@ -1309,9 +1352,9 @@
           </div>
         </div>
         <div class="alarm-editor-actions">
-          <button class="alarm-btn" id="alarm-cancel-btn" type="button">
+          <button class="alarm-btn" id="alarm-cancel-btn" type="button" data-i18n="CANCEL">
             Hủy</button
-          ><button class="alarm-btn primary" type="submit">Lưu báo thức</button>
+          ><button class="alarm-btn primary" type="submit" data-i18n="SAVE_ALARM">Lưu báo thức</button>
         </div>
       </form>
     </div>
@@ -1341,22 +1384,22 @@
           </svg>
         </div>
         <div class="alarm-alert-time" id="alarm-alert-time">07:00</div>
-        <div class="alarm-alert-label" id="alarm-alert-label">Báo thức</div>
-        <div class="alarm-alert-round" id="alarm-alert-round">
+        <div class="alarm-alert-label" id="alarm-alert-label" data-i18n="ALARM">Báo thức</div>
+        <div class="alarm-alert-round" id="alarm-alert-round" data-i18n="CONFIRMATION_PROGRESS_DEFAULT">
           Xác nhận 1/1
         </div>
-        <div class="alarm-sound-warning" id="alarm-sound-warning">
+        <div class="alarm-sound-warning" id="alarm-sound-warning" data-i18n="ALARM_SOUND_WARNING">
           Safari đã chặn âm thanh tự động. Hãy chạm vào màn hình, sau đó nhấn
           Xong khi nghe thấy báo thức.
         </div>
-        <button class="alarm-done-btn" id="alarm-done-btn" type="button">
+        <button class="alarm-done-btn" id="alarm-done-btn" type="button" data-i18n="DONE">
           Xong
         </button>
       </div>
     </div>
     <div class="alarm-waiting-banner" id="alarm-waiting-banner">
       <span class="alarm-wait-dot"></span
-      ><span id="alarm-waiting-text">Lần xác nhận tiếp theo sau 5:00</span>
+      ><span id="alarm-waiting-text" data-i18n="NEXT_CONFIRMATION_DEFAULT">Lần xác nhận tiếp theo sau 5:00</span>
     </div>
     <audio id="alarm-audio" preload="auto" loop src="/alarm.wav"></audio>
 

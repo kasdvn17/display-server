@@ -3,7 +3,7 @@ app.post("/frame/heartbeat", (req, res) => {
   const body = req.body && typeof req.body === "object" ? req.body : {};
   const sessionId = String(body.sessionId || "").trim().slice(0, 100);
   if (!sessionId)
-    return res.status(400).json({ error: "Thiếu sessionId" });
+    return res.status(400).json({ error: "sessionId is required" });
   const previousSession = frameSessions.get(sessionId);
   const nextHeartbeat = {
     sessionId,
@@ -82,7 +82,7 @@ app.get("/remote/control", (req, res) => {
     const session = String((req.query && req.query.session) || "");
     const displayHeartbeat = session ? frameSessions.get(session) : null;
     if (!displayHeartbeat)
-      return res.status(403).json({ error: "Phiên màn hình không xác định" });
+      return res.status(403).json({ error: "Unknown display session" });
     displayHeartbeat.lastSeen = Date.now();
     if (frameHeartbeat.sessionId === session)
       frameHeartbeat.lastSeen = displayHeartbeat.lastSeen;
@@ -103,9 +103,9 @@ app.get("/remote/control", (req, res) => {
     });
   }
   if (!REMOTE_CONTROL_TOKEN)
-    return res.status(503).json({ error: "Chưa cấu hình điều khiển từ xa" });
+    return res.status(503).json({ error: "Remote control is not configured" });
   if (!remoteTokenMatches(remoteTokenFromRequest(req)))
-    return res.status(401).json({ error: "Không được phép truy cập" });
+    return res.status(401).json({ error: "Unauthorized" });
   const items = readAlarmsFile().sort(
     (a, b) =>
       String(a.time).localeCompare(String(b.time)) ||
@@ -149,28 +149,28 @@ app.post("/remote/control", requireRemoteControl, (req, res) => {
         (session) => now - Number(session.lastSeen || 0) < 30000,
       );
       if (!hasOnlineDisplay)
-        return res.status(409).json({ error: "Màn hình đang offline" });
+        return res.status(409).json({ error: "Display is offline" });
       const extra = {};
       if (action === "navigate") {
         const view = String(body.view || "").trim().toLowerCase();
         if (!["home", "today", "media", "news", "alarm"].includes(view))
-          return res.status(400).json({ error: "Tab không hợp lệ" });
+          return res.status(400).json({ error: "Invalid tab" });
         extra.view = view;
       }
       if (action === "run_routine") {
         const routineId = String(body.routineId || body.id || "").trim();
         if (!["morning", "leaving", "day-check", "evening"].includes(routineId))
-          return res.status(400).json({ error: "Thói quen không hợp lệ" });
+          return res.status(400).json({ error: "Invalid routine" });
         extra.routineId = routineId;
       }
       if (action === "show_message") {
-        extra.title = String(body.title || "Tin nhắn từ Remote").trim().slice(0, 160);
+        extra.title = String(body.title || "Message from Remote").trim().slice(0, 160);
         extra.text = String(body.text || body.message || "").trim().slice(0, 2000);
-        if (!extra.text) return res.status(400).json({ error: "Cần nhập nội dung" });
+        if (!extra.text) return res.status(400).json({ error: "Message content is required" });
       }
       if (action === "assistant_query") {
         extra.text = String(body.text || body.message || "").trim().slice(0, 2000);
-        if (!extra.text) return res.status(400).json({ error: "Cần nhập câu hỏi" });
+        if (!extra.text) return res.status(400).json({ error: "A question is required" });
       }
       if (action === "retry_context") ambientContextCache.clear();
       if (action === "retry_calendar") {
@@ -195,7 +195,7 @@ app.post("/remote/control", requireRemoteControl, (req, res) => {
       const id = String(body.id || "").trim();
       const state = readFrameState();
       const item = state.notifications.find((entry) => String(entry.id) === id);
-      if (!item) return res.status(404).json({ error: "Không tìm thấy thông báo" });
+      if (!item) return res.status(404).json({ error: "Notification not found" });
       item.dismissedAt = new Date().toISOString();
       writeFrameState(state);
       return res.json({ ok: true, action, id });
@@ -220,10 +220,10 @@ app.post("/remote/control", requireRemoteControl, (req, res) => {
       action === "set_alarm_enabled"
     ) {
       const id = String(body.id || body.alarmId || "").trim();
-      if (!id) return res.status(400).json({ error: "Thiếu id" });
+      if (!id) return res.status(400).json({ error: "id is required" });
       const items = readAlarmsFile();
       const index = items.findIndex((a) => String(a.id) === id);
-      if (index < 0) return res.status(404).json({ error: "Không tìm thấy báo thức" });
+      if (index < 0) return res.status(404).json({ error: "Alarm not found" });
       const enabled =
         action === "enable_alarm"
           ? true
@@ -249,11 +249,11 @@ app.post("/remote/control", requireRemoteControl, (req, res) => {
 
     if (action === "delete_alarm" || action === "delete") {
       const id = String(body.id || body.alarmId || "").trim();
-      if (!id) return res.status(400).json({ error: "Thiếu id" });
+      if (!id) return res.status(400).json({ error: "id is required" });
       const items = readAlarmsFile();
       const next = items.filter((a) => String(a.id) !== id);
       if (next.length === items.length)
-        return res.status(404).json({ error: "Không tìm thấy báo thức" });
+        return res.status(404).json({ error: "Alarm not found" });
       writeAlarmsFile(next);
       noteRemoteCommand("delete_alarm", { alarmId: id });
       return res.json({ ok: true, action: "delete_alarm", alarmId: id });
@@ -283,7 +283,7 @@ app.post("/remote/control", requireRemoteControl, (req, res) => {
     }
 
     return res.status(400).json({
-      error: "Thao tác không xác định",
+      error: "Unknown action",
       actions: [
         "add_alarm",
         "enable_alarm",
@@ -299,7 +299,7 @@ app.post("/remote/control", requireRemoteControl, (req, res) => {
   } catch (err) {
     return res
       .status(400)
-      .json({ error: err.message || "Lệnh điều khiển từ xa thất bại" });
+      .json({ error: err.message || "Remote control command failed" });
   }
 });
 
@@ -308,4 +308,3 @@ app.get("/calendar", async (req, res) => {
   res.setHeader("Cache-Control", "private, max-age=60");
   res.json(data);
 });
-

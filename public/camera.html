@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi">
+<html lang="en" class="i18n-loading">
   <head>
     <meta charset="utf-8" />
     <meta
@@ -7,10 +7,15 @@
       content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"
     />
     <meta name="theme-color" content="#071019" />
-    <title>Camera Nest Frame</title>
+    <title data-i18n="CAMERA_DOCUMENT_TITLE">Camera Nest Frame</title>
+    <style>
+      #locale-loader{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;background:#080b10;transition:opacity .28s ease,visibility .28s ease}#locale-loader::before{content:"";width:42px;height:42px;border-radius:50%;border:3px solid rgba(255,255,255,.14);border-top-color:#ef5358;animation:locale-spin .8s linear infinite}@keyframes locale-spin{to{transform:rotate(360deg)}}html.i18n-ready #locale-loader{opacity:0;visibility:hidden;pointer-events:none}@media(prefers-reduced-motion:reduce){#locale-loader::before{animation-duration:1.8s}}
+    </style>
+    <script src="/js/i18n.js?v=20260825-2"></script>
     <link rel="stylesheet" href="/css/camera.css?v=20260824-2" />
   </head>
   <body>
+    <div id="locale-loader" aria-hidden="false"></div>
     <main class="stage" id="stage">
       <video
         class="remote-video"
@@ -45,13 +50,13 @@
           </div>
           <div>
             <strong>Camera Nest Frame</strong
-            ><span>Liên lạc riêng tư ngang hàng</span>
+            ><span data-i18n="CAMERA_SUBTITLE">Liên lạc riêng tư ngang hàng</span>
           </div>
         </div>
         <div class="error" id="error"></div>
         <form class="form" id="form">
           <label
-            ><span class="label">Token camera</span
+            ><span class="label" data-i18n="CAMERA_TOKEN">Token camera</span
             ><input
               class="field"
               id="token"
@@ -61,19 +66,20 @@
               placeholder="CAMERA_REMOTE_TOKEN"
           /></label>
           <label
-            ><span class="label">Tên của bạn</span
+            ><span class="label" data-i18n="YOUR_NAME">Tên của bạn</span
             ><input
               class="field"
               id="name"
               maxlength="60"
               autocomplete="name"
               value="Người xem từ xa"
+              data-i18n-value="REMOTE_VIEWER"
           /></label>
           <label class="share"
-            ><input id="share-video" type="checkbox" /> Chia sẻ camera của
-            thiết bị này với màn hình</label
+            ><input id="share-video" type="checkbox" /> <span data-i18n="SHARE_CAMERA">Chia sẻ camera của
+            thiết bị này với màn hình</span></label
           >
-          <button class="button" id="start" type="submit">
+          <button class="button" id="start" type="submit" data-i18n="START_CALL">
             Bắt đầu cuộc gọi
           </button>
         </form>
@@ -81,12 +87,12 @@
           <div class="call-state">
             <strong
               ><span class="dot"></span
-              ><span id="state-title">Đang gọi màn hình…</span></strong
-            ><span id="state-detail">Đang chờ màn hình phản hồi</span>
+              ><span id="state-title" data-i18n="CALLING_DISPLAY">Đang gọi màn hình…</span></strong
+            ><span id="state-detail" data-i18n="WAITING_FOR_DISPLAY">Đang chờ màn hình phản hồi</span>
           </div>
-          <button class="button end" id="end" type="button">Kết thúc</button>
+          <button class="button end" id="end" type="button" data-i18n="END_CALL">Kết thúc</button>
         </div>
-        <div class="hint">
+        <div class="hint" data-i18n="CAMERA_HTTPS_HINT">
           Cần sử dụng HTTPS. Hình ảnh và âm thanh truyền trực tiếp giữa các
           thiết bị; server chỉ trao đổi thông tin kết nối.
         </div>

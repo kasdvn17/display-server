@@ -172,26 +172,26 @@ async function buildCommutes(originLat, originLon, calendarEvents = []) {
 
 function weatherCodeLabel(code) {
   code = Number(code);
-  if (code === 0) return "Trời quang";
-  if ([1, 2].includes(code)) return "Có mây rải rác";
-  if (code === 3) return "Nhiều mây";
-  if ([45, 48].includes(code)) return "Sương mù";
-  if ([51, 53, 55, 56, 57].includes(code)) return "Mưa phùn";
-  if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return "Mưa";
-  if ([71, 73, 75, 77, 85, 86].includes(code)) return "Tuyết";
-  if ([95, 96, 99].includes(code)) return "Giông bão";
-  return "Thời tiết";
+  if (code === 0) return "Clear sky";
+  if ([1, 2].includes(code)) return "Partly cloudy";
+  if (code === 3) return "Overcast";
+  if ([45, 48].includes(code)) return "Fog";
+  if ([51, 53, 55, 56, 57].includes(code)) return "Drizzle";
+  if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return "Rain";
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return "Snow";
+  if ([95, 96, 99].includes(code)) return "Thunderstorm";
+  return "Weather";
 }
 
 function aqiLabel(aqi) {
   aqi = Number(aqi);
   if (!Number.isFinite(aqi)) return "";
-  if (aqi <= 50) return "Tốt";
-  if (aqi <= 100) return "Trung bình";
-  if (aqi <= 150) return "Không tốt cho nhóm nhạy cảm";
-  if (aqi <= 200) return "Không tốt";
-  if (aqi <= 300) return "Rất không tốt";
-  return "Nguy hiểm";
+  if (aqi <= 50) return "Good";
+  if (aqi <= 100) return "Moderate";
+  if (aqi <= 150) return "Unhealthy for sensitive groups";
+  if (aqi <= 200) return "Unhealthy";
+  if (aqi <= 300) return "Very unhealthy";
+  return "Hazardous";
 }
 
 async function buildAmbientContext(latitude, longitude) {
@@ -289,9 +289,9 @@ async function buildAmbientContext(latitude, longitude) {
       priority: 95,
       title:
         rainStartMinutes <= 5
-          ? "Trời bắt đầu mưa"
-          : `Mưa sau khoảng ${Math.max(1, rainStartMinutes)} phút`,
-      body: `${maxRainChanceNext3h}% khả năng mưa gần đây · ${weatherCodeLabel(current.weather_code)}`,
+          ? "Rain is starting"
+          : `Rain in about ${Math.max(1, rainStartMinutes)} minutes`,
+      body: `${maxRainChanceNext3h}% chance of rain nearby · ${weatherCodeLabel(current.weather_code)}`,
       icon: "rain",
     });
   } else if (maxRainChanceNext3h >= 65) {
@@ -299,8 +299,8 @@ async function buildAmbientContext(latitude, longitude) {
       id: "rain-risk",
       type: "weather",
       priority: 82,
-      title: "Có thể sắp mưa",
-      body: `Khả năng mưa tới ${maxRainChanceNext3h}% trong 3 giờ tới`,
+      title: "Rain may be approaching",
+      body: `Up to ${maxRainChanceNext3h}% chance of rain in the next 3 hours`,
       icon: "rain",
     });
   }
@@ -310,7 +310,7 @@ async function buildAmbientContext(latitude, longitude) {
       id: "aqi-high",
       type: "air",
       priority: 88,
-      title: `Chất lượng không khí: ${aqiLabel(aqi).toLowerCase()}`,
+      title: `Air quality: ${aqiLabel(aqi).toLowerCase()}`,
       body: `AQI ${aqi} · PM2.5 ${Math.round(Number(airCurrent.pm2_5) || 0)} µg/m³`,
       icon: "air",
     });
@@ -319,7 +319,7 @@ async function buildAmbientContext(latitude, longitude) {
       id: "aqi-moderate",
       type: "air",
       priority: 54,
-      title: "Chất lượng không khí ở mức trung bình",
+      title: "Air quality is moderate",
       body: `AQI ${aqi} · ${aqiLabel(aqi)}`,
       icon: "air",
     });
@@ -330,11 +330,11 @@ async function buildAmbientContext(latitude, longitude) {
       id: "uv-high",
       type: "uv",
       priority: maxUvNext12h >= 8 ? 80 : 60,
-      title: `UV cao nhất ở mức ${Math.round(maxUvNext12h)}`,
+      title: `UV peaks at ${Math.round(maxUvNext12h)}`,
       body:
         maxUvNext12h >= 8
-          ? "UV hôm nay rất cao · cần chống nắng"
-          : "UV hôm nay cao · nên chống nắng",
+          ? "UV is very high today · sun protection is required"
+          : "UV is high today · sun protection is recommended",
       icon: "sun",
     });
 
@@ -354,8 +354,8 @@ async function buildAmbientContext(latitude, longitude) {
         priority: mins <= 20 ? 92 : 72,
         title:
           mins <= 1
-            ? `${nextEvent.title} bắt đầu ngay bây giờ`
-            : `${nextEvent.title} sau ${mins} phút`,
+            ? `${nextEvent.title} starts now`
+            : `${nextEvent.title} starts in ${mins} minutes`,
         body: nextEvent.location || FRAME_CALENDAR_NAME,
         icon: "calendar",
       });
@@ -365,14 +365,14 @@ async function buildAmbientContext(latitude, longitude) {
     if (c.leaveInMinutes <= 75 && c.leaveInMinutes >= -30) {
       const title =
         c.leaveInMinutes <= 0
-          ? `Đi ngay tới ${c.name}`
-          : `Khởi hành sau ${c.leaveInMinutes} phút`;
+          ? `Leave now for ${c.name}`
+          : `Leave in ${c.leaveInMinutes} minutes`;
       notifications.push({
         id: `commute:${c.id}`,
         type: "commute",
         priority: c.leaveInMinutes <= 15 ? 100 : 86,
         title,
-        body: `${c.name} · ${c.durationMinutes} phút di chuyển${c.distanceKm != null ? ` · ${c.distanceKm} km` : ""}`,
+        body: `${c.name} · ${c.durationMinutes} minutes travel time${c.distanceKm != null ? ` · ${c.distanceKm} km` : ""}`,
         icon: "route",
         target: c.name,
       });
@@ -458,7 +458,7 @@ app.get("/ambient/context", async (req, res) => {
       id: "system:ambient-context",
       type: "error",
       priority: 78,
-      title: "Không thể cập nhật thông tin xung quanh",
+      title: "Unable to update ambient information",
       body: String(err.message || err),
       icon: "error",
       action: "retry-context",
@@ -467,7 +467,7 @@ app.get("/ambient/context", async (req, res) => {
       .status(502)
       .json({
         configured: true,
-        error: "Không thể cập nhật thông tin xung quanh",
+        error: "Unable to update ambient information",
         detail: String(err.message || err),
         notifications: [],
         commutes: [],
@@ -502,7 +502,7 @@ app.use((req, res, next) => {
   try {
     if (new URL(origin).host === String(req.get("host") || "")) return next();
   } catch (_) {}
-  return res.status(403).json({ error: "Đã chặn thay đổi khác nguồn" });
+  return res.status(403).json({ error: "Cross-origin state change blocked" });
 });
 
 function clampByte(value) {
@@ -599,6 +599,7 @@ app.get("/frame/bootstrap", (req, res) => {
         (config.theme.primaryColor || config.theme.primary));
   res.setHeader("Cache-Control", "private, max-age=60");
   res.json({
+    language: FRAME_LANGUAGE,
     timezone: FRAME_TIMEZONE,
     immichPublicUrl: IMMICH_PUBLIC_URL,
     spotifyDeviceName: SPOTIFY_DEVICE_NAME,

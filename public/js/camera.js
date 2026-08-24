@@ -1,5 +1,10 @@
 (function () {
   "use strict";
+  function cameraT(key, fallback, variables) {
+    return window.FrameI18n
+      ? window.FrameI18n.t(key, fallback, variables)
+      : String(fallback || key);
+  }
   var stage = document.getElementById("stage"),
     form = document.getElementById("form"),
     tokenInput = document.getElementById("token"),
@@ -29,7 +34,7 @@
   try {
     tokenInput.value = localStorage.getItem("nestframe-camera-token") || "";
     nameInput.value =
-      localStorage.getItem("nestframe-camera-name") || "Người xem từ xa";
+      localStorage.getItem("nestframe-camera-name") || cameraT("REMOTE_VIEWER", "Remote viewer");
   } catch (_) {}
   fetch("/frame/bootstrap", { cache: "no-store" })
     .then(function (r) {
@@ -77,7 +82,7 @@
         })
         .then(function (data) {
           if (!r.ok)
-            throw new Error(data.error || "Yêu cầu thất bại: " + r.status);
+            throw new Error(data.error || cameraT("REQUEST_FAILED_STATUS", "Request failed: {STATUS}", { STATUS: r.status }));
           return data;
         });
     });
@@ -167,19 +172,19 @@
           return signal("answer", pc.localDescription);
         })
         .catch(function (err) {
-          fail("Không thể thiết lập cuộc gọi camera: " + err.message);
+          fail(cameraT("CALL_SETUP_FAILED_DETAIL", "Unable to set up the camera call: {ERROR}", { ERROR: err.message }));
         });
     } else if (message.type === "candidate") addCandidate(message.payload);
     else if (message.type === "ready")
-      state("Màn hình đã trả lời", "Đang bảo mật kết nối trực tiếp…", false);
+      state(cameraT("DISPLAY_ANSWERED", "The display answered"), cameraT("SECURING_DIRECT_CONNECTION", "Securing the direct connection…"), false);
     else if (message.type === "connected")
-      state("Camera trực tiếp", "Đã kết nối trực tiếp tới màn hình", true);
+      state(cameraT("CAMERA_LIVE", "Live camera"), cameraT("CONNECTED_DIRECTLY", "Connected directly to the display"), true);
     else if (message.type === "error")
       fail(
         (message.payload && message.payload.message) ||
-          "Màn hình không thể mở camera",
+          cameraT("DISPLAY_CAMERA_FAILED", "The display could not open its camera"),
       );
-    else if (message.type === "end") fail("Màn hình đã kết thúc cuộc gọi");
+    else if (message.type === "end") fail(cameraT("DISPLAY_ENDED_CALL", "The display ended the call"));
   }
   function schedulePoll(myEpoch) {
     clearTimeout(pollTimer);
@@ -205,11 +210,11 @@
         if (myEpoch !== epoch) return;
         if (typeof data.cursor === "number") cursor = data.cursor;
         (data.messages || []).forEach(handleMessage);
-        if (data.ended) throw new Error("Phiên camera đã kết thúc");
+        if (data.ended) throw new Error(cameraT("CAMERA_SESSION_ENDED", "The camera session has ended"));
         schedulePoll(myEpoch);
       })
       .catch(function (err) {
-        if (myEpoch === epoch) fail(err.message || "Mất kết nối camera");
+        if (myEpoch === epoch) fail(err.message || cameraT("CAMERA_CONNECTION_LOST", "The camera connection was lost"));
       });
   }
   function fail(message) {
@@ -242,7 +247,7 @@
       var play = remoteVideo.play();
       if (play && play.catch)
         play.catch(function () {
-          state("Chạm để nghe âm thanh", "Trình duyệt đã tạm dừng phát tự động", true);
+          state(cameraT("TAP_TO_HEAR_AUDIO", "Tap to hear audio"), cameraT("AUTOPLAY_PAUSED", "The browser paused autoplay"), true);
         });
     };
     pc.onconnectionstatechange = function () {
@@ -250,9 +255,9 @@
       var s = pc.connectionState || pc.iceConnectionState;
       if (s === "connected" || s === "completed") {
         clearTimeout(connectTimer);
-        state("Camera trực tiếp", "Đã kết nối trực tiếp tới màn hình", true);
+        state(cameraT("CAMERA_LIVE", "Live camera"), cameraT("CONNECTED_DIRECTLY", "Connected directly to the display"), true);
       } else if (s === "failed" || s === "closed" || s === "disconnected")
-        fail("Đã mất kết nối camera trực tiếp");
+        fail(cameraT("DIRECT_CAMERA_LOST", "The direct camera connection was lost"));
     };
   }
   form.addEventListener("submit", function (ev) {
@@ -260,9 +265,9 @@
     if (callId) return;
     showError("");
     token = tokenInput.value.trim();
-    var viewerName = nameInput.value.trim() || "Người xem từ xa";
+    var viewerName = nameInput.value.trim() || cameraT("REMOTE_VIEWER", "Remote viewer");
     if (!token) {
-      showError("Hãy nhập CAMERA_REMOTE_TOKEN");
+      showError(cameraT("ENTER_CAMERA_TOKEN", "Enter CAMERA_REMOTE_TOKEN"));
       return;
     }
     if (
@@ -271,7 +276,7 @@
       !navigator.mediaDevices ||
       !navigator.mediaDevices.getUserMedia
     ) {
-      showError("Hãy mở trang này qua HTTPS bằng trình duyệt hỗ trợ WebRTC");
+      showError(cameraT("OPEN_WITH_HTTPS_WEBRTC", "Open this page over HTTPS in a WebRTC-capable browser"));
       return;
     }
     try {
@@ -280,7 +285,7 @@
     } catch (_) {}
     startBtn.disabled = true;
     stage.classList.add("calling");
-    state("Đang mở microphone…", "Hãy cấp quyền khi trình duyệt yêu cầu", false);
+    state(cameraT("OPENING_MICROPHONE", "Opening microphone…"), cameraT("GRANT_PERMISSION", "Grant permission when the browser asks"), false);
     var myEpoch = ++epoch;
     navigator.mediaDevices
       .getUserMedia({
@@ -318,16 +323,16 @@
         if (!data || myEpoch !== epoch) return;
         callId = data.callId;
         createPeer(data.iceServers, myEpoch);
-        state("Đang gọi màn hình…", "Đang chờ màn hình phản hồi", false);
+        state(cameraT("CALLING_DISPLAY", "Calling display…"), cameraT("WAITING_FOR_DISPLAY", "Waiting for the display to respond"), false);
         poll(myEpoch);
         connectTimer = setTimeout(function () {
           if (myEpoch === epoch && !stage.classList.contains("live"))
-            fail("Màn hình không trả lời trong vòng 30 giây");
+            fail(cameraT("DISPLAY_CALL_TIMEOUT", "The display did not answer before the call timed out"));
         }, CAMERA_CONNECT_TIMEOUT_MS);
       })
       .catch(function (err) {
         if (myEpoch === epoch)
-          fail(err.message || "Không thể bắt đầu cuộc gọi camera");
+          fail(err.message || cameraT("CAMERA_CALL_START_FAILED", "Unable to start the camera call"));
       });
   });
   endBtn.addEventListener("click", endCall);
@@ -357,9 +362,9 @@
     })
     .then(function (cfg) {
       if (!cfg.enabled)
-        showError("Chưa cấu hình truy cập camera từ xa trên server");
+        showError(cameraT("CAMERA_NOT_CONFIGURED", "Remote camera access is not configured on the server"));
     })
     .catch(function () {
-      showError("Không thể kết nối tới dịch vụ camera");
+      showError(cameraT("CAMERA_SERVICE_UNAVAILABLE", "Unable to connect to the camera service"));
     });
 })();

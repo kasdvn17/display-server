@@ -45,7 +45,7 @@ app.get("/news", async (req, res) => {
         return {
           id: item.guid || item.id || String(index),
           title,
-          source: source || feed.title || "Tin tức",
+          source: source || feed.title || "News",
           link: safePublicMediaUrl(item.link),
           publishedAt: item.isoDate || item.pubDate || "",
           image: safePublicMediaUrl(image),
@@ -62,7 +62,7 @@ app.get("/news", async (req, res) => {
     console.error("News feed error:", err.message || err);
     res
       .status(502)
-      .json({ error: "Không thể tải nguồn tin", items: newsCache.items || [] });
+      .json({ error: "Unable to load news feed", items: newsCache.items || [] });
   }
 });
 

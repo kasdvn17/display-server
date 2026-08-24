@@ -135,7 +135,7 @@
       if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
       window.speechSynthesis.cancel();
       var u = new SpeechSynthesisUtterance(String(text || ""));
-      u.lang = "vi-VN";
+      u.lang = frameLocale();
       u.rate = 0.96;
       window.speechSynthesis.speak(u);
     } catch (_) {}
@@ -173,11 +173,11 @@
     if (keepPageControls)
       setVoiceState(
         "idle",
-        "Đã xong",
+        tr("DONE", "Đã xong"),
         voiceOutputText.trim() ||
           (assistantPageTitle && assistantPageTitle.textContent) ||
-          "Nội dung đang hiển thị",
-        "Nhấn × để quay lại trang trước",
+          tr("CONTENT_DISPLAYED", "Nội dung đang hiển thị"),
+        tr("PRESS_CLOSE_RETURN", "Nhấn × để quay lại trang trước"),
       );
     if (voiceButton) voiceButton.classList.remove("active");
     var shouldResume = voiceWasSpotifyPlaying && !voiceTouchedSpotify;
@@ -189,7 +189,7 @@
     voiceTouchedSpotify = false;
   }
   function failVoiceAssistant(message, detail) {
-    var title = String(message || "Không thể xử lý yêu cầu"),
+    var title = String(message || tr("REQUEST_FAILED", "Không thể xử lý yêu cầu")),
       info = String(detail || "").trim(),
       spoken = info ? title + ". " + info : title;
     voiceLastError = spoken;
@@ -197,12 +197,17 @@
     stopVoicePlayback();
     finishVoiceSessionKeepUi();
     showVoiceShell();
-    setVoiceState("idle", "Không thể xử lý", spoken, "Chạm mic để thử lại");
+    setVoiceState(
+      "idle",
+      tr("UNABLE_TO_PROCESS", "Không thể xử lý"),
+      spoken,
+      tr("TAP_MIC_TO_RETRY", "Chạm mic để thử lại"),
+    );
     speakVoiceNotice(spoken);
     pushClientNotification(
       "client:gemini-live",
       title,
-      info || "Gemini Live không thể hoàn tất yêu cầu.",
+      info || tr("GEMINI_COULD_NOT_COMPLETE", "Gemini Live không thể hoàn tất yêu cầu."),
     ).then(loadNotifications);
   }
   function armVoiceProcessingTimeout(context) {
@@ -212,8 +217,10 @@
       voiceProcessingTimer = 0;
       if (epoch === voiceEpoch)
         failVoiceAssistant(
-          "Không thể xử lý yêu cầu",
-          "Đã quá thời gian chờ" + (context ? " khi " + context : "") + ".",
+          tr("REQUEST_FAILED", "Không thể xử lý yêu cầu"),
+          tr("TIMED_OUT_CONTEXT", "Đã quá thời gian chờ{CONTEXT}.", {
+            CONTEXT: context ? " " + tr("WHILE_CONTEXT", "khi {CONTEXT}", { CONTEXT: context }) : "",
+          }),
         );
     }, VOICE_PROCESSING_TIMEOUT_MS);
   }
@@ -232,7 +239,7 @@
       '" href="' +
       escVoice(u) +
       '" target="_blank" rel="noopener noreferrer">' +
-      escVoice(label || "Mở nguồn") +
+      escVoice(label || tr("OPEN_SOURCE", "Mở nguồn")) +
       " ↗</a>"
     );
   }
@@ -240,7 +247,7 @@
     var date = new Date(value);
     if (!value || isNaN(date.getTime())) return String(value || "");
     try {
-      return new Intl.DateTimeFormat("vi-VN", {
+      return new Intl.DateTimeFormat(frameLocale(), {
         day: "2-digit",
         month: "2-digit",
         timeZone: TIMEZONE,
@@ -275,7 +282,7 @@
         (text ? '<div class="dynamic-widget-text">' + text + "</div>" : "") +
         (url
           ? '<div class="dynamic-sources">' +
-            dynamicLink(url, "Mở chi tiết") +
+            dynamicLink(url, tr("OPEN_DETAILS", "Mở chi tiết")) +
             "</div>"
           : "") +
         "</div>" +
@@ -316,7 +323,7 @@
         (text ? '<div class="dynamic-widget-text">' + text + "</div>" : "") +
         (url
           ? '<div class="dynamic-sources">' +
-            dynamicLink(url, "Hồ sơ") +
+            dynamicLink(url, tr("PROFILE", "Hồ sơ")) +
             "</div>"
           : "") +
         "</div></div>"
@@ -499,7 +506,7 @@
           .map(function (x) {
             return dynamicLink(
               x.url || x.href || x.link,
-              x.title || x.source || x.label || "Nguồn",
+              x.title || x.source || x.label || tr("SOURCE", "Nguồn"),
             );
           })
           .join("") +
@@ -547,7 +554,7 @@
     if (url && type !== "sources")
       body +=
         '<div class="dynamic-sources">' +
-        dynamicLink(url, "Mở chi tiết") +
+        dynamicLink(url, tr("OPEN_DETAILS", "Mở chi tiết")) +
         "</div>";
     return body + "</div>";
   }
@@ -561,8 +568,8 @@
       return;
     assistantPage.classList.add("show");
     assistantPage.setAttribute("aria-hidden", "false");
-    assistantPageKicker.textContent = data.kicker || "Trợ lý Nest";
-    assistantPageTitle.textContent = data.title || "Thông tin";
+    assistantPageKicker.textContent = data.kicker || tr("NEST_ASSISTANT", "Trợ lý Nest");
+    assistantPageTitle.textContent = data.title || tr("INFORMATION", "Thông tin");
     assistantPageSub.textContent = data.subtitle || "";
     var layout = data.layout || {},
       widgets = Array.isArray(data.widgets) ? data.widgets.slice() : [];
@@ -613,7 +620,7 @@
     html +=
       (widgets.length
         ? ""
-        : '<div class="dynamic-empty">Không có nội dung trực quan để hiển thị.</div>') +
+        : '<div class="dynamic-empty">' + tr("NO_VISUAL_CONTENT", "Không có nội dung trực quan để hiển thị.") + "</div>") +
       "</div>";
     assistantPageContent.innerHTML = html;
     var grid = assistantPageContent.querySelector(".dynamic-ui-grid");
@@ -713,7 +720,7 @@
   function listenForVoiceFollowup() {
     var followupQuestion =
       String(voiceFollowupQuestion || voiceOutputText || "").trim() ||
-      "Bạn có thể nói thêm thông tin cần thiết";
+      tr("FOLLOWUP_HINT", "Bạn có thể nói thêm thông tin cần thiết");
     clearVoiceProcessingTimer();
     voiceTurnEnding = false;
     voiceTurnCompleted = false;
@@ -734,9 +741,9 @@
     var epoch = voiceEpoch;
     setVoiceState(
       "listening",
-      "Đang nghe tiếp…",
+      tr("LISTENING_FOR_FOLLOWUP", "Đang nghe tiếp…"),
       followupQuestion,
-      "Phiên sẽ tự đóng nếu không có phản hồi",
+      tr("FOLLOWUP_TIMEOUT_HINT", "Phiên sẽ tự đóng nếu không có phản hồi"),
     );
     navigator.mediaDevices
       .getUserMedia({
@@ -762,8 +769,8 @@
       .catch(function (err) {
         if (epoch === voiceEpoch)
           failVoiceAssistant(
-            "Không thể nghe câu trả lời tiếp theo",
-            (err && err.message) || "Không mở được microphone",
+            tr("FOLLOWUP_LISTEN_FAILED", "Không thể nghe câu trả lời tiếp theo"),
+            (err && err.message) || tr("MICROPHONE_OPEN_FAILED", "Không mở được microphone"),
           );
       });
   }
@@ -819,17 +826,20 @@
     if (!voiceProcessor) return;
     setVoiceState(
       "thinking",
-      "Đang xử lý…",
-      voiceLastUserText || "Đang hiểu yêu cầu…",
+      tr("PROCESSING", "Đang xử lý…"),
+      voiceLastUserText || tr("UNDERSTANDING_REQUEST", "Đang hiểu yêu cầu…"),
       "",
     );
     if (!sendVoiceJson({ realtimeInput: { audioStreamEnd: true } })) {
-      failVoiceAssistant("Không thể xử lý yêu cầu", "Mất kết nối tới Gemini.");
+      failVoiceAssistant(
+        tr("REQUEST_FAILED", "Không thể xử lý yêu cầu"),
+        tr("GEMINI_CONNECTION_LOST", "Mất kết nối tới Gemini."),
+      );
       return;
     }
     closeVoiceInput();
     voiceBusy = true;
-    armVoiceProcessingTimeout("Gemini phản hồi");
+    armVoiceProcessingTimeout(tr("GEMINI_RESPONSE", "Gemini phản hồi"));
   }
   function startLiveCapture(stream, isFollowup) {
     voiceStream = stream;
@@ -849,8 +859,8 @@
         else if (voiceCaptureIsFollowup) finishVoiceSessionKeepUi();
         else
           failVoiceAssistant(
-            "Không nghe thấy yêu cầu",
-            "Hãy chạm mic và thử nói lại.",
+            tr("NO_REQUEST_HEARD", "Không nghe thấy yêu cầu"),
+            tr("TAP_MIC_TRY_AGAIN", "Hãy chạm mic và thử nói lại."),
           );
       },
       voiceCaptureIsFollowup ? VOICE_FOLLOWUP_WAIT_MS : 14000,
@@ -903,8 +913,8 @@
         if (voiceCaptureIsFollowup) finishVoiceSessionKeepUi();
         else
           failVoiceAssistant(
-            "Không nghe thấy yêu cầu",
-            "Hãy chạm mic và thử nói lại.",
+            tr("NO_REQUEST_HEARD", "Không nghe thấy yêu cầu"),
+            tr("TAP_MIC_TRY_AGAIN", "Hãy chạm mic và thử nói lại."),
           );
       }
     };
@@ -912,9 +922,12 @@
     voiceBusy = false;
     setVoiceState(
       "listening",
-      "Đang nghe…",
-      "Bạn muốn hỏi gì?",
-      "Tự gửi khi bạn ngừng nói · chạm mic lần nữa để gửi",
+      tr("LISTENING", "Đang nghe…"),
+      tr("WHAT_WOULD_YOU_LIKE", "Bạn muốn hỏi gì?"),
+      tr(
+        "VOICE_AUTO_SEND_HINT",
+        "Tự gửi khi bạn ngừng nói · chạm mic lần nữa để gửi",
+      ),
     );
   }
   function queueGeminiAudio(base64) {
@@ -1076,7 +1089,7 @@
         : [];
     if (!calls.length) return;
     var epoch = voiceEpoch;
-    armVoiceProcessingTimeout("thực hiện công cụ");
+    armVoiceProcessingTimeout(tr("RUNNING_TOOL", "thực hiện công cụ"));
     Promise.all(
       calls.map(function (fc) {
         var key =
@@ -1108,7 +1121,8 @@
             })
               .then(function (r) {
                 return r.json().then(function (d) {
-                  if (!r.ok) throw new Error(d.error || "Công cụ thất bại");
+                  if (!r.ok)
+                    throw new Error(d.error || tr("TOOL_FAILED", "Công cụ thất bại"));
                   return d;
                 });
               })
@@ -1133,7 +1147,7 @@
               .catch(function (err) {
                 var detail =
                   err && err.name === "AbortError"
-                    ? "Quá thời gian chờ công cụ"
+                    ? tr("TOOL_TIMED_OUT", "Quá thời gian chờ công cụ")
                     : String((err && err.message) || err);
                 return { error: detail, response: { error: detail } };
               })
@@ -1186,9 +1200,9 @@
           if (value.error)
             setVoiceState(
               "thinking",
-              "Công cụ gặp lỗi",
+              tr("TOOL_ERROR", "Công cụ gặp lỗi"),
               String(fc.name || "Tool") + ": " + value.error,
-              "Đang gửi lỗi cho Gemini",
+              tr("SENDING_ERROR_TO_GEMINI", "Đang gửi lỗi cho Gemini"),
             );
           functionResponses.push({
             name: fc.name,
@@ -1202,17 +1216,19 @@
           })
         ) {
           failVoiceAssistant(
-            "Không thể gửi kết quả công cụ",
-            "Mất kết nối tới Gemini.",
+            tr("SEND_TOOL_RESULT_FAILED", "Không thể gửi kết quả công cụ"),
+            tr("GEMINI_CONNECTION_LOST", "Mất kết nối tới Gemini."),
           );
           return;
         }
-        armVoiceProcessingTimeout("chờ câu trả lời sau công cụ");
+        armVoiceProcessingTimeout(
+          tr("WAITING_AFTER_TOOL", "chờ câu trả lời sau công cụ"),
+        );
       })
       .catch(function (err) {
         if (epoch === voiceEpoch)
           failVoiceAssistant(
-            "Không thể thực hiện công cụ",
+            tr("RUN_TOOL_FAILED", "Không thể thực hiện công cụ"),
             (err && err.message) || String(err),
           );
       });
@@ -1241,17 +1257,17 @@
     if (!msg || typeof msg !== "object") return;
     if (msg.error) {
       failVoiceAssistant(
-        "Gemini trả về lỗi",
+        tr("GEMINI_RETURNED_ERROR", "Gemini returned an error"),
         msg.error.message || msg.error.status || JSON.stringify(msg.error),
       );
       return;
     }
     if (msg.goAway) {
       failVoiceAssistant(
-        "Phiên Gemini đã kết thúc",
+        tr("GEMINI_SESSION_ENDED", "The Gemini session has ended"),
         msg.goAway.timeLeft
-          ? "Thời gian còn lại: " + msg.goAway.timeLeft
-          : "Máy chủ yêu cầu đóng kết nối.",
+          ? tr("TIME_REMAINING", "Time remaining: {TIME}", { TIME: msg.goAway.timeLeft })
+          : tr("SERVER_REQUESTED_CLOSE", "The server requested that the connection close."),
       );
       return;
     }
@@ -1264,7 +1280,7 @@
         voiceStarting = false;
         voiceBusy = true;
         voiceLastUserText = remoteText;
-        setVoiceState("thinking", "Đang xử lý…", remoteText, "Yêu cầu từ xa");
+        setVoiceState("thinking", tr("PROCESSING", "Processing…"), remoteText, tr("REMOTE_REQUEST", "Remote request"));
         if (
           !sendVoiceJson({
             clientContent: {
@@ -1273,8 +1289,8 @@
             },
           })
         )
-          failVoiceAssistant("Không thể gửi yêu cầu", "Mất kết nối tới Gemini.");
-        else armVoiceProcessingTimeout("Gemini phản hồi yêu cầu từ xa");
+          failVoiceAssistant(tr("REQUEST_SEND_FAILED", "Unable to send request"), tr("GEMINI_CONNECTION_LOST", "Connection to Gemini was lost."));
+        else armVoiceProcessingTimeout(tr("REMOTE_GEMINI_RESPONSE", "Gemini response to the remote request"));
       } else if (voiceStream) startLiveCapture(voiceStream);
       return;
     }
@@ -1287,8 +1303,8 @@
       voiceOutputText = "";
       setVoiceState(
         "listening",
-        "Đang nghe…",
-        voiceLastUserText || "Bạn muốn nói thêm gì?",
+        tr("LISTENING", "Listening…"),
+        voiceLastUserText || tr("WHAT_ELSE_TO_ADD", "What else would you like to add?"),
         "",
       );
     }
@@ -1299,7 +1315,7 @@
       ).trim();
       setVoiceState(
         voiceProcessor ? "listening" : "thinking",
-        voiceProcessor ? "Đang nghe…" : "Đang xử lý…",
+        voiceProcessor ? tr("LISTENING", "Listening…") : tr("PROCESSING", "Processing…"),
         voiceLastUserText,
         "",
       );
@@ -1312,8 +1328,8 @@
         voiceOutputText,
         String(sc.outputTranscription.text),
       );
-      setVoiceState("speaking", "Trợ lý", "" + voiceOutputText.trim(), "");
-      armVoiceProcessingTimeout("hoàn tất câu trả lời");
+      setVoiceState("speaking", tr("ASSISTANT", "Assistant"), "" + voiceOutputText.trim(), "");
+      armVoiceProcessingTimeout(tr("FINISHING_RESPONSE", "finishing the response"));
     }
     if (sc.modelTurn && Array.isArray(sc.modelTurn.parts)) {
       for (var i = 0; i < sc.modelTurn.parts.length; i++) {
@@ -1324,12 +1340,12 @@
           commitVoiceVisual();
           setVoiceState(
             "speaking",
-            "Trợ lý",
-            voiceOutputText.trim() || "Đang trả lời…",
+            tr("ASSISTANT", "Assistant"),
+            voiceOutputText.trim() || tr("RESPONDING", "Responding…"),
             "",
           );
           queueGeminiAudio(part.inlineData.data);
-          armVoiceProcessingTimeout("hoàn tất âm thanh");
+          armVoiceProcessingTimeout(tr("FINISHING_AUDIO", "finishing audio"));
         }
       }
     }
@@ -1363,7 +1379,7 @@
           model: "models/" + session.model,
           generationConfig: {
             responseModalities: ["AUDIO"],
-            speechConfig: { languageCode: "vi-VN" },
+            speechConfig: { languageCode: frameLocale() },
           },
           systemInstruction: { parts: [{ text: session.instructions }] },
           tools: [{ functionDeclarations: session.tools || [] }],
@@ -1395,7 +1411,7 @@
     };
     ws.onerror = function () {
       if (voiceSocket === ws)
-        failVoiceAssistant("Mất kết nối", "Không thể kết nối Gemini Live.");
+        failVoiceAssistant(tr("CONNECTION_LOST", "Connection lost"), tr("GEMINI_CONNECT_FAILED", "Unable to connect to Gemini Live."));
     };
     ws.onclose = function (ev) {
       if (voiceSocket === ws) voiceSocket = null;
@@ -1405,8 +1421,8 @@
         ev.code !== 1000
       )
         failVoiceAssistant(
-          "Gemini Live đã ngắt kết nối",
-          ev.reason || "Mã lỗi " + ev.code,
+          tr("GEMINI_DISCONNECTED", "Gemini Live disconnected"),
+          ev.reason || tr("ERROR_CODE", "Error code {CODE}", { CODE: ev.code }),
         );
     };
   }
@@ -1442,16 +1458,16 @@
       pauseSpotify();
     setVoiceState(
       "thinking",
-      "Đang chuẩn bị",
-      "Đang kết nối trợ lý…",
-      "Cho phép microphone nếu Safari hỏi",
+      tr("PREPARING", "Preparing"),
+      tr("CONNECTING_ASSISTANT", "Connecting to the assistant…"),
+      tr("ALLOW_MIC_SAFARI", "Allow microphone access if Safari asks"),
     );
-    armVoiceProcessingTimeout("kết nối Gemini");
+    armVoiceProcessingTimeout(tr("CONNECTING_GEMINI", "connecting to Gemini"));
     var AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) {
       failVoiceAssistant(
-        "Không thể bắt đầu trợ lý",
-        "Safari này không có Web Audio API",
+        tr("ASSISTANT_START_FAILED", "Unable to start the assistant"),
+        tr("WEB_AUDIO_UNAVAILABLE", "Web Audio API is unavailable in this browser"),
       );
       return;
     }
@@ -1461,13 +1477,13 @@
       voicePlayhead = voiceAudioContext.currentTime;
     } catch (err) {
       failVoiceAssistant(
-        "Không thể mở âm thanh",
-        err.message || "Lỗi AudioContext",
+        tr("AUDIO_OPEN_FAILED", "Unable to open audio"),
+        err.message || tr("AUDIO_CONTEXT_ERROR", "AudioContext error"),
       );
       return;
     }
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      failVoiceAssistant("Không hỗ trợ microphone", "Hãy mở frame bằng HTTPS");
+      failVoiceAssistant(tr("MICROPHONE_UNSUPPORTED", "Microphone is not supported"), tr("OPEN_FRAME_HTTPS", "Open the frame over HTTPS"));
       return;
     }
     Promise.all([
@@ -1478,7 +1494,7 @@
       }).then(function (r) {
         return r.json().then(function (d) {
           if (!r.ok)
-            throw new Error(d.error || "Không lấy được Gemini Live token");
+            throw new Error(d.error || tr("GEMINI_TOKEN_FAILED", "Unable to get a Gemini Live token"));
           return d;
         });
       }),
@@ -1503,8 +1519,8 @@
         console.error("Gemini Live start failed", err);
         if (epoch === voiceEpoch)
           failVoiceAssistant(
-            "Không thể bắt đầu trợ lý",
-            (err && err.message) || "Gemini Live không khả dụng",
+            tr("ASSISTANT_START_FAILED", "Unable to start the assistant"),
+            (err && err.message) || tr("GEMINI_UNAVAILABLE", "Gemini Live is unavailable"),
           );
       });
   }
@@ -1529,11 +1545,11 @@
     voiceHandledToolCalls = {};
     setVoiceState(
       "thinking",
-      "Yêu cầu từ xa",
+      tr("REMOTE_REQUEST", "Remote request"),
       text,
-      "Đang kết nối trợ lý…",
+      tr("CONNECTING_ASSISTANT", "Connecting to the assistant…"),
     );
-    armVoiceProcessingTimeout("kết nối Gemini từ xa");
+    armVoiceProcessingTimeout(tr("CONNECTING_GEMINI_REMOTE", "connecting to Gemini for a remote request"));
     var AC = window.AudioContext || window.webkitAudioContext;
     if (AC) {
       try {
@@ -1551,7 +1567,7 @@
     })
       .then(function (r) {
         return r.json().then(function (data) {
-          if (!r.ok) throw new Error(data.error || "Không lấy được Gemini Live token");
+          if (!r.ok) throw new Error(data.error || tr("GEMINI_TOKEN_FAILED", "Unable to get a Gemini Live token"));
           return data;
         });
       })
@@ -1561,8 +1577,8 @@
       .catch(function (err) {
         if (epoch === voiceEpoch)
           failVoiceAssistant(
-            "Không thể xử lý yêu cầu từ xa",
-            (err && err.message) || "Gemini Live không khả dụng",
+            tr("REMOTE_REQUEST_FAILED", "Unable to process the remote request"),
+            (err && err.message) || tr("GEMINI_UNAVAILABLE", "Gemini Live is unavailable"),
           );
       });
   }

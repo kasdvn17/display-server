@@ -12,7 +12,7 @@ app.get("/lyrics", async (req, res) => {
     artist.length > 200 ||
     album.length > 250
   ) {
-    return res.status(400).json({ error: "Cần tên bài hát và nghệ sĩ" });
+    return res.status(400).json({ error: "Track title and artist are required" });
   }
 
   const key = [title, artist, album, Math.round(duration)]
@@ -47,7 +47,6 @@ app.get("/lyrics", async (req, res) => {
       "Lyrics lookup failed:",
       err && err.message ? err.message : err,
     );
-    return res.status(502).json({ error: "Không thể tìm lời bài hát" });
+    return res.status(502).json({ error: "Unable to find lyrics" });
   }
 });
-

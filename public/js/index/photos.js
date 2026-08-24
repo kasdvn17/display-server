@@ -23,7 +23,7 @@
   var indicatorTimer = null;
   var nextDeadline = 0;
   var nextDelayMs = IMMICH.intervalMs;
-  var ambientLabel = "Ảnh tiếp theo";
+  var ambientLabel = tr("NEXT_PHOTO", "Ảnh tiếp theo");
   var categoryCursor = { albums: 0, locations: 0, memories: 0, discovery: 0 };
 
   function assetThumbUrl(id) {
@@ -62,16 +62,17 @@
       photoActionTitle.textContent =
         (document.getElementById("photo-info-place") &&
           document.getElementById("photo-info-place").textContent) ||
-        "Thao tác với ảnh";
+        tr("PHOTO_ACTIONS", "Thao tác với ảnh");
     if (photoFavoriteLabel)
       photoFavoriteLabel.textContent = currentPhotoFavorite
-        ? "Xóa khỏi mục Yêu thích"
-        : "Yêu thích trong Immich";
+        ? tr("REMOVE_FROM_FAVORITES", "Xóa khỏi mục Yêu thích")
+        : tr("FAVORITE_IN_IMMICH", "Yêu thích trong Immich");
     photoActionSheet.classList.add("show");
     photoActionSheet.setAttribute("aria-hidden", "false");
   }
   function photoAction(action, value) {
-    if (!currentDisplayedAssetId) return Promise.reject(new Error("Không có ảnh"));
+    if (!currentDisplayedAssetId)
+      return Promise.reject(new Error(tr("NO_PHOTO", "Không có ảnh")));
     var id = currentDisplayedAssetId;
     return fetchFrameJson(
       "/ambient/photo-action",
@@ -121,13 +122,15 @@
           currentPhotoFavorite = next;
           if (photoFavoriteLabel)
             photoFavoriteLabel.textContent = next
-              ? "Xóa khỏi mục Yêu thích"
-              : "Yêu thích trong Immich";
+              ? tr("REMOVE_FROM_FAVORITES", "Xóa khỏi mục Yêu thích")
+              : tr("FAVORITE_IN_IMMICH", "Yêu thích trong Immich");
           showAmbientNotice(
             {
               type: "update",
-              title: next ? "Đã thêm vào mục Yêu thích" : "Đã xóa khỏi mục Yêu thích",
-              body: "Đã cập nhật trong Immich",
+              title: next
+                ? tr("ADDED_TO_FAVORITES", "Đã thêm vào mục Yêu thích")
+                : tr("REMOVED_FROM_FAVORITES", "Đã xóa khỏi mục Yêu thích"),
+              body: tr("UPDATED_IN_IMMICH", "Đã cập nhật trong Immich"),
             },
             3500,
           );
@@ -165,8 +168,11 @@
           showAmbientNotice(
             {
               type: "update",
-              title: "Đã ẩn khỏi khung ảnh",
-              body: "Ảnh này sẽ không còn xuất hiện trong trình chiếu",
+              title: tr("HIDDEN_FROM_FRAME", "Đã ẩn khỏi khung ảnh"),
+              body: tr(
+                "HIDDEN_FROM_FRAME_HELP",
+                "Ảnh này sẽ không còn xuất hiện trong trình chiếu",
+              ),
             },
             4200,
           );
@@ -195,7 +201,7 @@
     var d = new Date(value);
     if (isNaN(d.getTime())) return "";
     try {
-      return new Intl.DateTimeFormat("vi-VN", {
+      return new Intl.DateTimeFormat(frameLocale(), {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
@@ -215,13 +221,19 @@
       if (IMMICH_PUBLIC_URL) {
         photoCard.href =
           IMMICH_PUBLIC_URL + "/photos/" + encodeURIComponent(item.id);
-        photoCard.setAttribute("aria-label", "Mở ảnh này trong Immich");
+        photoCard.setAttribute(
+          "aria-label",
+          tr("OPEN_PHOTO_IN_IMMICH", "Mở ảnh này trong Immich"),
+        );
       } else {
         photoCard.removeAttribute("href");
-        photoCard.setAttribute("aria-label", "Thông tin ảnh hiện tại");
+        photoCard.setAttribute(
+          "aria-label",
+          tr("CURRENT_PHOTO_INFO", "Thông tin ảnh hiện tại"),
+        );
       }
     }
-    var location = item.location || "Thư viện ảnh của bạn";
+    var location = item.location || tr("YOUR_PHOTO_LIBRARY", "Thư viện ảnh của bạn");
     var date = formatPhotoDate(item.date);
     var album = item.album || "";
     var detailParts = [];
@@ -230,7 +242,8 @@
     if (place) place.textContent = location;
     if (details)
       details.textContent = detailParts[0] || item.storySubtitle || "Immich";
-    if (source) source.textContent = item.storyTitle || "Khung ảnh";
+    if (source)
+      source.textContent = item.storyTitle || tr("PHOTO_FRAME", "Khung ảnh");
 
     // Album membership for memory/event photos is resolved accurately on demand.
     if (item.id) {
@@ -246,13 +259,14 @@
           currentPhotoFavorite = !!info.favorite;
           if (photoFavoriteLabel)
             photoFavoriteLabel.textContent = currentPhotoFavorite
-              ? "Xóa khỏi mục Yêu thích"
-              : "Yêu thích trong Immich";
+              ? tr("REMOVE_FROM_FAVORITES", "Xóa khỏi mục Yêu thích")
+              : tr("FAVORITE_IN_IMMICH", "Yêu thích trong Immich");
           var ds = formatPhotoDate(info.date || item.date);
           var pieces = [];
           if (ds) pieces.push(ds);
           if (albums.length) pieces.push(albums[0].name);
-          if (place) place.textContent = p || "Thư viện ảnh của bạn";
+          if (place)
+            place.textContent = p || tr("YOUR_PHOTO_LIBRARY", "Thư viện ảnh của bạn");
           if (details)
             details.textContent = pieces[0] || item.storySubtitle || "Immich";
         })
@@ -290,7 +304,8 @@
       updatePhotoInfo(item);
     };
     img.onerror = function () {
-      if (renderToken === slideRenderToken) scheduleAmbient(800, "Đang thử lại");
+      if (renderToken === slideRenderToken)
+        scheduleAmbient(800, tr("RETRYING", "Đang thử lại"));
     };
     img.src = url;
   }
@@ -475,7 +490,7 @@
     if (!candidate) return null;
     var item = {};
     for (var key in candidate) item[key] = candidate[key];
-    item.storyTitle = story.title || "Khung ảnh";
+    item.storyTitle = story.title || tr("PHOTO_FRAME", "Khung ảnh");
     item.storySubtitle = story.subtitle || "";
     if (!item.album && story.album) item.album = story.album;
     return item;
@@ -516,7 +531,10 @@
   function schedulePhotoRetry(label) {
     photoRetryCount = Math.min(6, photoRetryCount + 1);
     var delay = Math.min(60000, 2200 * Math.pow(1.8, photoRetryCount - 1));
-    scheduleAmbient(Math.round(delay), label || "Đang thử lại ảnh theo địa điểm");
+    scheduleAmbient(
+      Math.round(delay),
+      label || tr("RETRYING_LOCATION_PHOTOS", "Đang thử lại ảnh theo địa điểm"),
+    );
   }
   function chooseVerifiedLocationPhoto(maxAttempts) {
     maxAttempts = Math.max(1, Number(maxAttempts || 24));
@@ -555,7 +573,7 @@
       if (!candidate) continue;
       var item = {};
       for (var k in candidate) item[k] = candidate[k];
-      item.storyTitle = story.title || "Khung ảnh";
+      item.storyTitle = story.title || tr("PHOTO_FRAME", "Khung ảnh");
       item.storySubtitle = story.subtitle || "";
       if (!item.album && story.album) item.album = story.album;
       return item;
@@ -584,7 +602,9 @@
       .then(function (item) {
         locationPickBusy = false;
         if (!item) {
-          schedulePhotoRetry("Đang tìm ảnh theo địa điểm");
+          schedulePhotoRetry(
+            tr("FINDING_LOCATION_PHOTOS", "Đang tìm ảnh theo địa điểm"),
+          );
           return;
         }
         photoRetryCount = 0;
@@ -594,19 +614,21 @@
       })
       .catch(function () {
         locationPickBusy = false;
-        schedulePhotoRetry("Đang thử lại ảnh theo địa điểm");
+        schedulePhotoRetry(
+          tr("RETRYING_LOCATION_PHOTOS", "Đang thử lại ảnh theo địa điểm"),
+        );
       });
     return true;
   }
   function manualPhotoNext() {
     hideNews();
     nextCuratedPhoto();
-    scheduleAmbient(IMMICH.intervalMs, "Ảnh tiếp theo");
+    scheduleAmbient(IMMICH.intervalMs, tr("NEXT_PHOTO", "Ảnh tiếp theo"));
   }
   function manualPhotoPrevious() {
     hideNews();
     if (previousCuratedPhoto())
-      scheduleAmbient(IMMICH.intervalMs, "Ảnh tiếp theo");
+      scheduleAmbient(IMMICH.intervalMs, tr("NEXT_PHOTO", "Ảnh tiếp theo"));
   }
   function loadCuratedPool(force) {
     return fetch("/ambient/curated" + (force ? "?refresh=1" : ""), {
@@ -662,13 +684,13 @@
     clearTimeout(slideTimer);
     nextDelayMs = Math.max(500, delay);
     nextDeadline = Date.now() + nextDelayMs;
-    ambientLabel = label || "Ảnh tiếp theo";
+    ambientLabel = label || tr("NEXT_PHOTO", "Ảnh tiếp theo");
     animateNextIndicator();
     slideTimer = setTimeout(ambientTick, nextDelayMs);
   }
   function initPhotoFrame() {
     nextCuratedPhoto();
-    scheduleAmbient(IMMICH.intervalMs, "Ảnh tiếp theo");
+    scheduleAmbient(IMMICH.intervalMs, tr("NEXT_PHOTO", "Ảnh tiếp theo"));
   }
 
   document.addEventListener("visibilitychange", function () {

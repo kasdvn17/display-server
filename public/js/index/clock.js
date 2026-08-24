@@ -3,22 +3,22 @@
     clockTimer = 0;
   function resetClockFormatters() {
     clockFormatters = {
-      hour: new Intl.DateTimeFormat("vi-VN", {
+      hour: new Intl.DateTimeFormat(frameLocale(), {
         timeZone: TIMEZONE,
         hour: "2-digit",
         hour12: false,
       }),
-      minute: new Intl.DateTimeFormat("vi-VN", {
+      minute: new Intl.DateTimeFormat(frameLocale(), {
         timeZone: TIMEZONE,
         minute: "2-digit",
       }),
-      date: new Intl.DateTimeFormat("vi-VN", {
+      date: new Intl.DateTimeFormat(frameLocale(), {
         timeZone: TIMEZONE,
         weekday: "short",
         month: "short",
         day: "numeric",
       }),
-      hour24: new Intl.DateTimeFormat("vi-VN", {
+      hour24: new Intl.DateTimeFormat(frameLocale(), {
         timeZone: TIMEZONE,
         hour: "numeric",
         hour12: false,
@@ -57,10 +57,10 @@
   }
 
   function greeting(h) {
-    if (h < 5) return "Chúc ngủ ngon";
-    if (h < 12) return "Chào buổi sáng";
-    if (h < 18) return "Chào buổi chiều";
-    return "Chào buổi tối";
+    if (h < 5) return tr("GOOD_NIGHT", "Chúc ngủ ngon");
+    if (h < 12) return tr("GOOD_MORNING", "Chào buổi sáng");
+    if (h < 18) return tr("GOOD_AFTERNOON", "Chào buổi chiều");
+    return tr("GOOD_EVENING", "Chào buổi tối");
   }
 
   function updateClock() {
@@ -81,4 +81,8 @@
     resetClockFormatters();
     scheduleClock();
     initPhotoFrame();
+  });
+  window.addEventListener("frame:languagechange", function () {
+    resetClockFormatters();
+    updateClock();
   });

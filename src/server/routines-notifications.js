@@ -79,8 +79,8 @@ function activeFrameNotifications() {
 }
 
 function repeatDaysText(days) {
-  if (!Array.isArray(days) || !days.length) return "Một lần";
-  if (days.length === 7) return "Hằng ngày";
+  if (!Array.isArray(days) || !days.length) return "One time";
+  if (days.length === 7) return "Daily";
   const labels = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
   return days.map((day) => labels[Number(day)] || "").filter(Boolean).join(", ");
 }
@@ -92,7 +92,7 @@ function upcomingAlarmItems() {
     .slice(0, 5)
     .map((alarm) => ({
       label: String(alarm.time || "--:--"),
-      value: String(alarm.label || "Báo thức"),
+      value: String(alarm.label || "Alarm"),
       detail: repeatDaysText(alarm.repeatDays),
     }));
 }
@@ -104,7 +104,7 @@ function calendarWidgetItems(context, limit = 6) {
       : [];
   return events.slice(0, limit).map((event) => ({
     time: String(event.start || ""),
-    title: String(event.title || "Sự kiện"),
+    title: String(event.title || "Event"),
     detail: [event.location, event.description].filter(Boolean).join(" · "),
     url: String(event.url || ""),
   }));
@@ -125,8 +125,8 @@ function contextAlertItems(context) {
     )
     .slice(0, 6)
     .map((item) => ({
-      label: String(item.type || "Thông tin"),
-      value: String(item.title || "Thông báo"),
+      label: String(item.type || "Information"),
+      value: String(item.title || "Notification"),
       detail: String(item.body || ""),
       icon: String(item.icon || item.type || "info"),
     }));
@@ -144,13 +144,13 @@ function buildMorningBriefing(context) {
     span: 4,
     order: 0,
     emphasis: "hero",
-    title: weather.label || "Thời tiết",
+    title: weather.label || "Weather",
     value:
       weather.temperature == null ? "—" : `${Math.round(weather.temperature)}°`,
     text: [
       weather.maxRainChanceNext3h == null
         ? ""
-        : `${Math.round(weather.maxRainChanceNext3h)}% khả năng mưa`,
+        : `${Math.round(weather.maxRainChanceNext3h)}% chance of rain`,
       air.aqi == null ? "" : `AQI ${Math.round(air.aqi)}`,
       air.maxUvNext12h == null ? "" : `UV ${Math.round(air.maxUvNext12h)}`,
     ]
@@ -162,9 +162,9 @@ function buildMorningBriefing(context) {
     type: "calendar",
     span: 8,
     order: 1,
-    title: "Lịch sắp tới",
+    title: "Upcoming calendar",
     items: events,
-    text: events.length ? "" : "Không có sự kiện sắp tới.",
+    text: events.length ? "" : "No upcoming events.",
   });
   if (commutes.length) {
     const commute = commutes[0];
@@ -172,19 +172,19 @@ function buildMorningBriefing(context) {
       type: "stats",
       span: 6,
       order: 2,
-      title: "Di chuyển",
+      title: "Commute",
       items: [
         {
-          label: "Khởi hành",
+          label: "Departure",
           value:
             commute.leaveInMinutes <= 0
-              ? "Đi ngay"
-              : `${commute.leaveInMinutes} phút nữa`,
+              ? "Leave now"
+              : `In ${commute.leaveInMinutes} minutes`,
         },
-        { label: "Thời gian", value: `${commute.durationMinutes} phút` },
+        { label: "Duration", value: `${commute.durationMinutes} minutes` },
         {
-          label: "Điểm đến",
-          value: String(commute.eventTitle || commute.name || "Điểm đến"),
+          label: "Destination",
+          value: String(commute.eventTitle || commute.name || "Destination"),
         },
       ],
     });
@@ -195,7 +195,7 @@ function buildMorningBriefing(context) {
       type: "callout",
       span: commutes.length ? 6 : 12,
       order: 3,
-      title: "Điều cần chú ý",
+      title: "Things to note",
       items: alerts,
     });
   const alarms = upcomingAlarmItems();
@@ -204,14 +204,14 @@ function buildMorningBriefing(context) {
       type: "list",
       span: 12,
       order: 4,
-      title: "Báo thức đang bật",
+      title: "Active alarms",
       items: alarms,
     });
   return {
     kind: "dynamic_ui",
-    kicker: "Tóm tắt buổi sáng",
-    title: "Chào buổi sáng",
-    subtitle: `Tổng hợp cho ${FRAME_LOCATION_NAME} · ${frameDateKey()}`,
+    kicker: "Morning briefing",
+    title: "Good morning",
+    subtitle: `Summary for ${FRAME_LOCATION_NAME} · ${frameDateKey()}`,
     layout: { columns: 12, gap: 14, density: "comfortable" },
     widgets,
   };
@@ -232,29 +232,29 @@ function routineDefinitions(context) {
   return [
     {
       id: "morning",
-      name: "Chào buổi sáng",
-      description: "Thời tiết, lịch, đường đi, cảnh báo và báo thức.",
+      name: "Good morning",
+      description: "Weather, calendar, commute, alerts, and alarms.",
       icon: "sun",
       suggested: suggestedId === "morning",
     },
     {
       id: "leaving",
-      name: "Ra khỏi nhà",
-      description: "Giờ nên đi, thời tiết và sự kiện tiếp theo.",
+      name: "Leave home",
+      description: "Departure time, weather, and the next event.",
       icon: "route",
       suggested: suggestedId === "leaving",
     },
     {
       id: "day-check",
-      name: "Kiểm tra hôm nay",
-      description: "Tóm tắt lịch và các thông báo chưa đọc.",
+      name: "Check today",
+      description: "Calendar summary and unread notifications.",
       icon: "calendar",
       suggested: suggestedId === "day-check",
     },
     {
       id: "evening",
-      name: "Chuẩn bị buổi tối",
-      description: "Báo thức, lịch tiếp theo và điều cần lưu ý.",
+      name: "Evening preparation",
+      description: "Alarms, upcoming calendar, and things to note.",
       icon: "moon",
       suggested: suggestedId === "evening",
     },
@@ -278,26 +278,26 @@ function buildRoutineDisplay(id, context) {
       span: 7,
       order: 0,
       emphasis: "hero",
-      title: "Kế hoạch di chuyển",
+      title: "Commute plan",
       items: commute
         ? [
             {
-              label: "Khởi hành",
+              label: "Departure",
               value:
                 commute.leaveInMinutes <= 0
-                  ? "Đi ngay"
-                  : `${commute.leaveInMinutes} phút nữa`,
+                  ? "Leave now"
+                  : `In ${commute.leaveInMinutes} minutes`,
             },
-            { label: "Thời gian", value: `${commute.durationMinutes} phút` },
-            { label: "Điểm đến", value: commute.eventTitle || commute.name },
+            { label: "Duration", value: `${commute.durationMinutes} minutes` },
+            { label: "Destination", value: commute.eventTitle || commute.name },
           ]
-        : [{ label: "Trạng thái", value: "Chưa có chuyến đi sắp tới" }],
+        : [{ label: "Status", value: "No upcoming trips" }],
     });
     widgets.push({
       type: "weather",
       span: 5,
       order: 1,
-      title: weather.label || "Thời tiết",
+      title: weather.label || "Weather",
       value:
         weather.temperature == null
           ? "—"
@@ -305,7 +305,7 @@ function buildRoutineDisplay(id, context) {
       text:
         weather.maxRainChanceNext3h == null
           ? ""
-          : `${Math.round(weather.maxRainChanceNext3h)}% khả năng mưa`,
+          : `${Math.round(weather.maxRainChanceNext3h)}% chance of rain`,
     });
   } else {
     widgets.push({
@@ -313,17 +313,17 @@ function buildRoutineDisplay(id, context) {
       span: 7,
       order: 0,
       emphasis: "hero",
-      title: "Lịch sắp tới",
+      title: "Upcoming calendar",
       items: events,
-      text: events.length ? "" : "Không có sự kiện sắp tới.",
+      text: events.length ? "" : "No upcoming events.",
     });
     widgets.push({
       type: "list",
       span: 5,
       order: 1,
-      title: "Báo thức đang bật",
+      title: "Active alarms",
       items: alarms,
-      text: alarms.length ? "" : "Không có báo thức đang bật.",
+      text: alarms.length ? "" : "No active alarms.",
     });
   }
   if (alerts.length)
@@ -331,20 +331,20 @@ function buildRoutineDisplay(id, context) {
       type: "callout",
       span: 12,
       order: 3,
-      title: "Thông báo quan trọng",
+      title: "Important notifications",
       items: alerts,
     });
   const title =
     id === "leaving"
-      ? "Sẵn sàng ra khỏi nhà"
+      ? "Ready to leave home"
       : id === "evening"
-        ? "Chuẩn bị buổi tối"
-        : "Tổng quan hôm nay";
+        ? "Evening preparation"
+        : "Today's overview";
   return {
     kind: "dynamic_ui",
-    kicker: "Thói quen Nest",
+    kicker: "Nest routines",
     title,
-    subtitle: "Được tổng hợp trên server từ dữ liệu mới nhất.",
+    subtitle: "Generated on the server from the latest data.",
     layout: { columns: 12, gap: 14, density: "comfortable" },
     widgets,
   };
@@ -356,14 +356,14 @@ app.get("/routines", async (req, res) => {
     res.setHeader("Cache-Control", "no-store");
     res.json({ items: routineDefinitions(context), generatedAt: new Date().toISOString() });
   } catch (err) {
-    res.status(502).json({ error: "Không thể tải thói quen", detail: String(err.message || err) });
+    res.status(502).json({ error: "Unable to load routines", detail: String(err.message || err) });
   }
 });
 
 app.post("/routines/:id/run", async (req, res) => {
   const id = String(req.params.id || "").trim();
   if (!["morning", "leaving", "day-check", "evening"].includes(id))
-    return res.status(404).json({ error: "Thói quen không tồn tại" });
+    return res.status(404).json({ error: "Routine not found" });
   try {
     const context = await getRoutineAmbientContext(req.body);
     const display = buildRoutineDisplay(id, context);
@@ -373,11 +373,11 @@ app.post("/routines/:id/run", async (req, res) => {
       id: `system:routine:${id}`,
       type: "error",
       priority: 72,
-      title: "Không thể hoàn tất thói quen",
+      title: "Unable to complete routine",
       body: String(err.message || err),
       icon: "error",
     });
-    return res.status(502).json({ error: "Không thể hoàn tất thói quen", detail: String(err.message || err) });
+    return res.status(502).json({ error: "Unable to complete routine", detail: String(err.message || err) });
   }
 });
 
@@ -402,7 +402,7 @@ app.get("/briefing/morning", async (req, res) => {
       display: buildMorningBriefing(context),
     });
   } catch (err) {
-    res.status(502).json({ error: "Không thể tạo bản tóm tắt buổi sáng", detail: String(err.message || err) });
+    res.status(502).json({ error: "Unable to create morning briefing", detail: String(err.message || err) });
   }
 });
 
@@ -447,7 +447,7 @@ app.put("/notifications/:id/read", (req, res) => {
   const item = state.notifications.find(
     (entry) => String(entry.id) === String(req.params.id),
   );
-  if (!item) return res.status(404).json({ error: "Thông báo không tồn tại" });
+  if (!item) return res.status(404).json({ error: "Notification not found" });
   item.readAt = item.readAt || new Date().toISOString();
   writeFrameState(state);
   res.json({ ok: true, item });
@@ -458,9 +458,8 @@ app.delete("/notifications/:id", (req, res) => {
   const item = state.notifications.find(
     (entry) => String(entry.id) === String(req.params.id),
   );
-  if (!item) return res.status(404).json({ error: "Thông báo không tồn tại" });
+  if (!item) return res.status(404).json({ error: "Notification not found" });
   item.dismissedAt = new Date().toISOString();
   writeFrameState(state);
   res.json({ ok: true });
 });
-

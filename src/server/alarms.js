@@ -43,9 +43,9 @@ function remoteTokenMatches(candidate) {
 
 function requireRemoteControl(req, res, next) {
   if (!REMOTE_CONTROL_TOKEN)
-    return res.status(503).json({ error: "Chưa cấu hình điều khiển từ xa" });
+    return res.status(503).json({ error: "Remote control is not configured" });
   if (!remoteTokenMatches(remoteTokenFromRequest(req)))
-    return res.status(401).json({ error: "Không được phép truy cập" });
+    return res.status(401).json({ error: "Unauthorized" });
   next();
 }
 
@@ -115,11 +115,11 @@ function cleanAlarmInput(input, existing) {
   input = input && typeof input === "object" ? input : {};
   const time = String(input.time ?? existing?.time ?? "").trim();
   if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(time))
-    throw new Error("Thời gian báo thức không hợp lệ");
+    throw new Error("Invalid alarm time");
   const label =
-    String(input.label ?? existing?.label ?? "Báo thức")
+    String(input.label ?? existing?.label ?? "Alarm")
       .trim()
-      .slice(0, 80) || "Báo thức";
+      .slice(0, 80) || "Alarm";
   const enabled =
     input.enabled === undefined
       ? existing
@@ -222,14 +222,14 @@ app.post("/alarms", (req, res) => {
       id: `alarm:created:${item.id}`,
       type: "alarm",
       priority: 48,
-      title: `Đã đặt báo thức ${item.time}`,
+      title: `Alarm set for ${item.time}`,
       body: `${item.label} · ${repeatDaysText(item.repeatDays)}`,
       icon: "alarm",
       action: "open-alarms",
     });
     res.status(201).json(item);
   } catch (err) {
-    res.status(400).json({ error: err.message || "Báo thức không hợp lệ" });
+    res.status(400).json({ error: err.message || "Invalid alarm" });
   }
 });
 
@@ -239,7 +239,7 @@ app.put("/alarms/:id", (req, res) => {
     const index = items.findIndex(
       (a) => String(a.id) === String(req.params.id),
     );
-    if (index < 0) return res.status(404).json({ error: "Không tìm thấy báo thức" });
+    if (index < 0) return res.status(404).json({ error: "Alarm not found" });
     const previous = items[index];
     const data = cleanAlarmInput(req.body, previous);
     items[index] = {
@@ -252,7 +252,7 @@ app.put("/alarms/:id", (req, res) => {
     writeAlarmsFile(items);
     res.json(items[index]);
   } catch (err) {
-    res.status(400).json({ error: err.message || "Báo thức không hợp lệ" });
+    res.status(400).json({ error: err.message || "Invalid alarm" });
   }
 });
 
@@ -260,7 +260,7 @@ app.delete("/alarms/:id", (req, res) => {
   const items = readAlarmsFile();
   const next = items.filter((a) => String(a.id) !== String(req.params.id));
   if (next.length === items.length)
-    return res.status(404).json({ error: "Không tìm thấy báo thức" });
+    return res.status(404).json({ error: "Alarm not found" });
   writeAlarmsFile(next);
   res.status(204).end();
 });
@@ -270,10 +270,10 @@ app.delete("/alarms/:id", (req, res) => {
 app.post("/alarms/:id/trigger", (req, res) => {
   const dateKey = String((req.body && req.body.dateKey) || "").trim();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey))
-    return res.status(400).json({ error: "Ngày không hợp lệ" });
+    return res.status(400).json({ error: "Invalid date" });
   const items = readAlarmsFile();
   const index = items.findIndex((a) => String(a.id) === String(req.params.id));
-  if (index < 0) return res.status(404).json({ error: "Không tìm thấy báo thức" });
+  if (index < 0) return res.status(404).json({ error: "Alarm not found" });
   items[index] = {
     ...items[index],
     lastTriggeredDate: dateKey,
@@ -284,8 +284,8 @@ app.post("/alarms/:id/trigger", (req, res) => {
     id: `alarm:triggered:${items[index].id}:${dateKey}`,
     type: "alarm",
     priority: 88,
-    title: `Báo thức ${items[index].time}`,
-      body: String(items[index].label || "Báo thức"),
+    title: `Alarm ${items[index].time}`,
+      body: String(items[index].label || "Alarm"),
     icon: "alarm",
     action: "open-alarms",
   });

@@ -1,6 +1,17 @@
 (function () {
   "use strict";
 
+  function tr(key, fallback, variables) {
+    return window.FrameI18n && window.FrameI18n.t
+      ? window.FrameI18n.t(key, fallback, variables)
+      : String(fallback || key);
+  }
+  function frameLocale() {
+    return window.FrameI18n && window.FrameI18n.language === "vi"
+      ? "vi-VN"
+      : "en-US";
+  }
+
   // Kiosk interaction guard: block pinch/double-tap zoom and text selection
   // everywhere except editable controls.
   function isEditableTarget(node) {
@@ -66,7 +77,10 @@
     topReloadButton.addEventListener("click", function () {
       if (topReloadButton.classList.contains("reloading")) return;
       topReloadButton.classList.add("reloading");
-      topReloadButton.setAttribute("aria-label", "Đang tải lại màn hình");
+      topReloadButton.setAttribute(
+        "aria-label",
+        tr("RELOADING_SCREEN", "Đang tải lại màn hình"),
+      );
       /* Cache-bust the document URL so kiosk mode reliably picks up a new build. */
       try {
         var reloadUrl = new URL(window.location.href);
@@ -81,13 +95,21 @@
   function syncIdleCamera(state, text) {
     if (idleCamera) idleCamera.setAttribute("data-state", state || "setup");
     if (idleCameraText) {
-      if (state === "live") idleCameraText.textContent = text || "Camera trực tiếp";
+      if (state === "live")
+        idleCameraText.textContent = text || tr("CAMERA_LIVE", "Camera trực tiếp");
       else if (state === "connecting")
-        idleCameraText.textContent = text || "Camera đang kết nối";
-      else if (state === "ready") idleCameraText.textContent = "Camera sẵn sàng";
+        idleCameraText.textContent =
+          text || tr("CAMERA_CONNECTING", "Camera đang kết nối");
+      else if (state === "ready")
+        idleCameraText.textContent = tr("CAMERA_READY", "Camera sẵn sàng");
       else if (state === "error")
-        idleCameraText.textContent = text || "Camera không khả dụng";
-      else idleCameraText.textContent = "Camera chưa kết nối";
+        idleCameraText.textContent =
+          text || tr("CAMERA_UNAVAILABLE", "Camera không khả dụng");
+      else
+        idleCameraText.textContent = tr(
+          "CAMERA_NOT_CONNECTED",
+          "Camera chưa kết nối",
+        );
     }
   }
   function syncIdleMusic() {
@@ -196,13 +218,15 @@
           })
           .then(function (data) {
             if (!r.ok)
-              throw new Error(data.error || "Yêu cầu thất bại: " + r.status);
+              throw new Error(
+                data.error || tr("REQUEST_FAILED_STATUS", "Yêu cầu thất bại: {STATUS}", { STATUS: r.status }),
+              );
             return data;
           });
       })
       .catch(function (err) {
         if (err && err.name === "AbortError")
-          throw new Error("Yêu cầu đã quá thời gian chờ");
+          throw new Error(tr("REQUEST_TIMED_OUT", "Yêu cầu đã quá thời gian chờ"));
         throw err;
       })
       .then(

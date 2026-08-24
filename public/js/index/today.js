@@ -142,7 +142,7 @@
     if (!notificationList) return;
     if (!items.length) {
       notificationList.innerHTML =
-        '<div class="today-empty">Không có thông báo mới.</div>';
+        '<div class="today-empty">' + tr("NO_NEW_NOTIFICATIONS", "Không có thông báo mới.") + "</div>";
       return;
     }
     notificationList.innerHTML = items
@@ -158,12 +158,12 @@
           '"><div class="notification-icon" aria-hidden="true">' +
           notificationGlyph(item.icon || item.type) +
           '</div><div class="notification-copy"><strong>' +
-          escVoice(item.title || "Thông báo") +
+          escVoice(item.title || tr("NOTIFICATIONS", "Thông báo")) +
           "</strong><span>" +
           escVoice(item.body || "") +
           '</span></div><button class="notification-dismiss" type="button" data-dismiss-notification="' +
           id +
-          '" aria-label="Ẩn thông báo">×</button></article>'
+          '" aria-label="' + tr("DISMISS_NOTIFICATION", "Ẩn thông báo") + '">×</button></article>'
         );
       })
       .join("");
@@ -210,7 +210,7 @@
       .catch(function () {
         if (notificationList)
           notificationList.innerHTML =
-            '<div class="today-empty">Không thể tải thông báo.</div>';
+            '<div class="today-empty">' + tr("LOAD_NOTIFICATIONS_FAILED", "Không thể tải thông báo.") + "</div>";
         return null;
       });
   }
@@ -224,7 +224,7 @@
     var items = payload && Array.isArray(payload.items) ? payload.items : [];
     if (!items.length) {
       routineGrid.innerHTML =
-        '<div class="today-empty">Không có routine khả dụng.</div>';
+        '<div class="today-empty">' + tr("NO_ROUTINES", "Không có thói quen khả dụng.") + "</div>";
       return;
     }
     routineGrid.innerHTML = items
@@ -241,7 +241,7 @@
             ? '<span class="routine-suggested">Suggested</span>'
             : "") +
           "<strong>" +
-          escVoice(item.name || "Thói quen") +
+          escVoice(item.name || tr("ROUTINES", "Thói quen")) +
           "</strong><p>" +
           escVoice(item.description || "") +
           "</p></button>"
@@ -264,7 +264,7 @@
       .catch(function () {
         if (routineGrid)
           routineGrid.innerHTML =
-            '<div class="today-empty">Không thể tải routine.</div>';
+            '<div class="today-empty">' + tr("LOAD_ROUTINES_FAILED", "Không thể tải thói quen.") + "</div>";
         return null;
       });
   }
@@ -277,21 +277,22 @@
       body: frameCoordinateBody(),
     })
       .then(function (result) {
-        if (!result || !result.display) throw new Error("Thói quen không có nội dung");
+        if (!result || !result.display)
+          throw new Error(tr("ROUTINE_HAS_NO_CONTENT", "Thói quen không có nội dung"));
         showVoiceShell();
         setVoiceState(
           "idle",
-          "Thói quen hoàn tất",
-          result.display.title || "Đã chuẩn bị thông tin",
-          "Nhấn × để quay lại Hôm nay",
+          tr("ROUTINE_COMPLETE", "Thói quen hoàn tất"),
+          result.display.title || tr("INFORMATION_READY", "Đã chuẩn bị thông tin"),
+          tr("PRESS_CLOSE_RETURN_TODAY", "Nhấn × để quay lại Hôm nay"),
         );
         showAssistantPage(result.display);
       })
       .catch(function (err) {
         pushClientNotification(
           "client:routine:" + id,
-          "Không thể hoàn tất thói quen",
-          (err && err.message) || "Lỗi không xác định",
+          tr("ROUTINE_FAILED", "Không thể hoàn tất thói quen"),
+          (err && err.message) || tr("UNKNOWN_ERROR", "Lỗi không xác định"),
         );
         if (notificationList)
           loadNotifications();
@@ -369,7 +370,8 @@
     if (!data || !data.configured) {
       if (contextMetrics) contextMetrics.classList.remove("show");
       if (weatherTemp) weatherTemp.textContent = "--°";
-      if (weatherDetail) weatherDetail.textContent = "Cần vị trí";
+      if (weatherDetail)
+        weatherDetail.textContent = tr("LOCATION_REQUIRED", "Cần vị trí");
       return;
     }
     var w = data.weather || {},
@@ -377,15 +379,21 @@
     if (weatherTemp)
       weatherTemp.textContent =
         w.temperature == null ? "--°" : Math.round(Number(w.temperature)) + "°";
-    var detail = w.label || "Thời tiết";
+    var detail = w.label || tr("WEATHER", "Thời tiết");
     if (w.rainStartMinutes != null && Number(w.rainStartMinutes) <= 180)
       detail +=
         " · rain " +
         (Number(w.rainStartMinutes) <= 5
-          ? "ngay bây giờ"
-          : "sau " + Math.max(1, Math.round(Number(w.rainStartMinutes))) + " phút");
+          ? tr("RIGHT_NOW", "ngay bây giờ")
+          : tr("IN_MINUTES", "sau {COUNT} phút", {
+              COUNT: Math.max(1, Math.round(Number(w.rainStartMinutes))),
+            }));
     else if (Number(w.maxRainChanceNext3h || 0) >= 40)
-      detail += " · " + Math.round(Number(w.maxRainChanceNext3h)) + "% khả năng mưa";
+      detail +=
+        " · " +
+        tr("RAIN_CHANCE", "{PERCENT}% khả năng mưa", {
+          PERCENT: Math.round(Number(w.maxRainChanceNext3h)),
+        });
     if (weatherDetail) weatherDetail.textContent = detail;
     if (aqiValue)
       aqiValue.textContent =
@@ -416,7 +424,8 @@
       homeCalendarGlance.classList.add("show");
       homeCalendarGlance._event = nextEv;
       if (homeCalendarTitle)
-        homeCalendarTitle.textContent = nextEv.title || "Sự kiện tiếp theo";
+        homeCalendarTitle.textContent =
+          nextEv.title || tr("NEXT_EVENT", "Sự kiện tiếp theo");
       if (homeCalendarTime)
         homeCalendarTime.textContent = formatBriefEventTime(nextEv.start);
     } else if (homeCalendarGlance) {
@@ -426,11 +435,11 @@
   }
   function ambientNotificationKind(type) {
     if (type === "commute") return "Commute";
-    if (type === "weather") return "Cảnh báo thời tiết";
-    if (type === "air") return "Chất lượng không khí";
-    if (type === "uv") return "Cảnh báo UV";
-    if (type === "calendar") return "Lịch";
-    return "Cập nhật xung quanh";
+    if (type === "weather") return tr("WEATHER_ALERT", "Cảnh báo thời tiết");
+    if (type === "air") return tr("AIR_QUALITY", "Chất lượng không khí");
+    if (type === "uv") return tr("UV_ALERT", "Cảnh báo UV");
+    if (type === "calendar") return tr("CALENDAR", "Lịch");
+    return tr("AMBIENT_UPDATE", "Cập nhật xung quanh");
   }
   function hideAmbientNotice() {
     clearTimeout(ambientNoticeTimer);
@@ -448,7 +457,8 @@
     if (ambientNoticeKind)
       ambientNoticeKind.textContent = ambientNotificationKind(item.type);
     if (ambientNoticeTitle)
-      ambientNoticeTitle.textContent = item.title || "Cập nhật xung quanh";
+      ambientNoticeTitle.textContent =
+        item.title || tr("AMBIENT_UPDATE", "Cập nhật xung quanh");
     if (ambientNoticeBody) ambientNoticeBody.textContent = item.body || "";
     ambientNotice.classList.add("show");
     if (ambientNoticeProgress) {
@@ -497,7 +507,7 @@
       body.push(
         w.label +
           (w.apparentTemperature != null
-            ? " · feels " + Math.round(Number(w.apparentTemperature)) + "°"
+            ? tr("FEELS_LIKE_VALUE", " · feels like {VALUE}°", { VALUE: Math.round(Number(w.apparentTemperature)) })
             : ""),
       );
     if (a.aqi != null)
@@ -507,16 +517,16 @@
           (a.aqiLabel ? " " + String(a.aqiLabel).toLowerCase() : ""),
       );
     if (a.maxUvNext12h != null)
-      body.push("UV peak " + Math.round(Number(a.maxUvNext12h)));
+      body.push(tr("UV_PEAK", "UV peak {VALUE}", { VALUE: Math.round(Number(a.maxUvNext12h)) }));
     showAmbientNotice(
       {
         type: "weather",
         title:
           w.temperature == null
-            ? "Thời tiết"
+            ? tr("WEATHER", "Thời tiết")
             : Math.round(Number(w.temperature)) +
               "° · " +
-              (w.label || "Thời tiết"),
+              (w.label || tr("WEATHER", "Thời tiết")),
         body: body.join(" · "),
       },
       AMBIENT_NOTICE_DURATION_MS,
@@ -609,7 +619,7 @@
     var d = new Date(value);
     if (isNaN(d.getTime())) return "";
     try {
-      return new Intl.DateTimeFormat("vi-VN", {
+      return new Intl.DateTimeFormat(frameLocale(), {
         hour: "2-digit",
         minute: "2-digit",
         hour12: false,
@@ -644,19 +654,19 @@
     if (w.rainStartMinutes != null)
       weatherBits.push(
         Number(w.rainStartMinutes) <= 5
-          ? "Trời bắt đầu mưa"
-          : "Mưa sau " +
-              Math.max(1, Math.round(Number(w.rainStartMinutes))) +
-              " min",
+          ? tr("RAIN_STARTING", "Trời bắt đầu mưa")
+          : tr("RAIN_IN_MINUTES", "Mưa sau {COUNT} phút", {
+              COUNT: Math.max(1, Math.round(Number(w.rainStartMinutes))),
+            }),
       );
     else if (w.maxRainChanceNext3h != null)
-      weatherBits.push(Math.round(Number(w.maxRainChanceNext3h)) + "% rain");
+      weatherBits.push(tr("RAIN_PERCENT", "{COUNT}% rain", { COUNT: Math.round(Number(w.maxRainChanceNext3h)) }));
     if (a.aqi != null) weatherBits.push("AQI " + Math.round(Number(a.aqi)));
     if (a.maxUvNext12h != null)
       weatherBits.push("UV " + Math.round(Number(a.maxUvNext12h)));
     if (morningWeatherSub)
       morningWeatherSub.textContent =
-        weatherBits.join(" · ") || "Thời tiết ổn định";
+        weatherBits.join(" · ") || tr("STABLE_WEATHER", "Thời tiết ổn định");
     var now = Date.now(),
       ev =
         events.find(function (x) {
@@ -664,7 +674,8 @@
           return isFinite(t) && t >= now - 5 * 60000;
         }) || events[0];
     if (ev) {
-      if (morningEvent) morningEvent.textContent = ev.title || "Sự kiện lịch";
+      if (morningEvent)
+        morningEvent.textContent = ev.title || tr("CALENDAR_EVENT", "Sự kiện lịch");
       if (morningEventSub)
         morningEventSub.textContent =
           formatBriefEventTime(ev.start) +
@@ -672,12 +683,12 @@
     } else {
       if (morningEvent)
         morningEvent.textContent = calendar.configured
-          ? "Không có sự kiện sắp tới"
-          : "Chưa cấu hình lịch";
+          ? tr("NO_UPCOMING_EVENTS", "Không có sự kiện sắp tới")
+          : tr("CALENDAR_NOT_CONFIGURED", "Chưa cấu hình lịch");
       if (morningEventSub)
         morningEventSub.textContent = calendar.configured
-          ? "Không có việc sắp tới"
-          : "Add FRAME_CALENDAR_ICS_URL";
+          ? tr("NOTHING_UPCOMING", "Không có việc sắp tới")
+          : tr("ADD_CALENDAR_URL", "Add FRAME_CALENDAR_ICS_URL");
     }
     var c = commutes.slice().sort(function (x, y) {
       return Number(x.leaveInMinutes) - Number(y.leaveInMinutes);
@@ -686,18 +697,27 @@
       var leave = Number(c.leaveInMinutes);
       if (morningCommute)
         morningCommute.textContent =
-          leave <= 0 ? "Đi ngay" : "Đi sau " + leave + " phút";
+          leave <= 0
+            ? tr("LEAVE_NOW", "Đi ngay")
+            : tr("LEAVE_IN_MINUTES", "Đi sau {COUNT} phút", { COUNT: leave });
       if (morningCommuteSub)
         morningCommuteSub.textContent =
-          (c.eventTitle || c.name || "Destination") +
+          (c.eventTitle || c.name || tr("DESTINATION", "Destination")) +
           " · " +
           Math.round(Number(c.durationMinutes) || 0) +
-          " min" +
+          " " + tr("MINUTES_SHORT", "min") +
           (c.distanceKm != null ? " · " + c.distanceKm + " km" : "");
     } else {
-      if (morningCommute) morningCommute.textContent = "Không có chuyến đi sắp tới";
+      if (morningCommute)
+        morningCommute.textContent = tr(
+          "NO_UPCOMING_TRIPS",
+          "Không có chuyến đi sắp tới",
+        );
       if (morningCommuteSub)
-        morningCommuteSub.textContent = "Hiện chưa có việc cần đi";
+        morningCommuteSub.textContent = tr(
+          "NO_TRAVEL_NEEDED",
+          "Hiện chưa có việc cần đi",
+        );
     }
     hideAmbientNotice();
     hideNews();
@@ -750,13 +770,15 @@
       if (c)
         body.push(
           Number(c.leaveInMinutes) <= 0
-            ? "Đi ngay"
-            : "Đi sau " + c.leaveInMinutes + " phút",
+            ? tr("LEAVE_NOW", "Đi ngay")
+            : tr("LEAVE_IN_MINUTES", "Đi sau {COUNT} phút", {
+                COUNT: c.leaveInMinutes,
+              }),
         );
       showAmbientNotice(
         {
           type: "calendar",
-          title: ev.title || "Sự kiện tiếp theo",
+          title: ev.title || tr("NEXT_EVENT", "Sự kiện tiếp theo"),
           body: body.join(" · "),
         },
         AMBIENT_NOTICE_DURATION_MS,

@@ -71,7 +71,7 @@ function spotifyConfigured() {
 
 async function spotifyTokenRequest(params) {
   if (!spotifyConfigured()) {
-    const err = new Error("Chưa cấu hình Spotify");
+    const err = new Error("Spotify is not configured");
     err.status = 503;
     throw err;
   }
@@ -115,7 +115,7 @@ async function refreshSpotifyAccessToken() {
   if (spotifyTokenRefreshPromise) return spotifyTokenRefreshPromise;
   spotifyTokenRefreshPromise = (async () => {
     if (!spotifyTokens || !spotifyTokens.refreshToken) {
-      const err = new Error("Spotify chưa kết nối");
+      const err = new Error("Spotify is not connected");
       err.status = 401;
       throw err;
     }
@@ -149,7 +149,7 @@ async function refreshSpotifyAccessToken() {
 
 async function getSpotifyAccessToken() {
   if (!spotifyTokens || !spotifyTokens.accessToken) {
-    const err = new Error("Spotify chưa kết nối");
+    const err = new Error("Spotify is not connected");
     err.status = 401;
     throw err;
   }
@@ -165,8 +165,8 @@ function spotifyCooldownError() {
     ),
     err = new Error(
       spotifyRateLimitReason === "QUOTA_EXCEEDED"
-        ? "Spotify đã vượt giới hạn quota phát triển"
-        : "Spotify đang giới hạn yêu cầu",
+        ? "Spotify development quota exceeded"
+        : "Spotify is rate limiting requests",
     );
   err.status = 429;
   err.retryAfter = String(seconds);
@@ -202,9 +202,9 @@ function noteSpotifyRateLimit(response, payload) {
     priority: reason === "QUOTA_EXCEEDED" ? 86 : 66,
     title:
       reason === "QUOTA_EXCEEDED"
-        ? "Spotify đã vượt giới hạn quota"
-        : "Spotify đang giới hạn yêu cầu",
-    body: `Server sẽ tự chờ ${Math.ceil(seconds / 60)} phút trước khi thử lại.`,
+        ? "Spotify quota exceeded"
+        : "Spotify is rate limiting requests",
+    body: `The server will wait ${Math.ceil(seconds / 60)} minutes before retrying.`,
     icon: "music",
     action: "open-media",
   });
@@ -245,7 +245,7 @@ async function spotifyApi(pathname, { method = "GET", query, body } = {}) {
         ? payload.error.message
         : typeof payload === "string" && payload
           ? payload
-          : `API Spotify trả về mã ${response.status}`;
+          : `Spotify API returned status ${response.status}`;
     const err = new Error(message);
     err.status = response.status;
     if (response.status === 429) {
@@ -369,7 +369,7 @@ function spotifyPlayerStateToPayload(state) {
 function spotifyRouteError(res, err, fallback) {
   const status = Number(err && err.status) || 502;
   const body = {
-    error: fallback || "Yêu cầu Spotify thất bại",
+    error: fallback || "Spotify request failed",
     detail: err && err.message ? err.message : String(err),
   };
   if (err && err.reason) body.reason = err.reason;
@@ -531,7 +531,7 @@ app.get("/spotify/callback", async (req, res) => {
   const expires = spotifyAuthStates.get(state);
   spotifyAuthStates.delete(state);
   if (error)
-    return res.status(400).send(`Xác thực Spotify thất bại: ${error}`);
+    return res.status(400).send(`Spotify authentication failed: ${error}`);
   if (!code || !state || !expires || expires < Date.now())
     return res
       .status(400)
@@ -588,7 +588,7 @@ app.get("/spotify/token", async (req, res) => {
       deviceName: SPOTIFY_DEVICE_NAME,
     });
   } catch (err) {
-    return spotifyRouteError(res, err, "Token Spotify không khả dụng");
+    return spotifyRouteError(res, err, "Spotify token is unavailable");
   }
 });
 
@@ -597,7 +597,7 @@ app.get("/spotify/search", async (req, res) => {
   if (q.length < 2 || q.length > 160)
     return res
       .status(400)
-      .json({ error: "Nội dung tìm kiếm phải có từ 2 đến 160 ký tự" });
+      .json({ error: "Search query must contain between 2 and 160 characters" });
   const key = `spotify:${q.toLowerCase()}`;
   const cached = musicSearchCache.get(key);
   if (cached && cached.expires > Date.now())
@@ -623,7 +623,7 @@ app.get("/spotify/search", async (req, res) => {
       "Spotify search error:",
       err && err.message ? err.message : err,
     );
-    return spotifyRouteError(res, err, "Tìm kiếm Spotify thất bại");
+    return spotifyRouteError(res, err, "Spotify search failed");
   }
 });
 
@@ -683,7 +683,7 @@ app.get("/spotify/personal", async (req, res) => {
     const payload = await spotifyPersonalCache.pending;
     return res.json({ ...payload, cached: false });
   } catch (err) {
-    return spotifyRouteError(res, err, "Không thể tải thư viện Spotify cá nhân");
+    return spotifyRouteError(res, err, "Unable to load personal Spotify library");
   }
 });
 
@@ -745,7 +745,7 @@ app.get("/spotify/player", async (req, res) => {
           err.rateLimitedUntil || spotifyRateLimitUntil || 0,
         ),
       });
-    return spotifyRouteError(res, err, "Không thể lấy trạng thái phát Spotify");
+    return spotifyRouteError(res, err, "Unable to retrieve Spotify playback state");
   }
 });
 
@@ -787,7 +787,7 @@ app.get("/spotify/devices", async (req, res) => {
     res.setHeader("Cache-Control", "no-store");
     return res.json({ ...payload, cached: false });
   } catch (err) {
-    return spotifyRouteError(res, err, "Không thể tải thiết bị Spotify");
+    return spotifyRouteError(res, err, "Unable to load Spotify devices");
   }
 });
 
@@ -838,7 +838,7 @@ app.post("/spotify/play", async (req, res) => {
     }
     return res.json({ ok: true, deviceId, recovered });
   } catch (err) {
-    return spotifyRouteError(res, err, "Không thể phát Spotify");
+    return spotifyRouteError(res, err, "Unable to play Spotify");
   }
 });
 
@@ -851,7 +851,7 @@ app.post("/spotify/pause", async (req, res) => {
     });
     return res.json({ ok: true });
   } catch (err) {
-    return spotifyRouteError(res, err, "Không thể tạm dừng Spotify");
+    return spotifyRouteError(res, err, "Unable to pause Spotify");
   }
 });
 
@@ -864,7 +864,7 @@ app.post("/spotify/next", async (req, res) => {
     });
     return res.json({ ok: true });
   } catch (err) {
-    return spotifyRouteError(res, err, "Không thể chuyển bài tiếp theo");
+    return spotifyRouteError(res, err, "Unable to skip to the next track");
   }
 });
 
@@ -877,7 +877,7 @@ app.post("/spotify/previous", async (req, res) => {
     });
     return res.json({ ok: true });
   } catch (err) {
-    return spotifyRouteError(res, err, "Không thể quay lại bài trước");
+    return spotifyRouteError(res, err, "Unable to return to the previous track");
   }
 });
 
@@ -894,7 +894,7 @@ app.put("/spotify/seek", async (req, res) => {
     });
     return res.json({ ok: true });
   } catch (err) {
-    return spotifyRouteError(res, err, "Không thể tua Spotify");
+    return spotifyRouteError(res, err, "Unable to seek Spotify playback");
   }
 });
 
@@ -909,7 +909,7 @@ app.put("/spotify/volume", async (req, res) => {
   )
     return res
       .status(400)
-      .json({ error: "Thiếu mức âm lượng Spotify từ 0 đến 100" });
+      .json({ error: "Spotify volume from 0 to 100 is required" });
   const volumePercent = Math.max(
     0,
     Math.min(100, Math.round(Number(rawVolume))),
@@ -924,13 +924,13 @@ app.put("/spotify/volume", async (req, res) => {
     });
     return res.json({ ok: true });
   } catch (err) {
-    return spotifyRouteError(res, err, "Không thể chỉnh âm lượng Spotify");
+    return spotifyRouteError(res, err, "Unable to change Spotify volume");
   }
 });
 
 app.put("/spotify/transfer", async (req, res) => {
   const deviceId = String((req.body && req.body.deviceId) || "").trim();
-  if (!deviceId) return res.status(400).json({ error: "Thiếu deviceId" });
+  if (!deviceId) return res.status(400).json({ error: "deviceId is required" });
   try {
     const playerState = await spotifyApi("/me/player");
     const isPlaying = !!(playerState && playerState.is_playing);
@@ -940,7 +940,7 @@ app.put("/spotify/transfer", async (req, res) => {
     });
     return res.json({ ok: true, continuedPlaying: isPlaying });
   } catch (err) {
-    return spotifyRouteError(res, err, "Không thể chuyển thiết bị phát Spotify");
+    return spotifyRouteError(res, err, "Unable to transfer Spotify playback");
   }
 });
 
@@ -954,7 +954,7 @@ app.put("/spotify/shuffle", async (req, res) => {
     });
     return res.json({ ok: true, state });
   } catch (err) {
-    return spotifyRouteError(res, err, "Không thể đổi chế độ phát ngẫu nhiên");
+    return spotifyRouteError(res, err, "Unable to change Spotify shuffle mode");
   }
 });
 
@@ -964,7 +964,7 @@ app.put("/spotify/repeat", async (req, res) => {
   if (!["off", "context", "track"].includes(state))
     return res
       .status(400)
-      .json({ error: "Chế độ lặp phải là off, context hoặc track" });
+      .json({ error: "Repeat mode must be off, context, or track" });
   try {
     await spotifyApi("/me/player/repeat", {
       method: "PUT",
@@ -972,7 +972,7 @@ app.put("/spotify/repeat", async (req, res) => {
     });
     return res.json({ ok: true, state });
   } catch (err) {
-    return spotifyRouteError(res, err, "Không thể đổi chế độ lặp Spotify");
+    return spotifyRouteError(res, err, "Unable to change Spotify repeat mode");
   }
 });
 
@@ -982,7 +982,7 @@ app.post("/spotify/queue", async (req, res) => {
   if (!/^spotify:(track|episode):[A-Za-z0-9]+$/.test(uri))
     return res
       .status(400)
-      .json({ error: "Cần URI của bài hát hoặc tập Spotify" });
+      .json({ error: "A Spotify track or episode URI is required" });
   try {
     await spotifyApi("/me/player/queue", {
       method: "POST",
@@ -990,7 +990,7 @@ app.post("/spotify/queue", async (req, res) => {
     });
     return res.json({ ok: true });
   } catch (err) {
-    return spotifyRouteError(res, err, "Không thể cập nhật hàng đợi Spotify");
+    return spotifyRouteError(res, err, "Unable to update Spotify queue");
   }
 });
 
@@ -1054,7 +1054,7 @@ function normalizeLyricsPayload(record, source, expectedDuration = 0) {
       durationDiff,
       syncStatus: timingWarning ? "timing-warning" : "synced",
       notice: timingWarning
-        ? `Lời có thể chưa đồng bộ · bản thu lệch ${Math.round(durationDiff)} giây`
+        ? `Lyrics may be out of sync · recording differs by ${Math.round(durationDiff)} seconds`
         : "",
     };
   }
@@ -1068,7 +1068,7 @@ function normalizeLyricsPayload(record, source, expectedDuration = 0) {
       matchedDuration: recordDuration || null,
       durationDiff,
       syncStatus: "unsynced",
-      notice: "Chưa đồng bộ",
+      notice: "Not synchronized",
     };
   return null;
 }
@@ -1359,4 +1359,3 @@ async function lookupLyricsOvh({ title, artist }) {
   }
   return null;
 }
-

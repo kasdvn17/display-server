@@ -22,14 +22,14 @@ function voiceToolDefinitions() {
       type: "function",
       name: "get_ambient_context",
       description:
-        "Lấy toàn bộ bối cảnh hiện tại của frame gồm thời tiết, chất lượng không khí, lịch, cảnh báo và các tuyến đi lại đã cấu hình. Dùng vị trí hiện tại do trình duyệt cung cấp.",
+        "Get the frame's complete current context, including weather, air quality, calendar, alerts, and configured commutes. Uses the browser-provided current location.",
       parameters: { type: "object", properties: {}, required: [] },
     },
     {
       type: "function",
       name: "get_directions",
       description:
-        "Find a driving route and automatically show a directions page. The browser securely supplies its current coordinates to this tool. When the user says “từ đây”, “vị trí hiện tại”, or omits the origin, leave origin empty so the server reverse-geocodes the live current address. If destination is missing or ambiguous, call request_followup instead of guessing. Do not call render_dynamic_ui afterwards.",
+        "Find a driving route and automatically show a directions page. The browser securely supplies its current coordinates to this tool. When the user says “from here”, “current location”, or omits the origin, leave origin empty so the server reverse-geocodes the live current address. If destination is missing or ambiguous, call request_followup instead of guessing. Do not call render_dynamic_ui afterwards.",
       parameters: {
         type: "object",
         properties: {
@@ -50,7 +50,7 @@ function voiceToolDefinitions() {
       type: "function",
       name: "show_recipe",
       description:
-        "Create and automatically show the canonical visual recipe page. Use this whenever the user asks for a recipe, how to cook a dish, ingredients, or cooking steps. Supply a useful complete recipe in Vietnamese. Do not call render_dynamic_ui afterwards.",
+        "Create and automatically show the canonical visual recipe page. Use this whenever the user asks for a recipe, how to cook a dish, ingredients, or cooking steps. Supply a useful complete recipe in the configured interface locale. Do not call render_dynamic_ui afterwards.",
       parameters: {
         type: "object",
         properties: {
@@ -69,7 +69,7 @@ function voiceToolDefinitions() {
       type: "function",
       name: "add_alarm",
       description:
-        "Create an alarm on Nest Frame. For relative requests such as “5 phút nữa” or “sau 2 tiếng”, pass relativeMinutes and DO NOT calculate HH:MM yourself; the server uses its current clock and frame timezone. For an explicit clock time, pass time.",
+        "Create an alarm on Nest Frame. For relative requests such as “in 5 minutes” or “in 2 hours”, pass relativeMinutes and DO NOT calculate HH:MM yourself; the server uses its current clock and frame timezone. For an explicit clock time, pass time.",
       parameters: {
         type: "object",
         properties: {
@@ -107,7 +107,7 @@ function voiceToolDefinitions() {
       type: "function",
       name: "manage_alarms",
       description:
-        "Liệt kê, bật, tắt, sửa hoặc xóa báo thức. Chỉ sửa/xóa khi người dùng yêu cầu rõ ràng; dùng id lấy từ action list.",
+        "List, enable, disable, edit, or delete alarms. Edit or delete only when explicitly requested; use an ID returned by the list action.",
       parameters: {
         type: "object",
         properties: {
@@ -116,7 +116,7 @@ function voiceToolDefinitions() {
             enum: ["list", "enable", "disable", "update", "delete"],
           },
           id: { type: "string" },
-          time: { type: "string", description: "Giờ HH:MM khi sửa." },
+          time: { type: "string", description: "HH:MM time when editing." },
           label: { type: "string" },
           repeatDays: {
             type: "array",
@@ -131,7 +131,7 @@ function voiceToolDefinitions() {
       type: "function",
       name: "manage_notifications",
       description:
-        "Liệt kê, tạo, đánh dấu đã đọc hoặc bỏ thông báo khỏi Notification Center của frame.",
+        "List, create, mark as read, or dismiss notifications in the frame Notification Center.",
       parameters: {
         type: "object",
         properties: {
@@ -151,14 +151,14 @@ function voiceToolDefinitions() {
       type: "function",
       name: "get_frame_status",
       description:
-        "Lấy trạng thái màn hình, tab hiện tại, assistant, page đang mở, camera, diagnostics, notifications và các service đã cấu hình.",
+        "Get display status, current tab, assistant, open page, camera, diagnostics, notifications, and configured services.",
       parameters: { type: "object", properties: {}, required: [] },
     },
     {
       type: "function",
       name: "control_frame",
       description:
-        "Điều khiển màn hình đang online: chuyển tab, đóng page, quay lại, idle, reload, dừng assistant, thử lại service hoặc hiện một thông báo. Chỉ gọi khi người dùng yêu cầu.",
+        "Control an online display: switch tabs, close a page, go back, idle, reload, stop the assistant, retry a service, or show a message. Call only when requested.",
       parameters: {
         type: "object",
         properties: {
@@ -191,7 +191,7 @@ function voiceToolDefinitions() {
       type: "function",
       name: "spotify_control",
       description:
-        "Điều khiển phát nhạc và âm lượng Spotify trên thiết bị Spotify Connect đang hoạt động.",
+        "Control Spotify playback and volume on the active Spotify Connect device.",
       parameters: {
         type: "object",
         properties: {
@@ -213,26 +213,26 @@ function voiceToolDefinitions() {
               "repeat_track",
             ],
             description:
-              "Dùng volume khi đặt một mức cụ thể; dùng volume_up hoặc volume_down khi người dùng yêu cầu tăng hoặc giảm.",
+              "Use volume for an absolute level; use volume_up or volume_down for relative changes.",
           },
           volumePercent: {
             type: "integer",
             minimum: 0,
             maximum: 100,
             description:
-              "Mức âm lượng tuyệt đối từ 0 đến 100, bắt buộc khi action là volume.",
+              "Absolute volume from 0 to 100, required for the volume action.",
           },
           step: {
             type: "integer",
             minimum: 1,
             maximum: 50,
             description:
-              "Số phần trăm cần tăng hoặc giảm; mặc định là 10 khi người dùng không nêu rõ.",
+              "Percentage to increase or decrease; defaults to 10 when omitted.",
           },
           positionSeconds: {
             type: "number",
             minimum: 0,
-            description: "Vị trí cần tua tới, tính bằng giây.",
+            description: "Playback position to seek to, in seconds.",
           },
         },
         required: ["action"],
@@ -253,7 +253,7 @@ function voiceToolDefinitions() {
       type: "function",
       name: "spotify_search",
       description:
-        "Tìm bài hát trong Spotify nhưng không tự phát. Trả về kết quả và URI để có thể thêm vào hàng đợi.",
+        "Search Spotify tracks without playing them. Returns results and URIs that can be queued.",
       parameters: {
         type: "object",
         properties: { query: { type: "string" } },
@@ -264,7 +264,7 @@ function voiceToolDefinitions() {
       type: "function",
       name: "spotify_queue_search",
       description:
-        "Tìm bài hát trên Spotify và thêm kết quả phù hợp nhất vào hàng đợi hiện tại.",
+        "Search Spotify and add the best matching track to the current queue.",
       parameters: {
         type: "object",
         properties: { query: { type: "string" } },
@@ -275,46 +275,46 @@ function voiceToolDefinitions() {
       type: "function",
       name: "spotify_library",
       description:
-        "Lấy nhạc Spotify cá nhân gồm top tracks, bài phát gần đây và bài đã lưu. Dùng cache server để giảm quota.",
+        "Get personal Spotify music including top tracks, recently played, and saved tracks. Uses server caching to reduce quota usage.",
       parameters: { type: "object", properties: {}, required: [] },
     },
     {
       type: "function",
       name: "spotify_devices",
       description:
-        "Liệt kê các thiết bị Spotify Connect hiện đang khả dụng, gồm thiết bị đang hoạt động, loại thiết bị và âm lượng.",
+        "List available Spotify Connect devices, including the active device, device type, and volume.",
       parameters: { type: "object", properties: {}, required: [] },
     },
     {
       type: "function",
       name: "spotify_connection_status",
       description:
-        "Kiểm tra Spotify đã cấu hình, đã kết nối hay đang cooldown/rate-limited. Không trả access token hoặc refresh token.",
+        "Check whether Spotify is configured, connected, or cooling down due to rate limits. Never returns access or refresh tokens.",
       parameters: { type: "object", properties: {}, required: [] },
     },
     {
       type: "function",
       name: "spotify_now_playing",
       description:
-        "Lấy bài hát hoặc podcast đang phát trên Spotify, trạng thái phát/tạm dừng, tiến độ, thiết bị đang dùng và âm lượng. Luôn gọi tool này khi người dùng hỏi đang phát gì hoặc Spotify đang ở trạng thái nào.",
+        "Get the current Spotify track or podcast, play/pause state, progress, active device, and volume. Always call this when asked what is playing or about Spotify status.",
       parameters: { type: "object", properties: {}, required: [] },
     },
     {
       type: "function",
       name: "spotify_select_player",
       description:
-        "Chọn hoặc chuyển sang một Spotify Connect player khác. Có thể truyền tên hoặc ID lấy từ spotify_devices. Nếu nhạc đang phát thì tiếp tục phát trên player mới; nếu đang tạm dừng thì giữ trạng thái tạm dừng.",
+        "Select or transfer to another Spotify Connect player using a name or ID from spotify_devices. Continue playback if playing; preserve pause state if paused.",
       parameters: {
         type: "object",
         properties: {
           deviceId: {
             type: "string",
-            description: "ID chính xác của thiết bị từ spotify_devices.",
+            description: "Exact device ID returned by spotify_devices.",
           },
           deviceName: {
             type: "string",
             description:
-              "Tên thiết bị Spotify; chỉ dùng khi không có deviceId.",
+              "Spotify device name; use only when deviceId is unavailable.",
           },
         },
         required: [],
@@ -331,21 +331,21 @@ function voiceToolDefinitions() {
       type: "function",
       name: "list_routines",
       description:
-        "Liệt kê các routine hiện có và nội dung gợi ý theo bối cảnh hiện tại.",
+        "List available routines and context-aware suggestions.",
       parameters: { type: "object", properties: {}, required: [] },
     },
     {
       type: "function",
       name: "get_morning_briefing",
       description:
-        "Tạo bản tóm tắt buổi sáng hiện tại gồm weather, calendar, commute và alerts.",
+        "Create the current morning briefing with weather, calendar, commute, and alerts.",
       parameters: { type: "object", properties: {}, required: [] },
     },
     {
       type: "function",
       name: "get_news_feed",
       description:
-        "Lấy các tin mới nhất từ NEWS_RSS_URL đã cấu hình cho tab Tin tức. Không dùng cho tìm kiếm theo chủ đề; khi đó dùng search_news.",
+        "Get the latest items from the configured NEWS_RSS_URL. Use search_news instead for topical searches.",
       parameters: {
         type: "object",
         properties: { limit: { type: "integer", minimum: 1, maximum: 20 } },
@@ -356,7 +356,7 @@ function voiceToolDefinitions() {
       type: "function",
       name: "get_lyrics",
       description:
-        "Tìm lời bài hát, ưu tiên lời đồng bộ từ LRCLIB và fallback lyrics.ovh.",
+        "Find song lyrics, preferring synchronized LRCLIB lyrics with lyrics.ovh as fallback.",
       parameters: {
         type: "object",
         properties: {
@@ -372,7 +372,7 @@ function voiceToolDefinitions() {
       type: "function",
       name: "get_camera_status",
       description:
-        "Kiểm tra camera/intercom có được cấu hình không và trạng thái camera mà màn hình báo gần nhất. Không truy cập video hoặc thông tin WebRTC signaling.",
+        "Check camera/intercom configuration and the latest camera status reported by the display. Does not access video or WebRTC signaling.",
       parameters: { type: "object", properties: {}, required: [] },
     },
     {
@@ -395,13 +395,13 @@ function voiceToolDefinitions() {
       type: "function",
       name: "search_news",
       description:
-        "Search current/recent news on the web. ALWAYS use this for breaking news, accidents, incidents, current events, or questions containing words like mới nhất/vừa xảy ra/hôm nay.",
+        "Search current or recent news on the web. ALWAYS use this for breaking news, accidents, incidents, current events, or questions containing terms such as latest, just happened, or today.",
       parameters: {
         type: "object",
         properties: {
           query: {
             type: "string",
-            description: "Focused news search query, preferably in Vietnamese.",
+            description: "Focused news search query in the configured interface locale.",
           },
           limit: { type: "integer", minimum: 1, maximum: 10 },
         },
@@ -433,7 +433,7 @@ function voiceToolDefinitions() {
           query: {
             type: "string",
             description:
-              "Person name or role, e.g. Bộ trưởng Bộ Ngoại giao Việt Nam.",
+              "Person name or role, for example Vietnam's Minister of Foreign Affairs.",
           },
         },
         required: ["query"],
@@ -591,30 +591,34 @@ function voiceInstructions() {
     String(nowParts.h).padStart(2, "0") +
     ":" +
     String(nowParts.mi).padStart(2, "0");
+  const localeInstruction =
+    FRAME_LANGUAGE === "vi"
+      ? "The configured interface locale is vi-VN. Reply in natural Vietnamese by default. If the user clearly speaks another language, you may answer in that language."
+      : "The configured interface locale is en-US. Reply in natural English by default. If the user clearly speaks another language, you may answer in that language.";
   return [
-    "Bạn là trợ lý giọng nói của Nest Frame, nói tiếng Việt tự nhiên, ngắn gọn, thân thiện và giống một smart display.",
-    "Mặc định trả lời bằng tiếng Việt. Nếu người dùng nói ngôn ngữ khác, có thể trả lời ngôn ngữ đó.",
-    "Không đọc dài dòng những thứ đang được hiển thị trên màn hình; hãy nói tóm tắt 1-3 câu.",
-    "Mỗi lượt chỉ trả lời bằng giọng nói MỘT lần. Trước khi gọi tool không nói trước rằng đã làm hoặc đã hiển thị; hãy chờ toàn bộ tool result rồi mới trả lời một câu tóm tắt cuối cùng. Không lặp lại câu xác nhận sau render_dynamic_ui.",
-    "Nếu thực sự cần thêm thông tin để làm đúng yêu cầu, BẮT BUỘC gọi request_followup trước, sau đó hỏi đúng một câu làm rõ và chờ người dùng trả lời trong cùng phiên. MỌI câu trả lời kết thúc bằng một câu hỏi cần người dùng trả lời đều phải gọi request_followup trong cùng lượt; tuyệt đối không chỉ nói câu hỏi rồi kết thúc. Không gọi request_followup sau câu trả lời hoàn chỉnh, không dùng nó để hỏi xã giao như “bạn có cần gì thêm không”. Khi tool trả lỗi, nói rõ tên thao tác và lỗi ngắn gọn; không nói rằng đã hoàn thành.",
-    "QUY TẮC FOLLOW-UP BẮT BUỘC: nếu tên người, tổ chức, địa điểm hoặc chủ đề có vẻ nghe sai/viết sai, không tìm thấy, mơ hồ, hoặc có nhiều kết quả hợp lý, KHÔNG được kết thúc bằng câu “có thể bạn đã viết sai” và KHÔNG tự chọn một kết quả khác. Hãy gọi request_followup, hỏi người dùng nhắc lại/đánh vần/làm rõ đúng một câu, rồi chờ câu trả lời tiếp theo. Sau follow-up mới chạy lại tool tra cứu với thông tin mới.",
-    "Dynamic UI: Weather, Directions, Person, News, Calendar, Recipe, routines và Info đều dùng CHUNG renderer. Mỗi tool dữ liệu có display đã tự tạo một page canonical ổn định ở client.",
-    "Mỗi lượt chỉ được tạo TỐI ĐA MỘT page. Sau get_weather, get_directions, lookup_person, search_news, get_news_feed, web_search, get_calendar, get_morning_briefing, run_routine, show_recipe hoặc show_info, KHÔNG gọi render_dynamic_ui nữa và không tạo page lần hai.",
-    "Chỉ gọi render_dynamic_ui khi không dùng bất kỳ tool dữ liệu có page canonical nào ở trên. Khi đó tự chọn 2-6 widget hữu ích, thứ tự, emphasis và span trên grid 12 cột; tối đa khoảng 8 widget, tối đa 1 hero, và chỉ dùng dữ kiện đã biết.",
-    "Nếu câu trả lời không cần nội dung giữ trên màn hình thì KHÔNG gọi render_dynamic_ui; chỉ trả lời bằng giọng nói.",
-    "Khi hỏi weather/rain/AQI/UV LUÔN gọi get_weather. Khi hỏi recipe/cách nấu và đã có tên món hoặc đủ nguyên liệu LUÔN gọi show_recipe. Nếu người dùng chỉ hỏi chung chung về công thức/cách nấu nhưng chưa nói món gì hoặc nguyên liệu chính nào, BẮT BUỘC gọi request_followup và hỏi họ muốn nấu món gì; không được chỉ nói câu hỏi rồi kết thúc lượt.",
-    "Khi người dùng hỏi đường đi, khoảng cách hoặc thời gian di chuyển, gọi get_directions. Nếu người dùng nói “từ đây”, “chỗ tôi” hoặc không nói điểm xuất phát thì để origin trống: tool sẽ dùng tọa độ hiện tại và trả địa chỉ hiện tại cho bạn. Nếu chưa có điểm đến hoặc địa điểm mơ hồ, BẮT BUỘC gọi request_followup và hỏi đúng một câu làm rõ trước khi tìm đường. Hiện chỉ cung cấp ước tính tuyến lái xe.",
-    "Khi hỏi calendar/lịch sắp tới gọi get_calendar. Khi hỏi toàn bộ bối cảnh xung quanh gồm weather, air, commute, lịch và alert, gọi get_ambient_context. Khi muốn biết các routine có thể chạy, gọi list_routines. Khi người dùng nói chào buổi sáng hoặc hỏi briefing sáng, gọi get_morning_briefing; khi sắp ra ngoài, kiểm tra hôm nay, buổi tối hoặc đi ngủ, gọi run_routine với routine phù hợp. Với thông tin tổng quát có ích để giữ trên màn hình, gọi show_info; page sẽ tự hiển thị.",
-    "Bạn CÓ khả năng tìm Internet qua tool. Với tin mới, tai nạn, sự cố, sự kiện hôm nay/mới nhất/vừa xảy ra LUÔN gọi search_news trước khi trả lời. Không được nói rằng bạn không thể tìm kiếm realtime nếu chưa thử tool.",
-    "Với câu hỏi cần tra cứu web hoặc thông tin có thể thay đổi, gọi web_search. Khi hỏi về một người/public figure, dùng lookup_person. Nếu người dùng chỉ nói CHỨC DANH mà chưa nêu tên, hãy gọi web_search trước để xác định người đang giữ chức hiện tại, sau đó gọi lookup_person bằng HỌ TÊN vừa tìm được. Có thể gọi search_news để xác minh thay đổi chức vụ mới.",
-    "Khi dùng kết quả search, chỉ khẳng định điều được nguồn hỗ trợ; nói ngắn gọn và để chi tiết/sources trong dynamic UI. Không bịa dữ kiện còn thiếu.",
-    "Mọi link trong dynamic UI phải sao chép nguyên URL HTTP(S) tuyệt đối từ tool result. Tuyệt đối không dùng #, đường dẫn tương đối hoặc URL giả; nếu không có URL nguồn thật thì bỏ link và không tạo nút “Mở chi tiết”.",
-    "Khi người dùng yêu cầu alarm hoặc Spotify, dùng tool tương ứng. Dùng manage_alarms action list trước nếu cần id để sửa/xóa; chỉ sửa hoặc xóa khi người dùng yêu cầu rõ. Khi hỏi đang phát gì, LUÔN gọi spotify_now_playing. Dùng spotify_search để chỉ tìm, spotify_play_search để tìm và phát, spotify_queue_search để thêm vào hàng đợi, spotify_library cho top/recent/saved. Với âm lượng, seek, shuffle và repeat dùng spotify_control đúng action. Khi người dùng muốn xem thiết bị Spotify, gọi spotify_devices. Khi họ muốn chọn hoặc đổi player, gọi spotify_select_player với deviceId hoặc deviceName; nếu chưa nêu player hoặc tên không đủ rõ, gọi spotify_devices rồi request_followup để họ chọn, không tự đoán. Với alarm tương đối như “5 phút nữa”, “sau nửa tiếng” hoặc “2 tiếng nữa”, truyền relativeMinutes cho add_alarm và tuyệt đối không tự cộng thành HH:MM. Chỉ truyền time khi người dùng nêu giờ đồng hồ cụ thể. Sau tool, xác nhận ngắn gọn.",
-    "Dùng get_frame_status để kiểm tra frame/camera/service. Chỉ dùng control_frame khi người dùng yêu cầu rõ một thao tác trên màn hình. Dùng manage_notifications cho notification center; chỉ tạo, đánh dấu hoặc bỏ thông báo khi người dùng yêu cầu rõ, còn action list là chỉ đọc. Dùng get_news_feed cho nguồn RSS mặc định và search_news cho truy vấn tin theo chủ đề. Dùng get_lyrics khi người dùng muốn lời một bài cụ thể; nếu đang phát và chưa biết tên bài, gọi spotify_now_playing trước. Không bao giờ yêu cầu, đọc hoặc tiết lộ token, API key, OAuth credential hay WebRTC signaling.",
-    "Nếu tool trả lỗi, nói rõ ngắn gọn thay vì giả vờ đã thực hiện.",
-    "Thời gian mặc định theo múi giờ của frame: " +
+    "You are the Nest Frame voice assistant. Speak naturally, briefly, and helpfully like a smart display.",
+    localeInstruction,
+    "Do not read long content already visible on screen; give a concise one-to-three-sentence summary.",
+    "Respond by voice only ONCE per turn. Do not announce an action before calling a tool. Wait for all tool results, then provide one final summary. Do not repeat a confirmation after render_dynamic_ui.",
+    "If more information is genuinely required, you MUST call request_followup first, ask exactly one clarifying question, and wait for the user within the same session. Every response ending in a question that requires an answer must call request_followup in the same turn. Never ask and simply end the turn. Do not call request_followup after a complete answer or for social questions such as whether the user needs anything else. If a tool fails, state the action and error briefly; do not claim success.",
+    "MANDATORY FOLLOW-UP RULE: if a person, organization, place, or topic appears mistranscribed, misspelled, missing, ambiguous, or has multiple reasonable matches, do not guess or substitute another result. Call request_followup, ask the user to repeat, spell, or clarify it in exactly one question, then wait before rerunning the lookup tool.",
+    "Dynamic UI uses one shared renderer for Weather, Directions, Person, News, Calendar, Recipe, routines, and Info. Each data tool already produces a stable canonical page for the client.",
+    "Create AT MOST ONE page per turn. After get_weather, get_directions, lookup_person, search_news, get_news_feed, web_search, get_calendar, get_morning_briefing, run_routine, show_recipe, or show_info, do NOT call render_dynamic_ui and do not create a second page.",
+    "Call render_dynamic_ui only when no canonical-page data tool was used. Choose two to six useful widgets, order, emphasis, and spans on a 12-column grid; use at most about eight widgets and one hero, and only include known facts.",
+    "If the answer does not need to remain on screen, do NOT call render_dynamic_ui; answer by voice only.",
+    "For weather, rain, AQI, or UV questions, ALWAYS call get_weather. For cooking questions with a dish name or sufficient ingredients, ALWAYS call show_recipe. If the user asks generally for a recipe but has not named a dish or main ingredient, MUST call request_followup and ask what they want to cook.",
+    "For routes, distance, or travel time, call get_directions. If the user says from here, my location, or omits the origin, leave origin empty so the tool uses live coordinates and reverse-geocodes the current address. If the destination is missing or ambiguous, MUST call request_followup and ask exactly one clarifying question. Only driving estimates are currently supported.",
+    "For upcoming calendar items, call get_calendar. For all ambient context including weather, air, commute, calendar, and alerts, call get_ambient_context. Use list_routines to list routines. For a morning greeting or briefing, call get_morning_briefing; when leaving, checking today, preparing for evening, or going to bed, call run_routine with the appropriate routine. For useful general information that should remain on screen, call show_info.",
+    "You CAN search the Internet with tools. For breaking news, accidents, incidents, and current or latest events, ALWAYS call search_news before answering. Never claim that real-time search is unavailable before trying the tool.",
+    "For web research or information that may change, call web_search. For a public figure, use lookup_person. If only a ROLE is given, call web_search first to identify the current officeholder, then call lookup_person with the full name. search_news may verify recent leadership changes.",
+    "Only make claims supported by search sources. Keep speech concise and place details and sources in Dynamic UI. Never invent missing facts.",
+    "Every Dynamic UI link must copy an absolute HTTP(S) URL exactly from a tool result. Never use #, relative paths, or invented URLs. If no real source URL exists, omit the link and do not create an Open details button.",
+    "For alarms or Spotify, use the appropriate tool. Call manage_alarms with action list when an ID is needed; edit or delete only when explicitly requested. ALWAYS call spotify_now_playing when asked what is playing. Use spotify_search to search, spotify_play_search to find and play, spotify_queue_search to queue, and spotify_library for top, recent, or saved music. Use spotify_control for volume, seek, shuffle, and repeat. Use spotify_devices to list players. To select or switch players, call spotify_select_player with deviceId or deviceName; if missing or ambiguous, call spotify_devices then request_followup instead of guessing. For relative alarms such as five minutes from now, pass relativeMinutes and never calculate HH:MM yourself. Pass time only for an explicit clock time. Confirm briefly after the tool completes.",
+    "Use get_frame_status for display, camera, and service status. Use control_frame only for an explicitly requested display action. Use manage_notifications for the notification center and mutate notifications only when explicitly requested. Use get_news_feed for the default RSS feed and search_news for topical searches. Use get_lyrics for a specific song; if the current track is unknown, call spotify_now_playing first. Never request, read, or expose tokens, API keys, OAuth credentials, or WebRTC signaling.",
+    "If a tool returns an error, state it briefly instead of pretending the action succeeded.",
+    "The default frame timezone is " +
     FRAME_TIMEZONE +
-    ". Thời điểm hiện tại khi bắt đầu phiên là " +
+    ". The current time at the beginning of this session is " +
     frameNow +
     ".",
   ].join(" ");
@@ -631,16 +635,16 @@ async function geocodeVoiceLocation(query) {
         longitude: lon,
         name: FRAME_LOCATION_NAME,
       };
-    throw new Error("Chưa cấu hình vị trí mặc định cho frame");
+    throw new Error("Default frame location is not configured");
   }
   const u = new URL("https://geocoding-api.open-meteo.com/v1/search");
   u.searchParams.set("name", q);
   u.searchParams.set("count", "1");
-  u.searchParams.set("language", "vi");
+  u.searchParams.set("language", FRAME_LANGUAGE);
   u.searchParams.set("format", "json");
   const data = await fetchJsonExternal(u.toString(), 7000);
   const x = data && Array.isArray(data.results) ? data.results[0] : null;
-  if (!x) throw new Error("Không tìm thấy địa điểm");
+  if (!x) throw new Error("Location not found");
   return {
     latitude: Number(x.latitude),
     longitude: Number(x.longitude),
@@ -658,7 +662,8 @@ async function fetchNominatimJson(url) {
       {
         headers: {
           accept: "application/json",
-          "accept-language": "vi,en;q=0.8",
+          "accept-language":
+            FRAME_LANGUAGE === "vi" ? "vi,en;q=0.8" : "en,vi;q=0.8",
           "user-agent": NOMINATIM_USER_AGENT,
         },
       },
@@ -691,7 +696,7 @@ function routeCoordinate(value) {
 
 async function geocodeVoiceAddress(query, hint) {
   const text = cleanExternalText(query, 320);
-  if (!text) throw new Error("Thiếu địa chỉ cần tìm");
+  if (!text) throw new Error("Address is required");
   const coordinateMatch = text.match(
     /^\s*(-?\d+(?:\.\d+)?)\s*[,;]\s*(-?\d+(?:\.\d+)?)\s*$/,
   );
@@ -701,7 +706,7 @@ async function geocodeVoiceAddress(query, hint) {
     if (latitude != null && longitude != null)
       return { latitude, longitude, name: text };
   }
-  const key = "search:" + text.toLocaleLowerCase("vi"),
+  const key = "search:" + text.toLocaleLowerCase(FRAME_LANGUAGE),
     cached = voiceGeocodeCache.get(key);
   if (cached && cached.expires > Date.now()) return cached.value;
   const url = new URL(NOMINATIM_BASE_URL + "/search");
@@ -709,7 +714,7 @@ async function geocodeVoiceAddress(query, hint) {
   url.searchParams.set("format", "jsonv2");
   url.searchParams.set("addressdetails", "1");
   url.searchParams.set("limit", "1");
-  url.searchParams.set("accept-language", "vi");
+  url.searchParams.set("accept-language", FRAME_LANGUAGE);
   if (NOMINATIM_EMAIL) url.searchParams.set("email", NOMINATIM_EMAIL);
   if (hint) {
     url.searchParams.set(
@@ -723,7 +728,7 @@ async function geocodeVoiceAddress(query, hint) {
   const latitude = finiteCoord(place && place.lat, -90, 90),
     longitude = finiteCoord(place && place.lon, -180, 180);
   if (latitude == null || longitude == null)
-    throw new Error(`Không tìm thấy địa chỉ “${text}”`);
+    throw new Error(`Address not found: “${text}”`);
   const value = {
     latitude,
     longitude,
@@ -749,7 +754,7 @@ async function reverseGeocodeVoiceAddress(coordinate) {
   url.searchParams.set("format", "jsonv2");
   url.searchParams.set("zoom", "18");
   url.searchParams.set("addressdetails", "1");
-  url.searchParams.set("accept-language", "vi");
+  url.searchParams.set("accept-language", FRAME_LANGUAGE);
   if (NOMINATIM_EMAIL) url.searchParams.set("email", NOMINATIM_EMAIL);
   const data = await fetchNominatimJson(url.toString()),
     value = {
@@ -774,19 +779,19 @@ function routeStepText(step) {
     modifier = String(maneuver.modifier || ""),
     road = cleanExternalText((step && step.name) || "", 160),
     exit = Number(maneuver.exit) || 0;
-  if (type === "depart") return road ? `Khởi hành theo ${road}` : "Khởi hành";
-  if (type === "arrive") return "Đến điểm đến";
+  if (type === "depart") return road ? `Depart via ${road}` : "Depart";
+  if (type === "arrive") return "Arrive at destination";
   if (type === "roundabout" || type === "rotary")
-    return `Đi vào vòng xuyến${exit ? `, ra ở lối thứ ${exit}` : ""}${road ? ` để vào ${road}` : ""}`;
+    return `Enter the roundabout${exit ? ` and take exit ${exit}` : ""}${road ? ` onto ${road}` : ""}`;
   const turns = {
-    right: "Rẽ phải",
-    "sharp right": "Rẽ ngoặt phải",
-    "slight right": "Chếch phải",
-    left: "Rẽ trái",
-    "sharp left": "Rẽ ngoặt trái",
-    "slight left": "Chếch trái",
-    straight: "Đi thẳng",
-    uturn: "Quay đầu",
+    right: "Turn right",
+    "sharp right": "Make a sharp right",
+    "slight right": "Bear right",
+    left: "Turn left",
+    "sharp left": "Make a sharp left",
+    "slight left": "Bear left",
+    straight: "Continue straight",
+    uturn: "Make a U-turn",
   };
   if (
     type === "turn" ||
@@ -794,14 +799,14 @@ function routeStepText(step) {
     type === "end of road" ||
     type === "merge"
   )
-    return `${turns[modifier] || "Tiếp tục"}${road ? ` vào ${road}` : ""}`;
-  return road ? `Tiếp tục theo ${road}` : "Tiếp tục";
+    return `${turns[modifier] || "Continue"}${road ? ` onto ${road}` : ""}`;
+  return road ? `Continue on ${road}` : "Continue";
 }
 
 async function getVoiceDirections(args, context) {
   const destinationText = cleanExternalText(args && args.destination, 320);
   if (!destinationText)
-    throw new Error("Thiếu điểm đến; cần hỏi người dùng trước khi tìm đường");
+    throw new Error("Destination is required; ask the user before finding a route");
   const suppliedCurrent = routeCoordinate(context && context.currentLocation),
     configuredCurrent = routeCoordinate({
       latitude: FRAME_LATITUDE,
@@ -816,7 +821,7 @@ async function getVoiceDirections(args, context) {
       );
   if (usesCurrent && !current)
     throw new Error(
-      "Không nhận được vị trí hiện tại. Hãy bật quyền vị trí hoặc cấu hình FRAME_LATITUDE và FRAME_LONGITUDE",
+      "Current location is unavailable. Enable location permission or configure FRAME_LATITUDE and FRAME_LONGITUDE",
     );
   let origin;
   if (usesCurrent) {
@@ -839,7 +844,7 @@ async function getVoiceDirections(args, context) {
     !Number.isFinite(Number(route.duration)) ||
     !Number.isFinite(Number(route.distance))
   )
-    throw new Error("Không tìm thấy tuyến đường phù hợp");
+    throw new Error("No suitable route found");
   const rawSteps =
     route.legs && route.legs[0] && Array.isArray(route.legs[0].steps)
       ? route.legs[0].steps
@@ -959,7 +964,7 @@ function cleanExternalText(value, maxLen = 500) {
   ).slice(0, maxLen);
 }
 
-function splitNewsPublisher(rawTitle, fallback = "Tin tức") {
+function splitNewsPublisher(rawTitle, fallback = "News") {
   let title = String(rawTitle || "").trim(),
     source = "";
   const m = title.match(/\s+-\s+([^\-]{2,80})$/);
@@ -972,13 +977,13 @@ function splitNewsPublisher(rawTitle, fallback = "Tin tức") {
 
 async function searchVoiceNews(query, limit = 7) {
   query = String(query || "").trim();
-  if (!query) throw new Error("Thiếu nội dung tìm tin");
+  if (!query) throw new Error("News search query is required");
   limit = Math.max(1, Math.min(10, Number(limit) || 7));
   const url = new URL("https://news.google.com/rss/search");
   url.searchParams.set("q", query);
-  url.searchParams.set("hl", "vi");
+  url.searchParams.set("hl", FRAME_LANGUAGE);
   url.searchParams.set("gl", "VN");
-  url.searchParams.set("ceid", "VN:vi");
+  url.searchParams.set("ceid", `VN:${FRAME_LANGUAGE}`);
   const feed = await rssParser.parseURL(url.toString());
   let items = (feed.items || [])
     .slice(0, limit)
@@ -1023,8 +1028,8 @@ async function searchVoiceNews(query, limit = 7) {
   return {
     kind: "news-search",
     query,
-    title: "Tin tức",
-    subtitle: `Kết quả mới cho “${query}”`,
+    title: "News",
+    subtitle: `Latest results for “${query}”`,
     items,
     sources: ["Google News RSS"],
   };
@@ -1050,7 +1055,7 @@ function domainLabel(url) {
   }
 }
 
-async function searchWikipediaPages(query, lang = "vi", limit = 3) {
+async function searchWikipediaPages(query, lang = "en", limit = 3) {
   const u = new URL(`https://${lang}.wikipedia.org/w/api.php`);
   u.searchParams.set("action", "query");
   u.searchParams.set("format", "json");
@@ -1080,7 +1085,7 @@ async function searchWikipediaPages(query, lang = "vi", limit = 3) {
         (p.thumbnail && p.thumbnail.source) ||
         (p.original && p.original.source) ||
         "",
-      source: lang === "vi" ? "Wikipedia tiếng Việt" : "Wikipedia",
+      source: lang === "vi" ? "Vietnamese Wikipedia" : "Wikipedia",
     }));
 }
 
@@ -1112,10 +1117,10 @@ async function searchDuckDuckGo(query, limit = 7) {
 
 async function searchVoiceWeb(query, limit = 7) {
   query = String(query || "").trim();
-  if (!query) throw new Error("Thiếu nội dung tìm kiếm");
+  if (!query) throw new Error("Search query is required");
   limit = Math.max(1, Math.min(10, Number(limit) || 7));
   const [wiki, duck] = await Promise.all([
-    searchWikipediaPages(query, "vi", 2).catch(() => []),
+    searchWikipediaPages(query, FRAME_LANGUAGE, 2).catch(() => []),
     searchDuckDuckGo(query, limit).catch(() => []),
   ]);
   const seen = new Set(),
@@ -1138,8 +1143,8 @@ async function searchVoiceWeb(query, limit = 7) {
   return {
     kind: "web-search",
     query,
-    title: "Kết quả tìm kiếm",
-    subtitle: `Nguồn web cho “${query}”`,
+    title: "Search results",
+    subtitle: `Web sources for “${query}”`,
     items,
     sources: ["Wikipedia", "DuckDuckGo"],
   };
@@ -1217,7 +1222,7 @@ function extractHometownFromIntro(text) {
 
 async function lookupVoicePerson(query) {
   query = String(query || "").trim();
-  if (!query) throw new Error("Thiếu tên người cần tra cứu");
+  if (!query) throw new Error("A person name is required");
   async function find(lang) {
     const u = new URL(`https://${lang}.wikipedia.org/w/api.php`);
     u.searchParams.set("action", "query");
@@ -1237,9 +1242,12 @@ async function lookupVoicePerson(query) {
     const p = d && d.query && d.query.pages && d.query.pages[0];
     return p && !p.missing ? { ...p, lang } : null;
   }
-  let page = await find("vi").catch(() => null);
-  if (!page) page = await find("en").catch(() => null);
-  if (!page) throw new Error("Không tìm thấy hồ sơ phù hợp trên Wikipedia");
+  let page = await find(FRAME_LANGUAGE).catch(() => null);
+  if (!page)
+    page = await find(FRAME_LANGUAGE === "en" ? "vi" : "en").catch(
+      () => null,
+    );
+  if (!page) throw new Error("No matching Wikipedia profile found");
   const qid = page.pageprops && page.pageprops.wikibase_item;
   let entity = null;
   if (qid) {
@@ -1248,7 +1256,10 @@ async function lookupVoicePerson(query) {
     u.searchParams.set("format", "json");
     u.searchParams.set("ids", qid);
     u.searchParams.set("props", "claims|labels|descriptions");
-    u.searchParams.set("languages", "vi|en");
+    u.searchParams.set(
+      "languages",
+      FRAME_LANGUAGE === "en" ? "en|vi" : "vi|en",
+    );
     u.searchParams.set("languagefallback", "1");
     const d = await fetchJsonExternal(u.toString(), 8500).catch(() => null);
     entity = d && d.entities && d.entities[qid];
@@ -1295,27 +1306,27 @@ async function lookupVoicePerson(query) {
   const dob = wikidataDate(firstClaimValue(entity, "P569")),
     dod = wikidataDate(firstClaimValue(entity, "P570")),
     home = extractHometownFromIntro(intro);
-  if (dob) facts.push({ label: "Năm sinh / ngày sinh", value: dob });
-  if (dod) facts.push({ label: "Ngày mất", value: dod });
-  if (home) facts.push({ label: "Quê quán", value: home });
+  if (dob) facts.push({ label: "Born", value: dob });
+  if (dod) facts.push({ label: "Died", value: dod });
+  if (home) facts.push({ label: "Hometown", value: home });
   if (birthPlaceIds.length)
     facts.push({
-      label: "Nơi sinh",
+      label: "Place of birth",
       value: birthPlaceIds.map((id) => labels[id] || id).join(", "),
     });
   if (countryIds.length)
     facts.push({
-      label: "Quốc tịch",
+      label: "Nationality",
       value: countryIds.map((id) => labels[id] || id).join(", "),
     });
   if (occupationIds.length)
     facts.push({
-      label: "Nghề nghiệp",
+      label: "Occupation",
       value: occupationIds.map((id) => labels[id] || id).join(", "),
     });
   if (positionIds.length)
     facts.push({
-      label: "Chức vụ (Wikidata)",
+      label: "Position (Wikidata)",
       value: positionIds.map((id) => labels[id] || id).join(", "),
     });
   const wikiUrl =
@@ -1434,7 +1445,7 @@ async function getSpotifyDevicesForVoice() {
   const devices = ((data || {}).devices || [])
     .map((device) => ({
       id: String(device.id || ""),
-      name: String(device.name || "Thiết bị không tên"),
+      name: String(device.name || "Unnamed device"),
       type: String(device.type || "Unknown"),
       isActive: !!device.is_active,
       isRestricted: !!device.is_restricted,
@@ -1500,7 +1511,7 @@ async function searchSpotifyTracksForVoice(query, limit = 10) {
     take = Math.max(1, Math.min(10, Math.round(Number(limit) || 10))),
     key = `spotify:${q.toLocaleLowerCase("vi")}`,
     cached = musicSearchCache.get(key);
-  if (!q) throw new Error("Thiếu nội dung tìm kiếm Spotify");
+  if (!q) throw new Error("Spotify search query is required");
   if (cached && cached.expires > Date.now())
     return (cached.payload.results || []).slice(0, take);
   const data = await spotifyApi("/search", {
@@ -1532,7 +1543,7 @@ async function getConfiguredNewsForVoice(limit) {
   const items = (feed.items || [])
     .slice(0, Math.max(take, NEWS_LIMIT))
     .map((entry, index) => {
-      const split = splitNewsPublisher(entry.title || "", feed.title || "Tin tức");
+      const split = splitNewsPublisher(entry.title || "", feed.title || "News");
       return {
         id: String(entry.guid || entry.id || index),
         title: split.title,
@@ -1567,7 +1578,7 @@ async function executeVoiceTool(name, args, context) {
       coords = current || fallback;
     if (!coords)
       throw new Error(
-        "Không có vị trí hiện tại; hãy bật quyền vị trí hoặc cấu hình tọa độ frame",
+        "Current location is unavailable; enable location permission or configure frame coordinates",
       );
     return {
       kind: "ambient-context",
@@ -1584,12 +1595,12 @@ async function executeVoiceTool(name, args, context) {
       steps = normalizeRecipeList(args.steps, "step", 20),
       tips = normalizeRecipeList(args.tips, "tip", 10);
     if (!ingredients.length)
-      throw new Error("Công thức thiếu danh sách nguyên liệu");
+      throw new Error("Recipe is missing an ingredient list");
     if (!steps.length)
-      throw new Error("Công thức thiếu nội dung các bước thực hiện");
+      throw new Error("Recipe is missing preparation steps");
     return {
       kind: "recipe",
-      title: cleanExternalText(args.title || "Công thức", 220),
+      title: cleanExternalText(args.title || "Recipe", 220),
       summary: cleanExternalText(args.summary || "", 500),
       timeMinutes: Math.max(
         0,
@@ -1614,7 +1625,7 @@ async function executeVoiceTool(name, args, context) {
     const item = createAlarmRecord({
       time: target.time,
       scheduledDate: target.scheduledDate,
-      label: args.label || "Báo thức giọng nói",
+      label: args.label || "Voice alarm",
       repeatDays: Array.isArray(args.repeatDays) ? args.repeatDays : [],
       confirmCount: args.confirmCount || 1,
       enabled: true,
@@ -1627,7 +1638,7 @@ async function executeVoiceTool(name, args, context) {
       id: `alarm:created:${item.id}`,
       type: "alarm",
       priority: 48,
-      title: `Đã đặt báo thức ${item.time}`,
+      title: `Alarm set for ${item.time}`,
       body: `${item.label} · ${repeatDaysText(item.repeatDays)}`,
       icon: "alarm",
       action: "open-alarms",
@@ -1635,7 +1646,7 @@ async function executeVoiceTool(name, args, context) {
     return {
       kind: "action",
       ok: true,
-      message: `Đã đặt báo thức lúc ${item.time}`,
+      message: `Alarm set for ${item.time}`,
       alarm: item,
     };
   }
@@ -1649,7 +1660,7 @@ async function executeVoiceTool(name, args, context) {
       dismissVersion: remoteDismissVersion,
       dismissId: remoteDismissId,
     });
-    return { kind: "action", ok: true, message: "Đã tắt báo thức đang reo" };
+    return { kind: "action", ok: true, message: "Ringing alarm dismissed" };
   }
   if (name === "manage_alarms") {
     const action = String(args.action || "list"),
@@ -1659,12 +1670,12 @@ async function executeVoiceTool(name, args, context) {
         kind: "alarms",
         ok: true,
         items: items.sort((a, b) => String(a.time).localeCompare(String(b.time))),
-        message: `Có ${items.length} báo thức`,
+        message: `${items.length} alarms`,
       };
     const id = String(args.id || "").trim(),
       index = items.findIndex((item) => String(item.id) === id);
-    if (!id) throw new Error("Thiếu id báo thức; hãy gọi manage_alarms action list trước");
-    if (index < 0) throw new Error("Không tìm thấy báo thức");
+    if (!id) throw new Error("Alarm ID is required; call manage_alarms with action list first");
+    if (index < 0) throw new Error("Alarm not found");
     if (action === "delete") {
       const removed = items[index];
       items.splice(index, 1);
@@ -1673,11 +1684,11 @@ async function executeVoiceTool(name, args, context) {
       return {
         kind: "action",
         ok: true,
-        message: `Đã xóa báo thức ${removed.time} ${removed.label || ""}`.trim(),
+        message: `Deleted alarm ${removed.time} ${removed.label || ""}`.trim(),
       };
     }
     if (!["enable", "disable", "update"].includes(action))
-      throw new Error("Thao tác báo thức không hợp lệ");
+      throw new Error("Invalid alarm action");
     const changes = action === "enable"
       ? { enabled: true }
       : action === "disable"
@@ -1707,7 +1718,7 @@ async function executeVoiceTool(name, args, context) {
       kind: "action",
       ok: true,
       alarm: items[index],
-      message: `Đã cập nhật báo thức ${items[index].time}`,
+      message: `Updated alarm ${items[index].time}`,
     };
   }
   if (name === "manage_notifications") {
@@ -1718,19 +1729,19 @@ async function executeVoiceTool(name, args, context) {
         kind: "notifications",
         ok: true,
         ...payload,
-        message: `Có ${payload.items.length} thông báo`,
+        message: `${payload.items.length} notifications`,
       };
     }
     if (action === "create") {
       const item = cleanFrameNotification({
         type: "assistant",
-        title: args.title || "Thông báo từ trợ lý",
+        title: args.title || "Assistant notification",
         body: args.body || "",
         priority: args.priority,
         icon: "assistant",
       });
       upsertFrameNotifications(item);
-      return { kind: "action", ok: true, item, message: "Đã tạo thông báo" };
+      return { kind: "action", ok: true, item, message: "Notification created" };
     }
     const state = readFrameState();
     if (action === "read_all") {
@@ -1739,20 +1750,20 @@ async function executeVoiceTool(name, args, context) {
         item.dismissedAt || item.readAt ? item : { ...item, readAt: now },
       );
       writeFrameState(state);
-      return { kind: "action", ok: true, message: "Đã đánh dấu tất cả là đã đọc" };
+      return { kind: "action", ok: true, message: "All notifications marked as read" };
     }
     const id = String(args.id || "").trim(),
       item = state.notifications.find((entry) => String(entry.id) === id);
-    if (!id) throw new Error("Thiếu id thông báo");
-    if (!item) throw new Error("Không tìm thấy thông báo");
+    if (!id) throw new Error("Notification ID is required");
+    if (!item) throw new Error("Notification not found");
     if (action === "read") item.readAt = item.readAt || new Date().toISOString();
     else if (action === "dismiss") item.dismissedAt = new Date().toISOString();
-    else throw new Error("Thao tác thông báo không hợp lệ");
+    else throw new Error("Invalid notification action");
     writeFrameState(state);
     return {
       kind: "action",
       ok: true,
-      message: action === "read" ? "Đã đánh dấu thông báo là đã đọc" : "Đã bỏ thông báo",
+      message: action === "read" ? "Notification marked as read" : "Notification dismissed",
     };
   }
   if (name === "get_frame_status") {
@@ -1791,19 +1802,19 @@ async function executeVoiceTool(name, args, context) {
         "retry_camera",
         "show_message",
       ];
-    if (!allowed.includes(action)) throw new Error("Thao tác màn hình không hợp lệ");
-    if (!remoteStatusPayload().online) throw new Error("Màn hình đang offline");
+    if (!allowed.includes(action)) throw new Error("Invalid display action");
+    if (!remoteStatusPayload().online) throw new Error("Display is offline");
     const extra = {};
     if (action === "navigate") {
       const view = String(args.view || "");
       if (!["home", "today", "media", "news", "alarm"].includes(view))
-        throw new Error("Thiếu hoặc sai tab cần mở");
+        throw new Error("A valid tab is required");
       extra.view = view;
     }
     if (action === "show_message") {
-      extra.title = cleanExternalText(args.title || "Tin nhắn từ trợ lý", 160);
+      extra.title = cleanExternalText(args.title || "Message from assistant", 160);
       extra.text = cleanExternalText(args.text || "", 2000);
-      if (!extra.text) throw new Error("Thiếu nội dung cần hiển thị");
+      if (!extra.text) throw new Error("Display message content is required");
     }
     if (action === "retry_context") ambientContextCache.clear();
     if (action === "retry_calendar") {
@@ -1811,14 +1822,14 @@ async function executeVoiceTool(name, args, context) {
       ambientContextCache.clear();
     }
     const command = noteRemoteCommand(action, extra);
-    return { kind: "action", ok: true, command, message: `Đã gửi lệnh ${action}` };
+    return { kind: "action", ok: true, command, message: `Sent ${action} command` };
   }
   if (name === "spotify_control") {
     const action = String(args.action || "");
     if (action === "seek") {
       const positionSeconds = Number(args.positionSeconds);
       if (!Number.isFinite(positionSeconds) || positionSeconds < 0)
-        throw new Error("Thiếu vị trí cần tua, tính bằng giây");
+        throw new Error("Seek position in seconds is required");
       await spotifyApi("/me/player/seek", {
         method: "PUT",
         query: { position_ms: Math.round(positionSeconds * 1000) },
@@ -1829,7 +1840,7 @@ async function executeVoiceTool(name, args, context) {
         kind: "action",
         ok: true,
         spotify: true,
-        message: `Đã tua tới ${Math.round(positionSeconds)} giây`,
+        message: `Seeked to ${Math.round(positionSeconds)} seconds`,
       };
     }
     if (action === "shuffle_on" || action === "shuffle_off") {
@@ -1844,7 +1855,7 @@ async function executeVoiceTool(name, args, context) {
         kind: "action",
         ok: true,
         spotify: true,
-        message: state ? "Đã bật phát ngẫu nhiên" : "Đã tắt phát ngẫu nhiên",
+        message: state ? "Shuffle enabled" : "Shuffle disabled",
       };
     }
     if (["repeat_off", "repeat_context", "repeat_track"].includes(action)) {
@@ -1861,10 +1872,10 @@ async function executeVoiceTool(name, args, context) {
         spotify: true,
         message:
           state === "off"
-            ? "Đã tắt lặp lại"
+            ? "Repeat disabled"
             : state === "track"
-              ? "Đã lặp lại bài hiện tại"
-              : "Đã lặp lại danh sách hiện tại",
+              ? "Repeating the current track"
+              : "Repeating the current context",
       };
     }
     if (["volume", "volume_up", "volume_down"].includes(action)) {
@@ -1878,7 +1889,7 @@ async function executeVoiceTool(name, args, context) {
           rawVolume === "" ||
           !Number.isFinite(Number(rawVolume))
         )
-          throw new Error("Thiếu mức âm lượng Spotify từ 0 đến 100");
+          throw new Error("Spotify volume from 0 to 100 is required");
         volumePercent = Math.max(
           0,
           Math.min(100, Math.round(Number(rawVolume))),
@@ -1890,7 +1901,7 @@ async function executeVoiceTool(name, args, context) {
         );
         if (!Number.isFinite(currentVolume))
           throw new Error(
-            "Không lấy được âm lượng hiện tại; hãy mở Spotify trên một thiết bị trước",
+            "Current volume is unavailable; open Spotify on a device first",
           );
 
         const requestedStep = Number(args.step);
@@ -1921,17 +1932,17 @@ async function executeVoiceTool(name, args, context) {
         ok: true,
         spotify: true,
         volumePercent,
-        message: `Đã đặt âm lượng Spotify ở mức ${volumePercent}%`,
+        message: `Spotify volume set to ${volumePercent}%`,
       };
     }
 
     const map = {
-      play: ["/me/player/play", "PUT", "Đã tiếp tục phát Spotify"],
-      pause: ["/me/player/pause", "PUT", "Đã tạm dừng Spotify"],
-      next: ["/me/player/next", "POST", "Đã chuyển sang bài tiếp theo"],
-      previous: ["/me/player/previous", "POST", "Đã quay lại bài trước"],
+      play: ["/me/player/play", "PUT", "Spotify playback resumed"],
+      pause: ["/me/player/pause", "PUT", "Spotify paused"],
+      next: ["/me/player/next", "POST", "Skipped to the next track"],
+      previous: ["/me/player/previous", "POST", "Returned to the previous track"],
     };
-    if (!map[action]) throw new Error("Spotify action không hợp lệ");
+    if (!map[action]) throw new Error("Invalid Spotify action");
     await spotifyApi(map[action][0], { method: map[action][1] });
     spotifyPlayerCacheVersion++;
     spotifyPlayerCache = {
@@ -1955,14 +1966,14 @@ async function executeVoiceTool(name, args, context) {
       query: q,
       results,
       message: results.length
-        ? `Tìm thấy ${results.length} bài hát`
-        : "Không tìm thấy bài hát phù hợp",
+        ? `Found ${results.length} tracks`
+        : "No matching tracks found",
     };
   }
   if (name === "spotify_play_search") {
     const q = String(args.query || "").trim();
     const track = (await searchSpotifyTracksForVoice(q, 5))[0];
-    if (!track) throw new Error("Không tìm thấy bài hát");
+    if (!track) throw new Error("Track not found");
     await spotifyApi("/me/player/play", {
       method: "PUT",
       body: { uris: [track.uri] },
@@ -1977,14 +1988,14 @@ async function executeVoiceTool(name, args, context) {
       kind: "action",
       ok: true,
       spotify: true,
-      message: `Đang phát ${track.title}`,
+      message: `Playing ${track.title}`,
       track,
     };
   }
   if (name === "spotify_queue_search") {
     const q = String(args.query || "").trim();
     const track = (await searchSpotifyTracksForVoice(q, 5))[0];
-    if (!track) throw new Error("Không tìm thấy bài hát");
+    if (!track) throw new Error("Track not found");
     await spotifyApi("/me/player/queue", {
       method: "POST",
       query: { uri: track.uri },
@@ -1994,7 +2005,7 @@ async function executeVoiceTool(name, args, context) {
       ok: true,
       spotify: true,
       track,
-      message: `Đã thêm ${track.title} vào hàng đợi`,
+      message: `Added ${track.title} to the queue`,
     };
   }
   if (name === "spotify_library") {
@@ -2003,14 +2014,14 @@ async function executeVoiceTool(name, args, context) {
       kind: "spotify-library",
       ok: true,
       ...library,
-      message: `Có ${library.top.length} top tracks, ${library.recent.length} bài gần đây và ${library.saved.length} bài đã lưu`,
+      message: `${library.top.length} top tracks, ${library.recent.length} recently played, and ${library.saved.length} saved tracks`,
     };
   }
   if (name === "spotify_devices") {
     const devices = await getSpotifyDevicesForVoice();
     if (!devices.length)
       throw new Error(
-        "Không tìm thấy thiết bị Spotify; hãy mở Spotify trên thiết bị cần sử dụng",
+        "No Spotify devices found; open Spotify on the device you want to use",
       );
     const active = devices.find((device) => device.isActive);
     return {
@@ -2019,8 +2030,8 @@ async function executeVoiceTool(name, args, context) {
       devices,
       activeDeviceId: active ? active.id : "",
       message: active
-        ? `Có ${devices.length} thiết bị Spotify; ${active.name} đang hoạt động`
-        : `Có ${devices.length} thiết bị Spotify nhưng chưa có thiết bị đang hoạt động`,
+        ? `${devices.length} Spotify devices; ${active.name} is active`
+        : `${devices.length} Spotify devices with none currently active`,
     };
   }
   if (name === "spotify_connection_status")
@@ -2077,16 +2088,16 @@ async function executeVoiceTool(name, args, context) {
       track: track || null,
       device: device || null,
       message: track
-        ? `${isPlaying ? "Đang phát" : "Đang tạm dừng"} ${track.title}${track.artist ? ` của ${track.artist}` : ""
-        }${device && device.name ? ` trên ${device.name}` : ""}`
-        : "Spotify hiện không phát nội dung nào",
+        ? `${isPlaying ? "Playing" : "Paused"} ${track.title}${track.artist ? ` by ${track.artist}` : ""
+        }${device && device.name ? ` on ${device.name}` : ""}`
+        : "Spotify is not currently playing anything",
     };
   }
   if (name === "spotify_transfer" || name === "spotify_select_player") {
     const requestedId = String(args.deviceId || "").trim();
     const requestedName = String(args.deviceName || "").trim();
     if (!requestedId && !requestedName)
-      throw new Error("Chưa chọn thiết bị Spotify cần chuyển sang");
+      throw new Error("A target Spotify device has not been selected");
 
     const [devices, playerState] = await Promise.all([
       getSpotifyDevicesForVoice(),
@@ -2094,7 +2105,7 @@ async function executeVoiceTool(name, args, context) {
     ]);
     if (!devices.length)
       throw new Error(
-        "Không tìm thấy thiết bị Spotify; hãy mở Spotify trên thiết bị cần sử dụng",
+        "No Spotify devices found; open Spotify on the device you want to use",
       );
 
     let matches = [];
@@ -2113,20 +2124,20 @@ async function executeVoiceTool(name, args, context) {
 
     if (!matches.length)
       throw new Error(
-        `Không tìm thấy thiết bị “${requestedName || requestedId}”. Thiết bị hiện có: ${devices
+        `Device “${requestedName || requestedId}” not found. Available devices: ${devices
           .map((device) => device.name)
           .join(", ")}`,
       );
     if (matches.length > 1)
       throw new Error(
-        `Có nhiều thiết bị khớp tên: ${matches
+        `Multiple devices match that name: ${matches
           .map((device) => device.name)
-          .join(", ")}. Hãy chọn tên cụ thể hơn`,
+          .join(", ")}. Choose a more specific name`,
       );
 
     const target = matches[0];
     if (target.isRestricted)
-      throw new Error(`Thiết bị ${target.name} không cho phép điều khiển từ xa`);
+      throw new Error(`Device ${target.name} does not allow remote control`);
 
     const currentDeviceId = String(
       playerState && playerState.device && playerState.device.id
@@ -2162,8 +2173,8 @@ async function executeVoiceTool(name, args, context) {
       continuedPlaying: isPlaying,
       message:
         target.id === currentDeviceId
-          ? `Spotify đã ở trên ${target.name}`
-          : `Đã chuyển Spotify sang ${target.name}${isPlaying ? " và tiếp tục phát" : ""
+          ? `Spotify is already on ${target.name}`
+          : `Transferred Spotify to ${target.name}${isPlaying ? " and resumed playback" : ""
           }`,
     };
   }
@@ -2199,8 +2210,8 @@ async function executeVoiceTool(name, args, context) {
     const items = await getConfiguredNewsForVoice(args.limit);
     return {
       kind: "news-search",
-      title: "Tin mới nhất",
-      subtitle: "Nguồn RSS đã cấu hình trên frame",
+      title: "Latest news",
+      subtitle: "RSS feed configured on the frame",
       items,
     };
   }
@@ -2209,7 +2220,7 @@ async function executeVoiceTool(name, args, context) {
       artist = cleanExternalText(args.artist, 200),
       album = cleanExternalText(args.album, 250),
       duration = Math.max(0, Math.min(3600, Number(args.durationSeconds) || 0));
-    if (!title || !artist) throw new Error("Cần tên bài hát và nghệ sĩ");
+    if (!title || !artist) throw new Error("Track title and artist are required");
     let lyrics = await lookupLrclib({ title, artist, album, duration });
     if (!lyrics) lyrics = await lookupLyricsOvh({ title, artist });
     return {
@@ -2220,7 +2231,7 @@ async function executeVoiceTool(name, args, context) {
       artist,
       album,
       ...(lyrics || { timed: false, source: null, lines: [] }),
-      message: lyrics ? `Đã tìm thấy lời ${title}` : `Không tìm thấy lời ${title}`,
+      message: lyrics ? `Found lyrics for ${title}` : `No lyrics found for ${title}`,
     };
   }
   if (name === "get_camera_status") {
@@ -2238,7 +2249,7 @@ async function executeVoiceTool(name, args, context) {
   if (name === "run_routine") {
     const id = String(args.routine || "").trim();
     if (!["morning", "leaving", "day-check", "evening"].includes(id))
-      throw new Error("Thói quen không hợp lệ");
+      throw new Error("Invalid routine");
     const currentLocation =
       context && context.currentLocation && typeof context.currentLocation === "object"
         ? context.currentLocation
@@ -2254,7 +2265,7 @@ async function executeVoiceTool(name, args, context) {
   if (name === "show_info")
     return {
       kind: "info",
-      title: String(args.title || "Thông tin"),
+      title: String(args.title || "Information"),
       subtitle: String(args.subtitle || ""),
       items: (Array.isArray(args.items) ? args.items : [])
         .slice(0, 12)
@@ -2266,7 +2277,7 @@ async function executeVoiceTool(name, args, context) {
     };
   if (name === "request_followup") {
     const question = String(args.question || "").trim();
-    if (!question) throw new Error("Thiếu câu hỏi follow-up");
+    if (!question) throw new Error("Follow-up question is required");
     return { kind: "followup", ok: true, question: question.slice(0, 500) };
   }
   if (name === "render_dynamic_ui") {
@@ -2344,8 +2355,8 @@ async function executeVoiceTool(name, args, context) {
       : "comfortable";
     return {
       kind: "dynamic_ui",
-      kicker: cleanText(args.kicker || "Trợ lý Nest", 100),
-      title: cleanText(args.title || "Thông tin", 220),
+      kicker: cleanText(args.kicker || "Nest Assistant", 100),
+      title: cleanText(args.title || "Information", 220),
       subtitle: cleanText(args.subtitle, 500),
       layout: {
         columns: Math.max(
@@ -2358,6 +2369,5 @@ async function executeVoiceTool(name, args, context) {
       widgets,
     };
   }
-  throw new Error("Công cụ giọng nói không xác định");
+  throw new Error("Unknown voice tool");
 }
-

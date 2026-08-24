@@ -13,7 +13,7 @@ app.get("/camera/config", (req, res) => {
 
 app.post("/camera/call", (req, res) => {
   if (!cameraAuth(req.body && req.body.token))
-    return res.status(401).json({ error: "Token camera không hợp lệ" });
+    return res.status(401).json({ error: "Invalid camera token" });
   cameraCleanup();
   for (const call of cameraCalls.values()) {
     if (
@@ -22,7 +22,7 @@ app.post("/camera/call", (req, res) => {
     ) {
       return res
         .status(409)
-        .json({ error: "Nest Frame đang trong một phiên camera khác" });
+        .json({ error: "Nest Frame is already in another camera session" });
     }
   }
   const now = Date.now();
@@ -31,9 +31,9 @@ app.post("/camera/call", (req, res) => {
       ? crypto.randomUUID()
       : crypto.randomBytes(16).toString("hex");
   const viewerName =
-    String((req.body && req.body.name) || "Người xem từ xa")
+    String((req.body && req.body.name) || "Remote viewer")
       .trim()
-      .slice(0, 60) || "Người xem từ xa";
+      .slice(0, 60) || "Remote viewer";
   const call = {
     id,
     viewerName,
@@ -81,7 +81,7 @@ app.get("/camera/frame/poll", (req, res) => {
 app.post("/camera/frame/signal", (req, res) => {
   const call = cameraCalls.get(String((req.body && req.body.callId) || ""));
   if (!call || call.ended)
-    return res.status(404).json({ error: "Không tìm thấy cuộc gọi camera" });
+    return res.status(404).json({ error: "Camera call not found" });
   const type = String(req.body.type || "");
   if (
     ![
@@ -94,7 +94,7 @@ app.post("/camera/frame/signal", (req, res) => {
       "heartbeat",
     ].includes(type)
   )
-    return res.status(400).json({ error: "Tín hiệu camera không hợp lệ" });
+    return res.status(400).json({ error: "Invalid camera signal" });
   call.frameHeartbeat = Date.now();
   call.updatedAt = Date.now();
   if (type === "ready") call.status = "connecting";
@@ -126,9 +126,9 @@ function getViewerCall(req) {
 
 app.get("/camera/viewer/poll", (req, res) => {
   if (!cameraAuth(req.query.token))
-    return res.status(401).json({ error: "Không được phép truy cập" });
+    return res.status(401).json({ error: "Unauthorized" });
   const call = cameraCalls.get(String(req.query.callId || ""));
-  if (!call) return res.status(404).json({ error: "Không tìm thấy phiên camera" });
+  if (!call) return res.status(404).json({ error: "Camera session not found" });
   const after = Math.max(0, Number(req.query.after || 0) || 0);
   if (!call.ended) {
     call.viewerHeartbeat = Date.now();
@@ -149,10 +149,10 @@ app.post("/camera/viewer/signal", (req, res) => {
   if (!call)
     return res
       .status(401)
-      .json({ error: "Không tìm thấy phiên camera hoặc không được phép truy cập" });
+      .json({ error: "Camera session not found or access denied" });
   const type = String(req.body.type || "");
   if (!["answer", "candidate", "end", "heartbeat"].includes(type))
-    return res.status(400).json({ error: "Tín hiệu camera không hợp lệ" });
+    return res.status(400).json({ error: "Invalid camera signal" });
   call.viewerHeartbeat = Date.now();
   call.updatedAt = Date.now();
   if (type === "end") {
@@ -162,4 +162,3 @@ app.post("/camera/viewer/signal", (req, res) => {
   cameraPushFrame({ type, callId: call.id, payload: req.body.payload || null });
   res.json({ ok: true });
 });
-

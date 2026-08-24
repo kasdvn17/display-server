@@ -17,7 +17,7 @@
   var cameraPc = null;
   var cameraLocalStream = null;
   var cameraCallId = "";
-  var cameraViewerName = "Người xem từ xa";
+  var cameraViewerName = tr("REMOTE_VIEWER", "Người xem từ xa");
   var cameraPendingCandidates = [];
   var cameraConfigured = false;
   var cameraCallEnding = false;
@@ -28,15 +28,20 @@
     syncIdleCamera(state, text);
     if (cameraHomeChip)
       cameraHomeChip.setAttribute("data-state", state || "ready");
-    if (cameraChipCopy) cameraChipCopy.textContent = text || "Camera sẵn sàng";
+    if (cameraChipCopy)
+      cameraChipCopy.textContent = text || tr("CAMERA_READY", "Camera sẵn sàng");
     if (cameraHomeChip)
-      cameraHomeChip.setAttribute("aria-label", text || "Camera sẵn sàng");
+      cameraHomeChip.setAttribute(
+        "aria-label",
+        text || tr("CAMERA_READY", "Camera sẵn sàng"),
+      );
     var globalStatus = document.getElementById("top-status-text");
     if (globalStatus) {
-      if (state === "live") globalStatus.textContent = "Camera trực tiếp";
+      if (state === "live")
+        globalStatus.textContent = tr("CAMERA_LIVE", "Camera trực tiếp");
       else if (state === "connecting")
-        globalStatus.textContent = "Cuộc gọi đến";
-      else globalStatus.textContent = "Trực tuyến";
+        globalStatus.textContent = tr("INCOMING_CALL", "Cuộc gọi đến");
+      else globalStatus.textContent = tr("ONLINE", "Trực tuyến");
     }
   }
 
@@ -101,8 +106,8 @@
       switchView("home");
     if (!keepStatus) {
       if (localStorage.getItem("nestframe-camera-enabled") === "1")
-        cameraSetStatus("ready", "Camera sẵn sàng");
-      else cameraSetStatus("setup", "Bật camera liên lạc");
+        cameraSetStatus("ready", tr("CAMERA_READY", "Camera sẵn sàng"));
+      else cameraSetStatus("setup", tr("ENABLE_CAMERA", "Bật camera liên lạc"));
     }
   }
 
@@ -146,20 +151,28 @@
       !navigator.mediaDevices ||
       !navigator.mediaDevices.getUserMedia
     ) {
-      cameraSetStatus("error", "Không hỗ trợ camera");
+      cameraSetStatus("error", tr("CAMERA_NOT_SUPPORTED", "Không hỗ trợ camera"));
       cameraCallId = start.callId || "";
       cameraFrameSignal("error", {
-        message: "WebRTC hoặc getUserMedia không khả dụng",
+        message: tr(
+          "WEBRTC_UNAVAILABLE",
+          "WebRTC hoặc getUserMedia không khả dụng",
+        ),
       }).catch(function () {});
       return;
     }
     cameraClosePeer(true);
     cameraCallId = start.callId || "";
-    cameraViewerName = start.viewerName || "Người xem từ xa";
+    cameraViewerName = start.viewerName || tr("REMOTE_VIEWER", "Người xem từ xa");
     cameraCallViewDismissed = false;
     if (cameraCallViewerName)
       cameraCallViewerName.textContent = cameraViewerName;
-    cameraSetStatus("connecting", "Đang kết nối · " + cameraViewerName);
+    cameraSetStatus(
+      "connecting",
+      tr("CONNECTING_TO_NAME", "Đang kết nối · {NAME}", {
+        NAME: cameraViewerName,
+      }),
+    );
     navigator.mediaDevices
       .getUserMedia(cameraConstraints())
       .then(function (stream) {
@@ -187,7 +200,10 @@
             var vp = cameraRemoteVideo.play();
             if (vp && vp.catch)
               vp.catch(function () {
-                cameraSetStatus("connecting", "Chạm nút camera để nghe âm thanh");
+                cameraSetStatus(
+                  "connecting",
+                  tr("TAP_CAMERA_FOR_AUDIO", "Chạm nút camera để nghe âm thanh"),
+                );
               });
             if (!cameraCallViewDismissed && typeof switchView === "function")
               switchView("call");
@@ -197,7 +213,10 @@
             var playPromise = cameraRemoteAudio.play();
             if (playPromise && playPromise.catch)
               playPromise.catch(function () {
-                cameraSetStatus("connecting", "Chạm nút camera để nghe âm thanh");
+                cameraSetStatus(
+                  "connecting",
+                  tr("TAP_CAMERA_FOR_AUDIO", "Chạm nút camera để nghe âm thanh"),
+                );
               });
           }
         };
@@ -211,13 +230,21 @@
         pc.onconnectionstatechange = function () {
           var st = pc.connectionState || pc.iceConnectionState;
           if (st === "connected" || st === "completed") {
-            cameraSetStatus("live", "Camera trực tiếp · " + cameraViewerName);
+            cameraSetStatus(
+              "live",
+              tr("CAMERA_LIVE_WITH_NAME", "Camera trực tiếp · {NAME}", {
+                NAME: cameraViewerName,
+              }),
+            );
             cameraFrameSignal("connected", {
               viewerName: cameraViewerName,
             }).catch(function () {});
           } else if (st === "failed" || st === "closed") {
             if (!cameraCallEnding)
-              cameraSetStatus("error", "Camera đã ngắt kết nối");
+              cameraSetStatus(
+                "error",
+                tr("CAMERA_DISCONNECTED", "Camera đã ngắt kết nối"),
+              );
             setTimeout(function () {
               cameraClosePeer(false);
             }, 1200);
@@ -241,11 +268,13 @@
         cameraSetStatus(
           "error",
           err && err.name === "NotAllowedError"
-            ? "Cần cấp quyền camera"
-            : "Camera không khả dụng",
+            ? tr("CAMERA_PERMISSION_REQUIRED", "Cần cấp quyền camera")
+            : tr("CAMERA_UNAVAILABLE", "Camera không khả dụng"),
         );
         cameraFrameSignal("error", {
-          message: (err && err.message) || "Không thể mở camera trước",
+          message:
+            (err && err.message) ||
+            tr("CAMERA_PREVIEW_FAILED", "Không thể mở camera trước"),
         }).catch(function () {});
         cameraClosePeer(true);
       });
@@ -265,7 +294,10 @@
         .setRemoteDescription(new RTCSessionDescription(msg.payload))
         .then(cameraFlushCandidates)
         .catch(function () {
-          cameraSetStatus("error", "Không thể thiết lập cuộc gọi");
+          cameraSetStatus(
+            "error",
+            tr("CALL_SETUP_FAILED", "Không thể thiết lập cuộc gọi"),
+          );
         });
     } else if (msg.type === "candidate" && msg.payload) {
       cameraAddCandidate(msg.payload);
@@ -314,14 +346,14 @@
       return;
     }
     if (!window.isSecureContext) {
-      cameraSetStatus("error", "Cần sử dụng HTTPS");
+      cameraSetStatus("error", tr("HTTPS_REQUIRED", "Cần sử dụng HTTPS"));
       return;
     }
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      cameraSetStatus("error", "Không hỗ trợ camera");
+      cameraSetStatus("error", tr("CAMERA_NOT_SUPPORTED", "Không hỗ trợ camera"));
       return;
     }
-    cameraSetStatus("connecting", "Enabling camera…");
+    cameraSetStatus("connecting", tr("ENABLING_CAMERA", "Enabling camera…"));
     navigator.mediaDevices
       .getUserMedia(cameraConstraints())
       .then(function (stream) {
@@ -329,7 +361,7 @@
         stream.getTracks().forEach(function (t) {
           t.stop();
         });
-        cameraSetStatus("ready", "Camera sẵn sàng");
+        cameraSetStatus("ready", tr("CAMERA_READY", "Camera sẵn sàng"));
         if (cameraRemoteAudio) {
           var pp = cameraRemoteAudio.play();
           if (pp && pp.catch) pp.catch(function () {});
@@ -339,8 +371,8 @@
         cameraSetStatus(
           "error",
           err && err.name === "NotAllowedError"
-            ? "Quyền camera bị từ chối"
-            : "Camera không khả dụng",
+            ? tr("CAMERA_PERMISSION_DENIED", "Quyền camera bị từ chối")
+            : tr("CAMERA_UNAVAILABLE", "Camera không khả dụng"),
         );
       });
   }
@@ -368,14 +400,18 @@
     })
     .then(function (cfg) {
       cameraConfigured = !!(cfg && cfg.enabled);
-      if (!cameraConfigured) cameraSetStatus("error", "Chưa cấu hình camera");
+      if (!cameraConfigured)
+        cameraSetStatus("error", tr("CAMERA_NOT_CONFIGURED", "Chưa cấu hình camera"));
       else if (!window.isSecureContext)
-        cameraSetStatus("error", "Cần sử dụng HTTPS");
+        cameraSetStatus("error", tr("HTTPS_REQUIRED", "Cần sử dụng HTTPS"));
       else if (localStorage.getItem("nestframe-camera-enabled") === "1")
-        cameraSetStatus("ready", "Camera sẵn sàng");
-      else cameraSetStatus("setup", "Bật camera liên lạc");
+        cameraSetStatus("ready", tr("CAMERA_READY", "Camera sẵn sàng"));
+      else cameraSetStatus("setup", tr("ENABLE_CAMERA", "Bật camera liên lạc"));
       if (cameraConfigured) cameraPollFrame();
     })
     .catch(function () {
-      cameraSetStatus("error", "Dịch vụ camera ngoại tuyến");
+      cameraSetStatus(
+        "error",
+        tr("CAMERA_SERVICE_OFFLINE", "Dịch vụ camera ngoại tuyến"),
+      );
     });

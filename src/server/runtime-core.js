@@ -21,6 +21,7 @@ const {
   NEWS_IMAGE_ENRICH_LIMIT,
   FRAME_CALENDAR_ICS_URL,
   FRAME_CALENDAR_NAME,
+  FRAME_LANGUAGE,
   FRAME_TIMEZONE,
   FRAME_CALENDAR_LOOKAHEAD_HOURS,
   FRAME_HIDDEN_ASSETS_FILE,
@@ -100,6 +101,10 @@ const spotifyAuthStates = new Map();
 const cameraCalls = new Map();
 let cameraFrameSeq = 0;
 const cameraFrameQueue = [];
+
+function serverLocaleText(english, vietnamese) {
+  return FRAME_LANGUAGE === "vi" ? vietnamese : english;
+}
 
 function cameraIceServers() {
   const servers = [];
@@ -236,7 +241,7 @@ function cleanFrameNotification(input) {
       0,
       Math.min(100, Math.round(Number(input && input.priority) || 50)),
     ),
-    title: String((input && input.title) || "Thông báo")
+    title: String((input && input.title) || "Notification")
       .trim()
       .slice(0, 180),
     body: String((input && input.body) || "").trim().slice(0, 800),
@@ -339,7 +344,7 @@ async function fetchWithTimeout(url, init = {}, timeoutMs = 10000) {
   };
   timer = setTimeout(
     () => {
-      controller.abort(new Error("Nguồn dữ liệu đã quá thời gian chờ"));
+      controller.abort(new Error("Data source timed out"));
       release();
     },
     Math.max(250, timeoutMs),
@@ -416,7 +421,7 @@ function publicHttpUrl(value) {
     url.username ||
     url.password
   )
-    throw new Error("Địa chỉ bên ngoài không an toàn");
+    throw new Error("Unsafe external address");
   const host = url.hostname.toLowerCase();
   if (
     !host ||
@@ -426,7 +431,7 @@ function publicHttpUrl(value) {
     host.endsWith(".internal") ||
     isPrivateAddress(host)
   )
-    throw new Error("Đã chặn địa chỉ mạng riêng bên ngoài");
+    throw new Error("External private network address blocked");
   return url;
 }
 async function assertPublicDns(url) {
@@ -435,7 +440,7 @@ async function assertPublicDns(url) {
     dns.lookup(url.hostname, { all: true, verbatim: true }),
     new Promise((_, reject) => {
       const timer = setTimeout(
-        () => reject(new Error("Tra cứu DNS đã quá thời gian chờ")),
+        () => reject(new Error("DNS lookup timed out")),
         2000,
       );
       timer.unref?.();
@@ -445,13 +450,13 @@ async function assertPublicDns(url) {
     !addresses.length ||
     addresses.some((entry) => isPrivateAddress(entry.address))
   )
-    throw new Error("Đã chặn địa chỉ DNS riêng");
+    throw new Error("Private DNS address blocked");
 }
 async function readTextLimited(response, maxBytes = 3 * 1024 * 1024) {
   const declared = Number(response.headers.get("content-length"));
   if (Number.isFinite(declared) && declared > maxBytes) {
     response.__releaseTimeout?.();
-    throw new Error("Phản hồi bên ngoài quá lớn");
+    throw new Error("External response is too large");
   }
   if (!response.body) return "";
   let size = 0,
@@ -462,7 +467,7 @@ async function readTextLimited(response, maxBytes = 3 * 1024 * 1024) {
       size += chunk.length;
       if (size > maxBytes) {
         response.body.cancel().catch(() => {});
-        throw new Error("Phản hồi bên ngoài quá lớn");
+        throw new Error("External response is too large");
       }
       text += decoder.decode(chunk, { stream: true });
     }
@@ -505,7 +510,7 @@ async function fetchPublicText(
     }
     return await readTextLimited(response, maxBytes);
   }
-  throw new Error("Có quá nhiều lần chuyển hướng bên ngoài");
+  throw new Error("Too many external redirects");
 }
 function safePublicMediaUrl(value) {
   try {

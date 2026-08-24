@@ -15,10 +15,18 @@
     var d = new Date(value);
     if (isNaN(d.getTime())) return "";
     var sec = Math.max(0, Math.floor((Date.now() - d.getTime()) / 1000));
-    if (sec < 60) return "Vừa xong";
-    if (sec < 3600) return Math.floor(sec / 60) + " phút trước";
-    if (sec < 86400) return Math.floor(sec / 3600) + " giờ trước";
-    return Math.floor(sec / 86400) + " ngày trước";
+    if (sec < 60) return tr("JUST_NOW", "Vừa xong");
+    if (sec < 3600)
+      return tr("MINUTES_AGO", "{COUNT} phút trước", {
+        COUNT: Math.floor(sec / 60),
+      });
+    if (sec < 86400)
+      return tr("HOURS_AGO", "{COUNT} giờ trước", {
+        COUNT: Math.floor(sec / 3600),
+      });
+    return tr("DAYS_AGO", "{COUNT} ngày trước", {
+      COUNT: Math.floor(sec / 86400),
+    });
   }
   function loadNews() {
     return fetchFrameJson("/news", { cache: "no-store" }, 20000)
@@ -54,14 +62,27 @@
     if (!feed) return;
     if (error) {
       feed.innerHTML =
-        '<div class="news-feed-empty"><strong>Tin tức không khả dụng</strong>Nhấn Làm mới để thử lại.</div>';
-      if (subtitle) subtitle.textContent = "Không thể cập nhật nguồn tin";
+        '<div class="news-feed-empty"><strong>' +
+        tr("NEWS_UNAVAILABLE", "Tin tức không khả dụng") +
+        "</strong>" +
+        tr("PRESS_REFRESH_TO_RETRY", "Nhấn Làm mới để thử lại.") +
+        "</div>";
+      if (subtitle)
+        subtitle.textContent = tr(
+          "NEWS_UPDATE_FAILED",
+          "Không thể cập nhật nguồn tin",
+        );
       return;
     }
     if (!newsItems.length) {
       feed.innerHTML =
-        '<div class="news-feed-empty"><strong>Chưa có tiêu đề</strong>Nguồn RSS đã cấu hình không trả về bài viết.</div>';
-      if (subtitle) subtitle.textContent = "Không có bài viết";
+        '<div class="news-feed-empty"><strong>' +
+        tr("NO_HEADLINES", "Chưa có tiêu đề") +
+        "</strong>" +
+        tr("RSS_NO_ARTICLES", "Nguồn RSS đã cấu hình không trả về bài viết.") +
+        "</div>";
+      if (subtitle)
+        subtitle.textContent = tr("NO_ARTICLES", "Không có bài viết");
       return;
     }
     var html = [];
@@ -88,20 +109,23 @@
           '"><div class="news-feed-image">' +
           imageHtml +
           '</div><div class="news-feed-body"><div class="news-feed-meta"><span class="news-feed-source">' +
-          escapeHtml(item.source || "Tin tức") +
+          escapeHtml(item.source || tr("NEWS_PAGE", "Tin tức")) +
           '</span><span class="news-feed-dot"></span><span>' +
-          escapeHtml(relativeNewsTime(item.publishedAt) || "Mới nhất") +
+          escapeHtml(relativeNewsTime(item.publishedAt) || tr("LATEST", "Mới nhất")) +
           '</span></div><h2 class="news-feed-title">' +
-          escapeHtml(item.title || "Bài viết chưa có tiêu đề") +
+          escapeHtml(item.title || tr("UNTITLED_ARTICLE", "Bài viết chưa có tiêu đề")) +
           "</h2>" +
           summary +
-          '<div class="news-feed-open">Đọc bài <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 16 16 8M10 8h6v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div></article>',
+          '<div class="news-feed-open">' + tr("READ_ARTICLE", "Đọc bài") + ' <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 16 16 8M10 8h6v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div></article>',
       );
     }
     feed.innerHTML = html.join("");
     if (subtitle)
-      subtitle.textContent =
-        newsItems.length + " bài mới nhất · vừa cập nhật";
+      subtitle.textContent = tr(
+        "LATEST_ARTICLES_UPDATED",
+        "{COUNT} bài mới nhất · vừa cập nhật",
+        { COUNT: newsItems.length },
+      );
   }
   function openNewsItem(index) {
     var item = newsItems[index];
@@ -129,8 +153,8 @@
     var time = document.getElementById("news-time");
     var progress = document.getElementById("news-progress");
     if (!panel || !headline) return false;
-    headline.textContent = item.title || "Tin mới nhất";
-    if (source) source.textContent = item.source || "Tin tức";
+    headline.textContent = item.title || tr("LATEST_NEWS", "Tin mới nhất");
+    if (source) source.textContent = item.source || tr("NEWS_PAGE", "Tin tức");
     if (time) time.textContent = relativeNewsTime(item.publishedAt);
     panel.setAttribute("data-link", item.link || "");
     panel.classList.add("show");
@@ -168,7 +192,7 @@
         ),
       );
     }
-    scheduleAmbient(IMMICH.intervalMs, "Ảnh tiếp theo");
+    scheduleAmbient(IMMICH.intervalMs, tr("NEXT_PHOTO", "Ảnh tiếp theo"));
   }
   var newsPanel = document.getElementById("news-ambient");
   if (newsPanel) {

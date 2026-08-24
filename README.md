@@ -165,10 +165,19 @@ display; it may differ from an internal `IMMICH_URL`.
 | `FRAME_COMMUTE_TARGETS` | Scheduled and calendar-aware commute estimates |
 | `REMOTE_CONTROL_TOKEN` | Authenticated `/remote` page |
 | `CAMERA_REMOTE_TOKEN` and optional TURN settings | Authenticated `/camera` page |
+| `FRAME_LANGUAGE` | Interface language (`vi` or `en`); defaults to `en` |
 | `FRAME_TIMEZONE` | Display clock, calendar, routines, and alarms |
 
 Keep private or secret ICS URLs in `.env`; the server fetches them without
 exposing the feed URL to the browser.
+
+### Interface language
+
+Set `FRAME_LANGUAGE=vi` or `FRAME_LANGUAGE=en` in `.env`, then restart the
+server. Translations are stored in `public/locales/vi.json` and
+`public/locales/en.json`. Static HTML uses `data-i18n="KEY"`; JavaScript can
+read the same strings with `window.FrameI18n.t("KEY", "Fallback")`. To preview
+a language without changing `.env`, open any page with `?lang=en` or `?lang=vi`.
 
 ## Spotify setup
 

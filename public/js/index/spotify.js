@@ -11,6 +11,7 @@
   var spotifyTargetDeviceId = "";
   var spotifyConnected = false;
   var spotifyConfigured = false;
+  var spotifyProfileName = "";
   var spotifyDevices = [];
   var spotifyState = {
     isPlaying: false,
@@ -86,8 +87,34 @@
   var spotifyVolumeTimer = 0,
     spotifyVolumeChangingUntil = 0;
 
+  function spotifyT(key, fallback, variables) {
+    return window.FrameI18n && window.FrameI18n.t
+      ? window.FrameI18n.t(key, fallback, variables)
+      : String(fallback || key);
+  }
+
   function setMediaState(text) {
     if (stateEl) stateEl.textContent = String(text || "").toUpperCase();
+  }
+  function spotifyRepeatLabel(mode) {
+    if (mode === "track")
+      return spotifyT("SPOTIFY_REPEAT_TRACK", "Lặp lại một bài");
+    if (mode === "context")
+      return spotifyT("SPOTIFY_REPEAT_CONTEXT", "Lặp lại tất cả");
+    return spotifyT("SPOTIFY_REPEAT_OFF", "Tắt lặp lại");
+  }
+  function spotifyDeviceType(type) {
+    var normalized = String(type || "").toLowerCase();
+    if (normalized === "computer")
+      return spotifyT("SPOTIFY_DEVICE_COMPUTER", "Máy tính");
+    if (normalized === "smartphone")
+      return spotifyT("SPOTIFY_DEVICE_SMARTPHONE", "Điện thoại");
+    if (normalized === "speaker")
+      return spotifyT("SPOTIFY_DEVICE_SPEAKER", "Loa");
+    if (normalized === "tv") return spotifyT("SPOTIFY_DEVICE_TV", "TV");
+    if (normalized === "tablet")
+      return spotifyT("SPOTIFY_DEVICE_TABLET", "Máy tính bảng");
+    return type || "Spotify Connect";
   }
   function setPlayIcon(playing) {
     if (idleNowPlaying) setTimeout(syncIdleMusic, 0);
@@ -106,9 +133,12 @@
       spotifyControls.style.opacity = connected ? "1" : ".45";
     if (musicSearchInput) musicSearchInput.disabled = !connected;
     if (!connected) {
-      setMediaState("CHƯA KẾT NỐI");
+      setMediaState(spotifyT("SPOTIFY_NOT_CONNECTED", "Chưa kết nối"));
       if (spotifyDeviceName)
-        spotifyDeviceName.textContent = "Hãy kết nối Spotify trước";
+        spotifyDeviceName.textContent = spotifyT(
+          "SPOTIFY_CONNECT_FIRST",
+          "Hãy kết nối Spotify trước",
+        );
     }
   }
   function spotifyFetch(url, options) {
@@ -118,7 +148,12 @@
         path,
       );
     if (!cooldownExempt && Date.now() < spotifyCooldownUntil) {
-      var blocked = new Error("Spotify đang tạm giới hạn yêu cầu");
+      var blocked = new Error(
+        spotifyT(
+          "SPOTIFY_RETRY_LATER",
+          "Spotify đang giới hạn yêu cầu — hãy thử lại sau",
+        ),
+      );
       blocked.status = 429;
       blocked.retryAfterMs = spotifyCooldownUntil - Date.now();
       return Promise.reject(blocked);
@@ -152,8 +187,10 @@
             until || Date.now() + 30000,
           );
           if (spotifySdkNote)
-            spotifySdkNote.textContent =
-              "Spotify đang giới hạn yêu cầu · sẽ tự thử lại sau";
+            spotifySdkNote.textContent = spotifyT(
+              "SPOTIFY_RATE_LIMITED",
+              "Spotify đang giới hạn yêu cầu · sẽ tự thử lại sau",
+            );
         }
         if (!r.ok) {
           var e = new Error(data.detail || data.error || "Spotify " + r.status);
@@ -303,9 +340,12 @@
     script.src = "https://sdk.scdn.co/spotify-player.js";
     script.async = true;
     script.onerror = function () {
-      setMediaState("LỖI SDK");
+      setMediaState(spotifyT("SPOTIFY_SDK_ERROR", "Lỗi SDK"));
       if (spotifySdkNote)
-        spotifySdkNote.textContent = "Không thể tải Spotify SDK";
+        spotifySdkNote.textContent = spotifyT(
+          "SPOTIFY_SDK_LOAD_FAILED",
+          "Không thể tải Spotify SDK",
+        );
     };
     document.body.appendChild(script);
   }
@@ -317,7 +357,7 @@
         spotifyAccessToken()
           .then(cb)
           .catch(function () {
-            setMediaState("LỖI XÁC THỰC");
+            setMediaState(spotifyT("SPOTIFY_AUTH_ERROR", "Lỗi xác thực"));
           });
       },
       volume: 0.65,
@@ -331,8 +371,10 @@
         } catch (_) {}
       }
       if (spotifySdkNote)
-        spotifySdkNote.textContent =
-          "iPad này đã sẵn sàng trong Spotify Connect";
+        spotifySdkNote.textContent = spotifyT(
+          "SPOTIFY_IPAD_READY",
+          "iPad này đã sẵn sàng trong Spotify Connect",
+        );
       refreshSpotifyDevices();
     });
     spotifyPlayer.addListener("not_ready", function () {
@@ -343,30 +385,43 @@
       )
         spotifyTargetDeviceId = "";
       if (spotifySdkNote)
-        spotifySdkNote.textContent = "Trình phát trên iPad đang tạm thời ngoại tuyến";
+        spotifySdkNote.textContent = spotifyT(
+          "SPOTIFY_IPAD_OFFLINE",
+          "Trình phát trên iPad đang tạm thời ngoại tuyến",
+        );
       scheduleSpotifyPoll(1000);
     });
     spotifyPlayer.addListener("initialization_error", function (e) {
-      setMediaState("LỖI SDK");
+      setMediaState(spotifyT("SPOTIFY_SDK_ERROR", "Lỗi SDK"));
       if (spotifySdkNote)
-        spotifySdkNote.textContent =
-          e.message || "Lỗi khởi tạo Spotify SDK";
+        spotifySdkNote.textContent = spotifyT(
+          "SPOTIFY_SDK_INIT_FAILED",
+          "Lỗi khởi tạo Spotify SDK",
+        );
     });
     spotifyPlayer.addListener("authentication_error", function (e) {
-      setMediaState("LỖI XÁC THỰC");
+      setMediaState(spotifyT("SPOTIFY_AUTH_ERROR", "Lỗi xác thực"));
       if (spotifySdkNote)
-        spotifySdkNote.textContent =
-          e.message || "Xác thực Spotify đã hết hạn";
+        spotifySdkNote.textContent = spotifyT(
+          "SPOTIFY_AUTH_EXPIRED",
+          "Xác thực Spotify đã hết hạn",
+        );
     });
     spotifyPlayer.addListener("account_error", function (e) {
-      setMediaState("CẦN PREMIUM");
+      setMediaState(spotifyT("SPOTIFY_PREMIUM_REQUIRED", "Cần Premium"));
       if (spotifySdkNote)
-        spotifySdkNote.textContent = e.message || "Cần tài khoản Spotify Premium";
+        spotifySdkNote.textContent = spotifyT(
+          "SPOTIFY_PREMIUM_ACCOUNT_REQUIRED",
+          "Cần tài khoản Spotify Premium",
+        );
     });
     spotifyPlayer.addListener("playback_error", function (e) {
-      setMediaState("LỖI PHÁT NHẠC");
+      setMediaState(spotifyT("SPOTIFY_PLAYBACK_ERROR", "Lỗi phát nhạc"));
       if (spotifySdkNote)
-        spotifySdkNote.textContent = e.message || "Lỗi phát nhạc Spotify";
+        spotifySdkNote.textContent = spotifyT(
+          "SPOTIFY_PLAYBACK_FAILED",
+          "Lỗi phát nhạc Spotify",
+        );
     });
     spotifyPlayer.addListener("player_state_changed", function (state) {
       if (!state) return;
@@ -376,7 +431,7 @@
       if (accepted) scheduleSpotifyPoll();
     });
     spotifyPlayer.connect().then(function (ok) {
-      if (!ok) setMediaState("SDK NGOẠI TUYẾN");
+      if (!ok) setMediaState(spotifyT("SPOTIFY_SDK_OFFLINE", "SDK ngoại tuyến"));
     });
   }
   function activateSpotifyElement() {
@@ -422,7 +477,11 @@
         (track.artist || "") + (track.album ? " · " + track.album : "");
     if (spotifyArt) {
       spotifyArt.src = track.thumbnail || "";
-      spotifyArt.alt = (track.album || track.title || "Spotify") + " artwork";
+      spotifyArt.alt = spotifyT(
+        "SPOTIFY_ARTWORK_NAMED",
+        "Ảnh bìa {NAME}",
+        { NAME: track.album || track.title || "Spotify" },
+      );
       if (changed) {
         spotifyArt.classList.remove("art-reveal");
         void spotifyArt.offsetWidth;
@@ -505,13 +564,14 @@
       spotifyState.device = {
         id: spotifyLocalDeviceId,
         name: "Nest Frame · iPad",
-        type: "Máy tính",
+        type: "Computer",
         isActive: true,
         isRestricted: false,
         volumePercent: spotifyState.volumePercent,
       };
       if (spotifyDeviceName)
-        spotifyDeviceName.textContent = "Nest Frame · iPad · iPad này";
+        spotifyDeviceName.textContent =
+          "Nest Frame · iPad · " + spotifyT("SPOTIFY_THIS_IPAD", "iPad này");
     }
     if (track) applyTrack(track);
     if (spotifyPlayer && spotifyPlayer.getVolume)
@@ -522,12 +582,19 @@
         })
         .catch(function () {});
     setPlayIcon(spotifyState.isPlaying);
-    setMediaState(spotifyState.isPlaying ? "ĐANG PHÁT" : "TẠM DỪNG");
+    setMediaState(
+      spotifyState.isPlaying
+        ? spotifyT("SPOTIFY_PLAYING", "Đang phát")
+        : spotifyT("SPOTIFY_PAUSED", "Tạm dừng"),
+    );
     if (shuffleBtn)
       shuffleBtn.classList.toggle("active", spotifyState.shuffle);
     if (repeatBtn) {
       repeatBtn.classList.toggle("active", spotifyState.repeat !== "off");
-      repeatBtn.setAttribute("aria-label", "Lặp lại: " + spotifyState.repeat);
+      repeatBtn.setAttribute(
+        "aria-label",
+        spotifyRepeatLabel(spotifyState.repeat),
+      );
     }
     updateSpotifyProgress();
     return true;
@@ -648,22 +715,31 @@
       spotifyState.durationMs = Math.max(0, Number(data.item.durationMs) || 0);
       applyTrack(data.item);
     } else {
-      if (!spotifyState.isPlaying && !currentTrack) setMediaState("SẴN SÀNG");
+      if (!spotifyState.isPlaying && !currentTrack)
+        setMediaState(spotifyT("SPOTIFY_READY", "Sẵn sàng"));
     }
     if (data.device) {
       spotifyTargetDeviceId = String(
         data.device.id || spotifyTargetDeviceId || "",
       );
       if (spotifyDeviceName)
-        spotifyDeviceName.textContent = data.device.name || "Thiết bị Spotify";
+        spotifyDeviceName.textContent =
+          data.device.name || spotifyT("SPOTIFY_DEVICE", "Thiết bị Spotify");
     }
     setPlayIcon(spotifyState.isPlaying);
     if (currentTrack)
-      setMediaState(spotifyState.isPlaying ? "ĐANG PHÁT" : "TẠM DỪNG");
+      setMediaState(
+        spotifyState.isPlaying
+          ? spotifyT("SPOTIFY_PLAYING", "Đang phát")
+          : spotifyT("SPOTIFY_PAUSED", "Tạm dừng"),
+      );
     if (shuffleBtn) shuffleBtn.classList.toggle("active", spotifyState.shuffle);
     if (repeatBtn) {
       repeatBtn.classList.toggle("active", spotifyState.repeat !== "off");
-      repeatBtn.setAttribute("aria-label", "Lặp lại: " + spotifyState.repeat);
+      repeatBtn.setAttribute(
+        "aria-label",
+        spotifyRepeatLabel(spotifyState.repeat),
+      );
     }
     updateSpotifyProgress();
   }
@@ -681,7 +757,7 @@
         if (e.status === 401) {
           showSpotifyConnectedUI(false);
         } else if (e.status === 429) {
-          setMediaState("BỊ GIỚI HẠN");
+          setMediaState(spotifyT("SPOTIFY_LIMITED", "Bị giới hạn"));
         } else if (window.console && console.warn)
           console.warn("Spotify state:", e.message || e);
       })
@@ -713,7 +789,9 @@
     currentQueue = Array.isArray(items) ? items.slice() : [];
     if (!currentQueue.length) {
       musicSearchResults.innerHTML =
-        '<div class="music-search-status">Không tìm thấy bài hát Spotify</div>';
+        '<div class="music-search-status">' +
+        spotifyT("SPOTIFY_NO_TRACKS", "Không tìm thấy bài hát Spotify") +
+        "</div>";
       musicSearchResults.classList.add("show");
       return;
     }
@@ -744,7 +822,9 @@
       copy.className = "music-result-copy";
       var title = document.createElement("strong");
       title.className = "music-result-title";
-      title.textContent = escapeText(item.title || "Bài hát Spotify");
+      title.textContent = escapeText(
+        item.title || spotifyT("SPOTIFY_TRACK", "Bài hát Spotify"),
+      );
       var sub = document.createElement("span");
       sub.className = "music-result-sub";
       sub.textContent = escapeText(resultSubtitle(item));
@@ -790,8 +870,8 @@
       renderSpotifyResults(
         list.slice(0, 10),
         data.recent && data.recent.length
-          ? "Đã phát gần đây"
-          : "Bài hát nổi bật của bạn",
+          ? spotifyT("SPOTIFY_RECENTLY_PLAYED", "Đã phát gần đây")
+          : spotifyT("SPOTIFY_YOUR_TOP_TRACKS", "Bài hát nổi bật của bạn"),
       );
     });
   }
@@ -806,24 +886,37 @@
       typeof AbortController !== "undefined" ? new AbortController() : null;
     if (musicSearchResults) {
       musicSearchResults.innerHTML =
-        '<div class="music-search-status">Đang tìm trên Spotify…</div>';
+        '<div class="music-search-status">' +
+        spotifyT("SPOTIFY_SEARCHING", "Đang tìm trên Spotify…") +
+        "</div>";
       musicSearchResults.classList.add("show");
     }
     var opts = { cache: "no-store" };
     if (searchController) opts.signal = searchController.signal;
     spotifyFetch("/spotify/search?q=" + encodeURIComponent(query), opts)
       .then(function (data) {
-        renderSpotifyResults(data.results || [], "Kết quả Spotify");
+        renderSpotifyResults(
+          data.results || [],
+          spotifyT("SPOTIFY_RESULTS", "Kết quả Spotify"),
+        );
       })
       .catch(function (err) {
         if (err && err.name === "AbortError") return;
         if (!musicSearchResults) return;
-        var message = "Không thể tìm kiếm trên Spotify";
+        var message = spotifyT(
+          "SPOTIFY_SEARCH_FAILED",
+          "Không thể tìm kiếm trên Spotify",
+        );
         if (err && err.status === 401)
-          message = "Phiên Spotify đã hết hạn — hãy kết nối lại";
+          message = spotifyT(
+            "SPOTIFY_SESSION_EXPIRED",
+            "Phiên Spotify đã hết hạn — hãy kết nối lại",
+          );
         else if (err && err.status === 429)
-          message = "Spotify đang giới hạn yêu cầu — hãy thử lại sau";
-        else if (err && err.message) message = err.message;
+          message = spotifyT(
+            "SPOTIFY_RETRY_LATER",
+            "Spotify đang giới hạn yêu cầu — hãy thử lại sau",
+          );
         musicSearchResults.innerHTML = "";
         var status = document.createElement("div");
         status.className = "music-search-status";
@@ -874,14 +967,18 @@
   function setLyricsSyncNotice(data) {
     if (!lyricsSyncNotice) return;
     var status = String((data && data.syncStatus) || "");
-    var text = String((data && data.notice) || "");
     lyricsSyncNotice.className = "lyrics-sync-notice";
     if (status === "timing-warning") {
       lyricsSyncNotice.textContent =
-        "⚠ " + (text || "Thời gian lời bài hát có thể lệch so với bản thu này");
+        "⚠ " +
+        spotifyT(
+          "SPOTIFY_LYRICS_TIMING_WARNING",
+          "Thời gian lời bài hát có thể lệch so với bản thu này",
+        );
       lyricsSyncNotice.classList.add("show", "warn");
     } else if (status === "unsynced") {
-      lyricsSyncNotice.textContent = text || "Chưa đồng bộ";
+      lyricsSyncNotice.textContent =
+        spotifyT("SPOTIFY_UNSYNCED", "Chưa đồng bộ");
       lyricsSyncNotice.classList.add("show", "unsynced");
     } else {
       lyricsSyncNotice.textContent = "";
@@ -898,7 +995,11 @@
     setLyricsSyncNotice(null);
     if (lyricsScroll)
       lyricsScroll.innerHTML =
-        '<div class="lyrics-empty"><strong>Đang tìm lời bài hát…</strong>Đang khớp với bản thu Spotify.<div class="lyrics-file">LRCLIB · lyrics.ovh</div></div>';
+        '<div class="lyrics-empty"><strong>' +
+        spotifyT("SPOTIFY_FINDING_LYRICS", "Đang tìm lời bài hát…") +
+        "</strong>" +
+        spotifyT("SPOTIFY_MATCHING_RECORDING", "Đang khớp với bản thu Spotify.") +
+        '<div class="lyrics-file">LRCLIB · lyrics.ovh</div></div>';
     var qs =
       "?title=" +
       encodeURIComponent(track.title) +
@@ -919,8 +1020,11 @@
         lyricTimed = !!data.timed;
         if (lyricsSource) {
           var sourceLabel = data.source
-            ? data.source + (lyricTimed ? " · đã đồng bộ" : " · văn bản")
-            : "Không có lời";
+            ? data.source +
+              (lyricTimed
+                ? " · " + spotifyT("SPOTIFY_LYRICS_SYNCED", "đã đồng bộ")
+                : " · " + spotifyT("SPOTIFY_LYRICS_TEXT", "văn bản"))
+            : spotifyT("SPOTIFY_NO_LYRICS", "Không có lời");
           if (data.durationDiff != null && isFinite(Number(data.durationDiff)))
             sourceLabel += " · Δ" + Math.round(Number(data.durationDiff)) + "s";
           lyricsSource.textContent = sourceLabel;
@@ -934,14 +1038,28 @@
         setLyricsSyncNotice(null);
         if (lyricsScroll)
           lyricsScroll.innerHTML =
-            '<div class="lyrics-empty"><strong>Lời bài hát không khả dụng</strong>Không thể kết nối tới dịch vụ lời bài hát.<div class="lyrics-file">LRCLIB · lyrics.ovh</div></div>';
+            '<div class="lyrics-empty"><strong>' +
+            spotifyT("SPOTIFY_LYRICS_UNAVAILABLE", "Lời bài hát không khả dụng") +
+            "</strong>" +
+            spotifyT(
+              "SPOTIFY_LYRICS_SERVICE_FAILED",
+              "Không thể kết nối tới dịch vụ lời bài hát.",
+            ) +
+            '<div class="lyrics-file">LRCLIB · lyrics.ovh</div></div>';
       });
   }
   function renderLyrics() {
     if (!lyricsScroll) return;
     if (!lyricLines.length) {
       lyricsScroll.innerHTML =
-        '<div class="lyrics-empty"><strong>Không tìm thấy lời bài hát</strong>Bản thu Spotify này chưa có trong các nguồn lời đã cấu hình.<div class="lyrics-file">LRCLIB · lyrics.ovh</div></div>';
+        '<div class="lyrics-empty"><strong>' +
+        spotifyT("SPOTIFY_LYRICS_NOT_FOUND", "Không tìm thấy lời bài hát") +
+        "</strong>" +
+        spotifyT(
+          "SPOTIFY_LYRICS_NOT_IN_SOURCES",
+          "Bản thu Spotify này chưa có trong các nguồn lời đã cấu hình.",
+        ) +
+        '<div class="lyrics-file">LRCLIB · lyrics.ovh</div></div>';
       return;
     }
     lyricsScroll.innerHTML = "";
@@ -955,7 +1073,9 @@
         div.setAttribute("role", "button");
         div.setAttribute(
           "aria-label",
-          "Phát từ " + formatTime(Number(line.time || 0)),
+          spotifyT("SPOTIFY_PLAY_FROM", "Phát từ {TIME}", {
+            TIME: formatTime(Number(line.time || 0)),
+          }),
         );
       }
       lyricsScroll.appendChild(div);
@@ -1100,7 +1220,13 @@
         });
       })
       .then(function (id) {
-        if (!id) throw new Error("Không có Spotify player nào khả dụng");
+        if (!id)
+          throw new Error(
+            spotifyT(
+              "SPOTIFY_PLAYER_UNAVAILABLE",
+              "Không có Spotify player nào khả dụng",
+            ),
+          );
         spotifyTargetDeviceId = String(id);
         return spotifyTargetDeviceId;
       });
@@ -1149,9 +1275,12 @@
         return begin(deviceId);
       })
       .catch(function (e) {
-        setMediaState("LỖI PHÁT NHẠC");
+        setMediaState(spotifyT("SPOTIFY_PLAYBACK_ERROR", "Lỗi phát nhạc"));
         if (spotifySdkNote)
-          spotifySdkNote.textContent = e.message || "Không thể phát Spotify";
+          spotifySdkNote.textContent = spotifyT(
+            "SPOTIFY_PLAYBACK_FAILED",
+            "Không thể phát Spotify",
+          );
       });
   }
   function pauseSpotify() {
@@ -1202,9 +1331,12 @@
         return result;
       })
       .catch(function (e) {
-        setMediaState("LỖI PHÁT NHẠC");
+        setMediaState(spotifyT("SPOTIFY_PLAYBACK_ERROR", "Lỗi phát nhạc"));
         if (spotifySdkNote)
-          spotifySdkNote.textContent = e.message || "Không thể phát Spotify";
+          spotifySdkNote.textContent = spotifyT(
+            "SPOTIFY_PLAYBACK_FAILED",
+            "Không thể phát Spotify",
+          );
       });
   }
   function seekSpotify(positionMs, resume) {
@@ -1302,7 +1434,10 @@
         .then(function () {
           spotifyState.repeat = next;
           repeatBtn.classList.toggle("active", next !== "off");
-          repeatBtn.setAttribute("aria-label", "Lặp lại: " + next);
+          repeatBtn.setAttribute(
+            "aria-label",
+            spotifyRepeatLabel(next),
+          );
         })
         .catch(function () {});
     });
@@ -1349,8 +1484,10 @@
       spotifySleepBtn.setAttribute(
         "aria-label",
         active
-          ? "Hẹn giờ tắt · còn " + formatSleepRemaining(remaining)
-          : "Hẹn giờ tắt Spotify",
+          ? spotifyT("SPOTIFY_TIMER_REMAINING", "Hẹn giờ tắt · còn {TIME}", {
+              TIME: formatSleepRemaining(remaining),
+            })
+          : spotifyT("SPOTIFY_SLEEP_TIMER", "Hẹn giờ tắt Spotify"),
       );
     }
     if (spotifySleepBadge)
@@ -1447,10 +1584,16 @@
   }
 
   function deviceLabel(d) {
-    if (!d) return "Không có thiết bị đang hoạt động";
+    if (!d)
+      return spotifyT(
+        "SPOTIFY_NO_ACTIVE_DEVICE",
+        "Không có thiết bị đang hoạt động",
+      );
     return (
       (d.name || "Spotify") +
-      (d.id === spotifyLocalDeviceId ? " · iPad này" : "")
+      (d.id === spotifyLocalDeviceId
+        ? " · " + spotifyT("SPOTIFY_THIS_IPAD", "iPad này")
+        : "")
     );
   }
   function refreshSpotifyDevices() {
@@ -1467,7 +1610,7 @@
           spotifyDevices.unshift({
             id: spotifyLocalDeviceId,
             name: SPOTIFY_BROWSER_DEVICE_NAME,
-            type: "Máy tính",
+            type: "Computer",
             isActive: false,
             isRestricted: false,
             local: true,
@@ -1485,7 +1628,12 @@
     spotifyDeviceMenu.innerHTML = "";
     if (!spotifyDevices.length) {
       spotifyDeviceMenu.innerHTML =
-        '<div class="music-search-status">Không có thiết bị Spotify Connect</div>';
+        '<div class="music-search-status">' +
+        spotifyT(
+          "SPOTIFY_NO_CONNECT_DEVICES",
+          "Không có thiết bị Spotify Connect",
+        ) +
+        "</div>";
       return;
     }
     spotifyDevices.forEach(function (d) {
@@ -1502,7 +1650,7 @@
       var strong = document.createElement("strong");
       strong.textContent = deviceLabel(d);
       var small = document.createElement("small");
-      small.textContent = d.type || "Spotify Connect";
+      small.textContent = spotifyDeviceType(d.type);
       c.appendChild(strong);
       c.appendChild(small);
       b.appendChild(dot);
@@ -1521,8 +1669,10 @@
           })
           .catch(function (e) {
             if (spotifySdkNote)
-              spotifySdkNote.textContent =
-                e.message || "Không thể chuyển thiết bị phát";
+              spotifySdkNote.textContent = spotifyT(
+                "SPOTIFY_TRANSFER_FAILED",
+                "Không thể chuyển thiết bị phát",
+              );
           });
       });
       spotifyDeviceMenu.appendChild(b);
@@ -1613,6 +1763,8 @@
     spotifyFetch("/spotify/status", { cache: "no-store" })
       .then(function (status) {
         spotifyConfigured = !!status.configured;
+        spotifyProfileName =
+          (status.profile && status.profile.displayName) || "Spotify Premium";
         if (status.deviceName)
           SPOTIFY_BROWSER_DEVICE_NAME = String(status.deviceName);
         showSpotifyConnectedUI(!!status.connected);
@@ -1620,18 +1772,24 @@
           if (spotifyConnectCard) {
             spotifyConnectCard.classList.add("show");
             spotifyConnectCard.querySelector("strong").textContent =
-              "Hãy cấu hình Spotify trước";
+              spotifyT("SPOTIFY_CONFIGURE_FIRST", "Hãy cấu hình Spotify trước");
             spotifyConnectCard.querySelector("span").textContent =
-              "Điền thông tin ứng dụng Spotify trong .env, sau đó khởi động lại server.";
+              spotifyT(
+                "SPOTIFY_CONFIGURE_HELP",
+                "Điền thông tin ứng dụng Spotify trong .env, sau đó khởi động lại server.",
+              );
           }
           return;
         }
         if (!status.connected) return;
         if (spotifySdkNote)
-          spotifySdkNote.textContent =
-            "Đã kết nối với tư cách " +
-            ((status.profile && status.profile.displayName) ||
-              "Spotify Premium");
+          spotifySdkNote.textContent = spotifyT(
+            "SPOTIFY_CONNECTED_AS",
+            "Đã kết nối với tư cách {NAME}",
+            {
+              NAME: spotifyProfileName,
+            },
+          );
         loadSpotifySdk();
         refreshSpotifyPlayer().then(function () {
           scheduleSpotifyPoll();
@@ -1640,7 +1798,60 @@
       .catch(function (e) {
         showSpotifyConnectedUI(false);
         if (spotifySdkNote)
-          spotifySdkNote.textContent = e.message || "Spotify không khả dụng";
+          spotifySdkNote.textContent = spotifyT(
+            "SPOTIFY_UNAVAILABLE",
+            "Spotify không khả dụng",
+          );
       });
     scheduleSpotifyTicker();
   }
+
+  window.addEventListener("frame:languagechange", function () {
+    if (!spotifyConnected) showSpotifyConnectedUI(false);
+    if (!spotifyConfigured && spotifyConnectCard) {
+      var heading = spotifyConnectCard.querySelector("strong");
+      var help = spotifyConnectCard.querySelector("span");
+      if (heading)
+        heading.textContent = spotifyT(
+          "SPOTIFY_CONFIGURE_FIRST",
+          "Hãy cấu hình Spotify trước",
+        );
+      if (help)
+        help.textContent = spotifyT(
+          "SPOTIFY_CONFIGURE_HELP",
+          "Điền thông tin ứng dụng Spotify trong .env, sau đó khởi động lại server.",
+        );
+    } else if (spotifyConnected && spotifySdkNote && spotifyProfileName) {
+      spotifySdkNote.textContent = spotifyT(
+        "SPOTIFY_CONNECTED_AS",
+        "Đã kết nối với tư cách {NAME}",
+        { NAME: spotifyProfileName },
+      );
+    }
+    if (currentTrack) {
+      setMediaState(
+        spotifyState.isPlaying
+          ? spotifyT("SPOTIFY_PLAYING", "Đang phát")
+          : spotifyT("SPOTIFY_PAUSED", "Tạm dừng"),
+      );
+    }
+    if (spotifyState.device && spotifyDeviceName)
+      spotifyDeviceName.textContent = deviceLabel(spotifyState.device);
+    if (repeatBtn)
+      repeatBtn.setAttribute(
+        "aria-label",
+        spotifyRepeatLabel(spotifyState.repeat),
+      );
+    if (spotifyArt && currentTrack)
+      spotifyArt.alt = spotifyT(
+        "SPOTIFY_ARTWORK_NAMED",
+        "Ảnh bìa {NAME}",
+        {
+          NAME: currentTrack.album || currentTrack.title || "Spotify",
+        },
+      );
+    if (lyricLines.length) renderLyrics();
+    renderSpotifySleepTimer();
+    if (spotifyDeviceMenu && spotifyDeviceMenu.classList.contains("show"))
+      renderSpotifyDevices();
+  });

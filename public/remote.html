@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi">
+<html lang="en" class="i18n-loading">
   <head>
     <meta charset="utf-8" />
     <meta
@@ -7,22 +7,27 @@
       content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"
     />
     <meta name="theme-color" content="#071019" />
-    <title>Điều khiển Nest Frame</title>
+    <title data-i18n="REMOTE_DOCUMENT_TITLE">Điều khiển Nest Frame</title>
+    <style>
+      #locale-loader{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;background:#080b10;transition:opacity .28s ease,visibility .28s ease}#locale-loader::before{content:"";width:42px;height:42px;border-radius:50%;border:3px solid rgba(255,255,255,.14);border-top-color:#ef5358;animation:locale-spin .8s linear infinite}@keyframes locale-spin{to{transform:rotate(360deg)}}html.i18n-ready #locale-loader{opacity:0;visibility:hidden;pointer-events:none}@media(prefers-reduced-motion:reduce){#locale-loader::before{animation-duration:1.8s}}
+    </style>
+    <script src="/js/i18n.js?v=20260825-2"></script>
     <link rel="stylesheet" href="/css/remote.css?v=20260824-3" />
   </head>
   <body>
+    <div id="locale-loader" aria-hidden="false"></div>
     <main class="shell">
       <div class="top">
         <div class="brand">
           <small>Nest Frame</small>
-          <h1>Trung tâm điều khiển</h1>
+          <h1 data-i18n="CONTROL_CENTER">Trung tâm điều khiển</h1>
         </div>
-        <div class="status" id="status">Chưa kết nối</div>
+        <div class="status" id="status" data-i18n="NOT_CONNECTED">Chưa kết nối</div>
       </div>
 
       <section class="card auth" id="auth-card">
-        <div style="font-weight: 700">Kết nối tới màn hình</div>
-        <div style="font-size: 13px; color: var(--muted)">
+        <div style="font-weight: 700" data-i18n="CONNECT_TO_DISPLAY">Kết nối tới màn hình</div>
+        <div style="font-size: 13px; color: var(--muted)" data-i18n="REMOTE_TOKEN_HELP">
           Nhập <code>REMOTE_CONTROL_TOKEN</code> đã cấu hình trên server. Token
           chỉ được lưu trong trình duyệt này.
         </div>
@@ -33,7 +38,8 @@
             type="password"
             autocomplete="current-password"
             placeholder="Token điều khiển từ xa"
-          /><button class="btn primary" id="connect">Kết nối</button>
+            data-i18n-placeholder="REMOTE_TOKEN_PLACEHOLDER"
+          /><button class="btn primary" id="connect" data-i18n="CONNECT">Kết nối</button>
         </div>
       </section>
 
@@ -41,96 +47,97 @@
         <section class="card overview">
           <div class="overview-main">
             <span class="live-dot" id="frame-dot"></span>
-            <div><small>Màn hình</small><strong id="frame-online">Ngoại tuyến</strong></div>
+            <div><small data-i18n="DISPLAY">Màn hình</small><strong id="frame-online" data-i18n="OFFLINE">Ngoại tuyến</strong></div>
           </div>
           <div class="overview-grid">
-            <div><span>Đang ở</span><strong id="frame-view">—</strong></div>
-            <div><span>Trợ lý</span><strong id="frame-assistant">—</strong></div>
-            <div><span>Trang thông tin</span><strong id="frame-page">Không mở</strong></div>
-            <div><span>Máy ảnh</span><strong id="frame-camera">—</strong></div>
+            <div><span data-i18n="CURRENT_VIEW">Đang ở</span><strong id="frame-view">—</strong></div>
+            <div><span data-i18n="ASSISTANT">Trợ lý</span><strong id="frame-assistant">—</strong></div>
+            <div><span data-i18n="INFO_PAGE">Trang thông tin</span><strong id="frame-page" data-i18n="NOT_OPEN">Không mở</strong></div>
+            <div><span data-i18n="CAMERA">Máy ảnh</span><strong id="frame-camera">—</strong></div>
           </div>
-          <div class="last-seen" id="frame-seen">Chưa nhận tín hiệu trạng thái</div>
+          <div class="last-seen" id="frame-seen" data-i18n="NO_STATUS_SIGNAL">Chưa nhận tín hiệu trạng thái</div>
         </section>
 
-        <div class="section-head"><h2>Khôi phục nhanh</h2><span>Khi màn hình bị kẹt</span></div>
+        <div class="section-head"><h2 data-i18n="QUICK_RECOVERY">Khôi phục nhanh</h2><span data-i18n="WHEN_DISPLAY_STUCK">Khi màn hình bị kẹt</span></div>
         <div class="action-grid recovery-grid">
-          <button class="action danger" data-command="stop_assistant"><b>■</b><span>Dừng trợ lý</span></button>
-          <button class="action" data-command="close_page"><b>×</b><span>Đóng trang</span></button>
-          <button class="action" data-command="back"><b>←</b><span>Quay lại</span></button>
-          <button class="action" data-command="idle"><b>◐</b><span>Chế độ chờ</span></button>
-          <button class="action" data-command="reload"><b>↻</b><span>Tải lại</span></button>
-          <button class="action danger" id="dismiss"><b>■</b><span>Dừng báo thức</span></button>
+          <button class="action danger" data-command="stop_assistant"><b>■</b><span data-i18n="STOP_ASSISTANT">Dừng trợ lý</span></button>
+          <button class="action" data-command="close_page"><b>×</b><span data-i18n="CLOSE_PAGE">Đóng trang</span></button>
+          <button class="action" data-command="back"><b>←</b><span data-i18n="GO_BACK">Quay lại</span></button>
+          <button class="action" data-command="idle"><b>◐</b><span data-i18n="IDLE_MODE">Chế độ chờ</span></button>
+          <button class="action" data-command="reload"><b>↻</b><span data-i18n="RELOAD_SCREEN">Tải lại</span></button>
+          <button class="action danger" id="dismiss"><b>■</b><span data-i18n="STOP_ALARM">Dừng báo thức</span></button>
         </div>
 
-        <div class="section-head"><h2>Điều hướng</h2><span>Chuyển tab trên màn hình</span></div>
+        <div class="section-head"><h2 data-i18n="NAVIGATION">Điều hướng</h2><span data-i18n="SWITCH_DISPLAY_TAB">Chuyển tab trên màn hình</span></div>
         <div class="nav-grid" id="nav-grid">
-          <button class="nav-command" data-view="home">Trang chủ</button>
-          <button class="nav-command" data-view="today">Hôm nay</button>
-          <button class="nav-command" data-view="media">Giải trí</button>
-          <button class="nav-command" data-view="news">Tin tức</button>
-          <button class="nav-command" data-view="alarm">Báo thức</button>
+          <button class="nav-command" data-view="home" data-i18n="HOME_PAGE">Trang chủ</button>
+          <button class="nav-command" data-view="today" data-i18n="TODAY_PAGE">Hôm nay</button>
+          <button class="nav-command" data-view="media" data-i18n="MEDIA_PAGE">Giải trí</button>
+          <button class="nav-command" data-view="news" data-i18n="NEWS_PAGE">Tin tức</button>
+          <button class="nav-command" data-view="alarm" data-i18n="ALARMS_PAGE">Báo thức</button>
         </div>
 
-        <div class="section-head"><h2>Thói quen</h2><span>Chạy trên màn hình</span></div>
+        <div class="section-head"><h2 data-i18n="ROUTINES">Thói quen</h2><span data-i18n="RUN_ON_DISPLAY">Chạy trên màn hình</span></div>
         <div class="routine-grid" id="routines"></div>
 
-        <div class="section-head"><h2>Gửi tới màn hình</h2><span>Không cần micro</span></div>
+        <div class="section-head"><h2 data-i18n="SEND_TO_DISPLAY">Gửi tới màn hình</h2><span data-i18n="NO_MIC_REQUIRED">Không cần micro</span></div>
         <form class="card compose" id="compose-form">
           <div class="compose-mode" id="compose-mode">
-            <button type="button" class="chip active" data-mode="message">Thông báo</button>
-            <button type="button" class="chip" data-mode="assistant">Hỏi Gemini</button>
+            <button type="button" class="chip active" data-mode="message" data-i18n="NOTIFICATIONS">Thông báo</button>
+            <button type="button" class="chip" data-mode="assistant" data-i18n="ASK_GEMINI">Hỏi Gemini</button>
           </div>
-          <input class="field" id="message-title" maxlength="160" placeholder="Tiêu đề (không bắt buộc)" />
-          <textarea class="field" id="message-text" maxlength="2000" rows="4" placeholder="Nhập nội dung gửi tới màn hình…" required></textarea>
-          <button class="btn primary" type="submit" id="message-send">Gửi tới màn hình</button>
+          <input class="field" id="message-title" maxlength="160" placeholder="Tiêu đề (không bắt buộc)" data-i18n-placeholder="OPTIONAL_TITLE_PLACEHOLDER" />
+          <textarea class="field" id="message-text" maxlength="2000" rows="4" placeholder="Nhập nội dung gửi tới màn hình…" data-i18n-placeholder="MESSAGE_PLACEHOLDER" required></textarea>
+          <button class="btn primary" type="submit" id="message-send" data-i18n="SEND_TO_DISPLAY">Gửi tới màn hình</button>
         </form>
 
-        <div class="section-head"><h2>Thông báo</h2><button class="text-button" id="read-all">Đánh dấu đã đọc</button></div>
+        <div class="section-head"><h2 data-i18n="NOTIFICATIONS">Thông báo</h2><button class="text-button" id="read-all" data-i18n="MARK_ALL_READ">Đánh dấu đã đọc</button></div>
         <div class="notification-list" id="notifications"></div>
 
-        <div class="section-head"><h2>Chẩn đoán</h2><span id="diagnostic-summary">—</span></div>
+        <div class="section-head"><h2 data-i18n="DIAGNOSTICS">Chẩn đoán</h2><span id="diagnostic-summary">—</span></div>
         <div class="diagnostic-list" id="diagnostics"></div>
 
         <div class="section-head">
-          <h2>Báo thức</h2>
-          <button class="text-button" id="add">＋ Thêm</button>
+          <h2 data-i18n="ALARMS_PAGE">Báo thức</h2>
+          <button class="text-button" id="add">＋ <span data-i18n="ADD">Thêm</span></button>
         </div>
-        <div class="subcount" id="count">0 báo thức</div>
+        <div class="subcount" id="count" data-i18n="ALARM_COUNT_ZERO">0 alarms</div>
         <div class="alarms" id="alarms"></div>
         <div class="card last">
-          <span>Lệnh gần nhất</span><strong id="last">—</strong>
+          <span data-i18n="LATEST_COMMAND">Lệnh gần nhất</span><strong id="last">—</strong>
         </div>
       </div>
     </main>
 
     <div class="modal-backdrop" id="modal-bg">
       <form class="modal" id="form">
-        <h3>Thêm báo thức</h3>
+        <h3 data-i18n="ADD_ALARM">Thêm báo thức</h3>
         <div class="grid">
           <label
-            ><span class="label">Thời gian</span
+            ><span class="label" data-i18n="TIME">Thời gian</span
             ><input class="field" id="time" type="time" required
           /></label>
           <label
-            ><span class="label">Nhãn</span
+            ><span class="label" data-i18n="LABEL">Nhãn</span
             ><input
               class="field"
               id="label"
               maxlength="80"
               placeholder="Thức dậy"
+              data-i18n-placeholder="WAKE_UP_PLACEHOLDER"
           /></label>
           <div class="full">
-            <span class="label">Lặp lại</span>
+            <span class="label" data-i18n="REPEAT">Lặp lại</span>
             <div class="chips" id="days"></div>
           </div>
           <div class="full">
-            <span class="label">Số lần cần xác nhận</span>
+            <span class="label" data-i18n="CONFIRMATION_COUNT">Số lần cần xác nhận</span>
             <div class="confirm-row" id="confirms"></div>
           </div>
         </div>
         <div class="modal-actions">
-          <button class="btn ghost" type="button" id="cancel">Hủy</button
-          ><button class="btn primary" type="submit">Lưu báo thức</button>
+          <button class="btn ghost" type="button" id="cancel" data-i18n="CANCEL">Hủy</button
+          ><button class="btn primary" type="submit" data-i18n="SAVE_ALARM">Lưu báo thức</button>
         </div>
       </form>
     </div>

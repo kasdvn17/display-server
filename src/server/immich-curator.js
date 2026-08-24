@@ -365,7 +365,7 @@ async function buildAmbientCuratorPool() {
         id: `memory:${yearsAgo}:${target.toISOString().slice(0, 10)}`,
         type: "memory",
         yearsAgo,
-        title: `${yearsAgo} năm trước`,
+        title: `${yearsAgo} years ago`,
         subtitle: storyDateLabel(sampled),
         assets: sampled,
       });
@@ -388,8 +388,8 @@ async function buildAmbientCuratorPool() {
         {
           id: "discovery:mix",
           type: "discovery",
-          title: "Khám phá lại",
-          subtitle: "Từ thư viện của bạn",
+          title: "Rediscover",
+          subtitle: "From your library",
           assets: discoveryAssets,
         },
       ]
@@ -550,7 +550,7 @@ async function pickVerifiedAmbientPhoto(recentIds) {
     if (!normalizedAssetHasLocation(details)) continue;
     return {
       ...details,
-      storyTitle: story.title || "Khung ảnh",
+      storyTitle: story.title || "Photo frame",
       storySubtitle: story.subtitle || "",
       album: details.album || story.album || "",
     };
@@ -568,7 +568,7 @@ app.get("/ambient/curated", async (req, res) => {
     res
       .status(502)
       .json({
-        error: "Không thể chuẩn bị ảnh nền",
+        error: "Unable to prepare background photos",
         detail: String(err.message || err),
       });
   }
@@ -584,14 +584,14 @@ app.get("/ambient/next-photo", async (req, res) => {
     const item = await pickVerifiedAmbientPhoto(recent);
     res.setHeader("Cache-Control", "no-store");
     if (!item)
-      return res.status(404).json({ error: "Không có ảnh theo địa điểm" });
+      return res.status(404).json({ error: "No location-based photos found" });
     return res.json({ item });
   } catch (err) {
     console.error("Next ambient photo failed:", err.message || err);
     return res
       .status(502)
       .json({
-        error: "Không thể chọn ảnh tiếp theo",
+        error: "Unable to select the next photo",
         detail: String(err.message || err),
       });
   }
@@ -601,7 +601,7 @@ app.get("/ambient/next-photo", async (req, res) => {
 app.get("/ambient/asset-info/:assetId", async (req, res) => {
   const assetId = String(req.params.assetId || "");
   if (!/^[0-9a-fA-F-]{30,40}$/.test(assetId))
-    return res.status(400).json({ error: "ID ảnh không hợp lệ" });
+    return res.status(400).json({ error: "Invalid photo ID" });
   try {
     const info = await getAmbientAssetInfo(assetId),
       e = info || {};
@@ -635,7 +635,7 @@ app.get("/ambient/asset-info/:assetId", async (req, res) => {
     });
   } catch (err) {
     console.error("Asset info error:", err.message || err);
-    res.status(502).json({ error: "Không thể lấy thông tin ảnh" });
+    res.status(502).json({ error: "Unable to retrieve photo information" });
   }
 });
 
@@ -643,7 +643,7 @@ app.post("/ambient/photo-action", async (req, res) => {
   const assetId = String((req.body && req.body.assetId) || "").trim();
   const action = String((req.body && req.body.action) || "").trim();
   if (!/^[0-9a-fA-F-]{30,40}$/.test(assetId))
-    return res.status(400).json({ error: "ID ảnh không hợp lệ" });
+    return res.status(400).json({ error: "Invalid photo ID" });
   try {
     if (action === "favorite") {
       const value =
@@ -672,13 +672,13 @@ app.post("/ambient/photo-action", async (req, res) => {
       ambientCuratorCache.payload = null;
       return res.json({ ok: true, action, assetId, hidden: false });
     }
-    return res.status(400).json({ error: "Thao tác ảnh không xác định" });
+    return res.status(400).json({ error: "Unknown photo action" });
   } catch (err) {
     console.error("Photo action failed:", err.message || err);
     return res
       .status(502)
       .json({
-        error: "Thao tác ảnh thất bại",
+        error: "Photo action failed",
         detail: String(err.message || err),
       });
   }
@@ -688,7 +688,7 @@ app.post("/ambient/photo-action", async (req, res) => {
 app.use("/immich", async (req, res) => {
   if (!["GET", "HEAD"].includes(req.method)) {
     res.setHeader("Allow", "GET, HEAD");
-    return res.status(405).json({ error: "Proxy media Immich chỉ cho phép đọc" });
+    return res.status(405).json({ error: "Immich media proxy is read-only" });
   }
   const controller = new AbortController();
   const abortUpstream = () => controller.abort();
@@ -739,11 +739,10 @@ app.use("/immich", async (req, res) => {
   } catch (err) {
     if (!controller.signal.aborted) console.error("Immich proxy error:", err);
     if (!res.headersSent)
-      res.status(502).json({ error: "Proxy Immich thất bại" });
+      res.status(502).json({ error: "Immich proxy failed" });
     else res.end();
   } finally {
     req.removeListener("aborted", abortUpstream);
     res.removeListener("close", abortUpstream);
   }
 });
-

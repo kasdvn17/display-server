@@ -30,6 +30,13 @@ function timezone(name, fallback) {
   }
 }
 
+function language(name, fallback = "en") {
+  const value = text(name, fallback).toLowerCase().split(/[-_]/)[0];
+  if (["vi", "en"].includes(value)) return value;
+  console.warn(`Invalid ${name} "${value}"; falling back to ${fallback}`);
+  return fallback;
+}
+
 function coordinate(name, minimum, maximum) {
   const raw = text(name);
   if (!raw) return null;
@@ -65,7 +72,8 @@ module.exports = Object.freeze({
   NEWS_IMAGE_ENRICH_LIMIT: number("NEWS_IMAGE_ENRICH_LIMIT", 12, 0, 20),
 
   FRAME_CALENDAR_ICS_URL: text("FRAME_CALENDAR_ICS_URL"),
-  FRAME_CALENDAR_NAME: text("FRAME_CALENDAR_NAME", "Lịch") || "Lịch",
+  FRAME_CALENDAR_NAME: text("FRAME_CALENDAR_NAME", "Calendar") || "Calendar",
+  FRAME_LANGUAGE: language("FRAME_LANGUAGE", "en"),
   FRAME_TIMEZONE: timezone("FRAME_TIMEZONE", "Asia/Ho_Chi_Minh"),
   FRAME_CALENDAR_LOOKAHEAD_HOURS: number(
     "FRAME_CALENDAR_LOOKAHEAD_HOURS",
@@ -140,7 +148,7 @@ module.exports = Object.freeze({
   FRAME_LATITUDE: coordinate("FRAME_LATITUDE", -90, 90),
   FRAME_LONGITUDE: coordinate("FRAME_LONGITUDE", -180, 180),
   FRAME_LOCATION_NAME:
-    text("FRAME_LOCATION_NAME", "Vị trí hiện tại") || "Vị trí hiện tại",
+    text("FRAME_LOCATION_NAME", "Current location") || "Current location",
   FRAME_COMMUTE_TARGETS: text("FRAME_COMMUTE_TARGETS"),
   AMBIENT_CONTEXT_REFRESH_MS: number(
     "AMBIENT_CONTEXT_REFRESH_MS",

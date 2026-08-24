@@ -65,7 +65,12 @@
         })
         .then(function (x) {
           if (!r.ok)
-            throw new Error(x.error || "Yêu cầu báo thức thất bại: " + r.status);
+            throw new Error(
+              x.error ||
+                tr("ALARM_REQUEST_FAILED", "Yêu cầu báo thức thất bại: {STATUS}", {
+                  STATUS: r.status,
+                }),
+            );
           return x;
         });
     });
@@ -119,11 +124,11 @@
     );
   }
   function alarmDaysText(days) {
-    if (!days || !days.length) return "Một lần";
+    if (!days || !days.length) return tr("ONE_TIME", "Một lần");
     var names = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
-    if (days.length === 7) return "Hằng ngày";
-    if (days.join(",") === "1,2,3,4,5") return "Ngày trong tuần";
-    if (days.join(",") === "0,6") return "Cuối tuần";
+    if (days.length === 7) return tr("DAILY", "Hằng ngày");
+    if (days.join(",") === "1,2,3,4,5") return tr("WEEKDAYS", "Ngày trong tuần");
+    if (days.join(",") === "0,6") return tr("WEEKENDS", "Cuối tuần");
     return days
       .map(function (d) {
         return names[d];
@@ -140,7 +145,14 @@
     alarmList.innerHTML = "";
     if (!alarms.length) {
       alarmList.innerHTML =
-        '<div class="alarm-empty"><strong>Chưa có báo thức</strong><span>Thêm báo thức, chọn ngày lặp và số lần xác nhận cách nhau 5 phút nếu cần.</span></div>';
+        '<div class="alarm-empty"><strong>' +
+        tr("NO_ALARMS", "Chưa có báo thức") +
+        "</strong><span>" +
+        tr(
+          "NO_ALARMS_HELP",
+          "Thêm báo thức, chọn ngày lặp và số lần xác nhận cách nhau 5 phút nếu cần.",
+        ) +
+        "</span></div>";
       return;
     }
     alarms
@@ -160,13 +172,16 @@
         copy.className = "alarm-card-copy";
         var label = document.createElement("div");
         label.className = "alarm-label";
-        label.textContent = a.label || "Báo thức";
+        label.textContent = a.label || tr("ALARM", "Báo thức");
         var meta = document.createElement("div");
         meta.className = "alarm-meta";
         meta.textContent =
           (Number(a.confirmCount || 1) > 1
-            ? Number(a.confirmCount) + " lần xác nhận · cách nhau 5 phút"
-            : "Xác nhận một lần") + (a.enabled ? "" : " · Đã tắt");
+            ? tr("CONFIRMATIONS_INTERVAL", "{COUNT} lần xác nhận · cách nhau 5 phút", {
+                COUNT: Number(a.confirmCount),
+              })
+            : tr("SINGLE_CONFIRMATION", "Xác nhận một lần")) +
+          (a.enabled ? "" : " · " + tr("DISABLED", "Đã tắt"));
         copy.appendChild(label);
         copy.appendChild(meta);
         var sw = document.createElement("button");
@@ -174,7 +189,9 @@
         sw.className = "alarm-switch" + (a.enabled ? " on" : "");
         sw.setAttribute(
           "aria-label",
-          a.enabled ? "Tắt báo thức" : "Bật báo thức",
+          a.enabled
+            ? tr("DISABLE_ALARM", "Tắt báo thức")
+            : tr("ENABLE_ALARM", "Bật báo thức"),
         );
         sw.addEventListener("click", function () {
           updateAlarm(a.id, { enabled: !a.enabled });
@@ -192,7 +209,7 @@
         var edit = document.createElement("button");
         edit.type = "button";
         edit.className = "alarm-icon-btn";
-        edit.setAttribute("aria-label", "Sửa báo thức");
+        edit.setAttribute("aria-label", tr("EDIT_ALARM", "Sửa báo thức"));
         edit.innerHTML = alarmSvg("edit");
         edit.addEventListener("click", function () {
           openAlarmEditor(a);
@@ -200,7 +217,7 @@
         var del = document.createElement("button");
         del.type = "button";
         del.className = "alarm-icon-btn delete";
-        del.setAttribute("aria-label", "Xóa báo thức");
+        del.setAttribute("aria-label", tr("DELETE_ALARM", "Xóa báo thức"));
         del.innerHTML = alarmSvg("delete");
         del.addEventListener("click", function () {
           deleteAlarm(a);
@@ -227,8 +244,10 @@
       .catch(function (e) {
         if (alarmList)
           alarmList.innerHTML =
-            '<div class="alarm-empty"><strong>Không thể tải báo thức</strong><span>' +
-            escapeHtml(e.message || "Server không khả dụng") +
+            '<div class="alarm-empty"><strong>' +
+            tr("LOAD_ALARMS_FAILED", "Không thể tải báo thức") +
+            "</strong><span>" +
+            escapeHtml(e.message || tr("SERVER_UNAVAILABLE", "Server không khả dụng")) +
             "</span></div>";
         return [];
       });
@@ -256,13 +275,17 @@
     if (alarmConfirmCaption)
       alarmConfirmCaption.textContent =
         n === 1
-          ? "Xác nhận một lần để hoàn tất"
-          : n + " lần xác nhận · reo lại sau mỗi 5 phút";
+          ? tr("CONFIRM_ONCE_TO_COMPLETE", "Xác nhận một lần để hoàn tất")
+          : tr("CONFIRMATIONS_RING_INTERVAL", "{COUNT} lần xác nhận · reo lại sau mỗi 5 phút", {
+              COUNT: n,
+            });
   }
   function openAlarmEditor(a) {
     alarmEditingId = (a && a.id) || "";
     if (alarmEditorTitle)
-      alarmEditorTitle.textContent = a ? "Sửa báo thức" : "Thêm báo thức";
+      alarmEditorTitle.textContent = a
+        ? tr("EDIT_ALARM", "Sửa báo thức")
+        : tr("ADD_ALARM", "Thêm báo thức");
     var now = new Date();
     now.setMinutes(now.getMinutes() + 5);
     var defaultTime =
@@ -294,7 +317,7 @@
     e.preventDefault();
     var body = {
       time: alarmTimeInput.value,
-      label: alarmLabelInput.value.trim() || "Báo thức",
+      label: alarmLabelInput.value.trim() || tr("ALARM", "Báo thức"),
       confirmCount: Number(alarmConfirmInput.value || 1),
       repeatDays: selectedAlarmDays(),
       enabled: alarmEnabledInput.checked,
@@ -308,7 +331,7 @@
         return loadAlarms();
       })
       .catch(function (err) {
-        alert(err.message || "Không thể lưu báo thức");
+        alert(err.message || tr("SAVE_ALARM_FAILED", "Không thể lưu báo thức"));
       });
   }
   function updateAlarm(id, patch) {
@@ -329,11 +352,18 @@
     })
       .then(loadAlarms)
       .catch(function (e) {
-        alert(e.message || "Không thể cập nhật báo thức");
+        alert(e.message || tr("UPDATE_ALARM_FAILED", "Không thể cập nhật báo thức"));
       });
   }
   function deleteAlarm(a) {
-    if (!confirm('Xóa báo thức "' + (a.label || a.time) + '"?')) return;
+    if (
+      !confirm(
+        tr("CONFIRM_DELETE_ALARM", 'Xóa báo thức "{NAME}"?', {
+          NAME: a.label || a.time,
+        }),
+      )
+    )
+      return;
     alarmFetch("/alarms/" + encodeURIComponent(a.id), { method: "DELETE" })
       .then(function () {
         if (
@@ -344,12 +374,15 @@
         return loadAlarms();
       })
       .catch(function (e) {
-        alert(e.message || "Không thể xóa báo thức");
+        alert(e.message || tr("DELETE_ALARM_FAILED", "Không thể xóa báo thức"));
       });
   }
 
   function unlockAlarmAudio(playForTest) {
-    if (!alarmAudio) return Promise.reject(new Error("Không có âm thanh báo thức"));
+    if (!alarmAudio)
+      return Promise.reject(
+        new Error(tr("NO_ALARM_AUDIO", "Không có âm thanh báo thức")),
+      );
     alarmAudio.volume = 1;
     alarmAudio.currentTime = 0;
     var p = alarmAudio.play();
@@ -424,12 +457,15 @@
     if (alarmResumeSpotify && typeof pauseSpotify === "function")
       pauseSpotify();
     alarmAlertTime.textContent = activeAlarmCycle.alarm.time;
-    alarmAlertLabel.textContent = activeAlarmCycle.alarm.label || "Báo thức";
-    alarmAlertRound.textContent =
-      "Xác nhận " +
-      (activeAlarmCycle.confirmed + 1) +
-      "/" +
-      activeAlarmCycle.total;
+    alarmAlertLabel.textContent = activeAlarmCycle.alarm.label || tr("ALARM", "Báo thức");
+    alarmAlertRound.textContent = tr(
+      "CONFIRMATION_PROGRESS",
+      "Xác nhận {CURRENT}/{TOTAL}",
+      {
+        CURRENT: activeAlarmCycle.confirmed + 1,
+        TOTAL: activeAlarmCycle.total,
+      },
+    );
     alarmAlert.classList.add("show");
     alarmSoundWarning.classList.remove("show");
     playAlarmSound();
@@ -446,15 +482,15 @@
         sec = Math.ceil(left / 1000),
         m = Math.floor(sec / 60),
         s = sec % 60;
-      alarmWaitingText.textContent =
-        "Báo thức · " +
-        activeAlarmCycle.confirmed +
-        "/" +
-        activeAlarmCycle.total +
-        " đã xác nhận · lần tiếp theo sau " +
-        m +
-        ":" +
-        String(s).padStart(2, "0");
+      alarmWaitingText.textContent = tr(
+        "ALARM_NEXT_CONFIRMATION",
+        "Báo thức · {CURRENT}/{TOTAL} đã xác nhận · lần tiếp theo sau {TIME}",
+        {
+          CURRENT: activeAlarmCycle.confirmed,
+          TOTAL: activeAlarmCycle.total,
+          TIME: m + ":" + String(s).padStart(2, "0"),
+        },
+      );
     }
     tick();
     alarmCountdownTimer = setInterval(tick, 1000);
@@ -592,15 +628,15 @@
     showVoiceShell();
     setVoiceState(
       "idle",
-      "Từ xa",
-      command.title || "Tin nhắn từ xa",
-      "Nhấn × để quay lại trang trước",
+      tr("REMOTE", "Từ xa"),
+      command.title || tr("REMOTE_MESSAGE", "Tin nhắn từ xa"),
+      tr("PRESS_CLOSE_RETURN", "Nhấn × để quay lại trang trước"),
     );
     showAssistantPage({
       kind: "dynamic_ui",
-      kicker: "Từ xa",
-      title: command.title || "Tin nhắn từ xa",
-      subtitle: "Được gửi tới màn hình này",
+      kicker: tr("REMOTE", "Từ xa"),
+      title: command.title || tr("REMOTE_MESSAGE", "Tin nhắn từ xa"),
+      subtitle: tr("SENT_TO_DISPLAY", "Được gửi tới màn hình này"),
       layout: { columns: 12, gap: 14, density: "comfortable" },
       widgets: [
         {
@@ -608,7 +644,7 @@
           span: 12,
           order: 0,
           emphasis: "hero",
-          title: command.title || "Thông báo",
+          title: command.title || tr("NOTIFICATIONS", "Thông báo"),
           text: command.text || "",
         },
       ],
@@ -647,8 +683,8 @@
       cameraSetStatus(
         localStorage.getItem("nestframe-camera-enabled") === "1" ? "ready" : "setup",
         localStorage.getItem("nestframe-camera-enabled") === "1"
-          ? "Camera sẵn sàng"
-          : "Bật camera liên lạc",
+          ? tr("CAMERA_READY", "Camera sẵn sàng")
+          : tr("ENABLE_CAMERA", "Bật camera liên lạc"),
       );
     }
     sendFrameHeartbeat();
@@ -744,7 +780,10 @@
     alarmTestSound.addEventListener("click", function () {
       unlockAlarmAudio(true).catch(function () {
         alert(
-          "Safari đã chặn nhạc chuông. Hãy tương tác với trang rồi chạm lại.",
+          tr(
+            "SAFARI_BLOCKED_ALARM_AUDIO",
+            "Safari đã chặn nhạc chuông. Hãy tương tác với trang rồi chạm lại.",
+          ),
         );
       });
     });
