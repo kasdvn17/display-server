@@ -68,6 +68,8 @@
   "ASK_GEMINI": "Ask Gemini",
   "OPTIONAL_TITLE_PLACEHOLDER": "Title (optional)",
   "MESSAGE_PLACEHOLDER": "Enter content to send to the display…",
+  "TITLE_PLACEHOLDER": "Title",
+  "DESCRIPTION_OPTIONAL_PLACEHOLDER": "Description (optional)",
   "MARK_ALL_READ": "Mark all as read",
   "DIAGNOSTICS": "Diagnostics",
   "ADD": "Add",
@@ -444,6 +446,7 @@
   "CONNECTED": "Connected",
   "CONNECTING": "Connecting…",
   "ENTER_CONTENT": "Enter some content",
+  "ENTER_TITLE": "Enter a title",
   "ENTER_TOKEN": "Enter a token",
   "ERROR_COUNT": "{COUNT} errors",
   "GEMINI_PROCESSING": "Gemini is processing",
@@ -487,5 +490,8 @@
   "RAIN_PERCENT": "{COUNT}% rain",
   "ADD_CALENDAR_URL": "Add FRAME_CALENDAR_ICS_URL",
   "DESTINATION": "Destination",
-  "ALARM_COUNT_ZERO": "0 alarms"
+  "ALARM_COUNT_ZERO": "0 alarms",
+  "BROADCAST": "Broadcast",
+  "BROADCAST_CLOSE_HINT": "Press × to stop speaking and close",
+  "BROADCAST_CLOSE": "Stop speaking and close broadcast"
 }

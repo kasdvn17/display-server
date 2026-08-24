@@ -437,20 +437,26 @@
         item.classList.toggle("active", item === button);
       });
       messageTitle.hidden = sendMode === "assistant";
-      messageText.placeholder = sendMode === "assistant" ? remoteT("GEMINI_QUESTION_PLACEHOLDER", "Enter a question for Gemini…") : remoteT("MESSAGE_PLACEHOLDER", "Enter content to send to the display…");
+      messageTitle.required = sendMode !== "assistant";
+      messageText.required = sendMode === "assistant";
+      messageText.placeholder = sendMode === "assistant" ? remoteT("GEMINI_QUESTION_PLACEHOLDER", "Enter a question for Gemini…") : remoteT("DESCRIPTION_OPTIONAL_PLACEHOLDER", "Description (optional)");
       messageSend.textContent = sendMode === "assistant" ? remoteT("ASK_GEMINI", "Ask Gemini") : remoteT("SEND_TO_DISPLAY", "Send to display");
     };
   });
 
   composeForm.onsubmit = function (event) {
     event.preventDefault();
-    var text = messageText.value.trim();
-    if (!text) return toast(remoteT("ENTER_CONTENT", "Enter some content"));
+    var text = messageText.value.trim(),
+      title = messageTitle.value.trim();
+    if (sendMode === "assistant" && !text)
+      return toast(remoteT("ENTER_CONTENT", "Enter some content"));
+    if (sendMode === "message" && !title)
+      return toast(remoteT("ENTER_TITLE", "Enter a title"));
     messageSend.disabled = true;
     command(
       sendMode === "assistant"
         ? { action: "assistant_query", text: text }
-        : { action: "show_message", title: messageTitle.value.trim(), text: text },
+        : { action: "show_message", title: title, text: text },
       sendMode === "assistant" ? remoteT("GEMINI_PROCESSING", "Gemini is processing") : remoteT("NOTIFICATION_SENT", "Notification sent"),
     )
       .then(function () {

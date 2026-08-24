@@ -131,7 +131,7 @@ function voiceToolDefinitions() {
       type: "function",
       name: "manage_notifications",
       description:
-        "List, create, mark as read, or dismiss notifications in the frame Notification Center.",
+        "List, create, mark as read, or dismiss notifications in the frame Notification Center. For create, choose the most semantically appropriate icon from the allowed list.",
       parameters: {
         type: "object",
         properties: {
@@ -140,11 +140,47 @@ function voiceToolDefinitions() {
             enum: ["list", "create", "read", "read_all", "dismiss"],
           },
           id: { type: "string" },
-          title: { type: "string" },
-          body: { type: "string" },
+          title: {
+            type: "string",
+            description: "Required title when action is create.",
+          },
+          body: {
+            type: "string",
+            description: "Optional notification description when action is create.",
+          },
           priority: { type: "integer", minimum: 0, maximum: 100 },
+          icon: {
+            type: "string",
+            enum: FRAME_ICON_NAMES,
+            description: "Semantic icon rendered with the current frame theme.",
+          },
         },
         required: ["action"],
+      },
+    },
+    {
+      type: "function",
+      name: "send_broadcast",
+      description:
+        "Send an immediate full-screen spoken broadcast to the online frame. Use only when the user explicitly says announce, announcement, broadcast, or asks to say something aloud on the frame. Choose the most appropriate semantic icon. For an ordinary notification request, use manage_notifications with action create instead.",
+      parameters: {
+        type: "object",
+        properties: {
+          title: {
+            type: "string",
+            description: "Required short title that the frame will read aloud.",
+          },
+          description: {
+            type: "string",
+            description: "Optional supporting text shown below the title but not read aloud.",
+          },
+          icon: {
+            type: "string",
+            enum: FRAME_ICON_NAMES,
+            description: "Semantic icon rendered with the current frame theme.",
+          },
+        },
+        required: ["title"],
       },
     },
     {
@@ -158,7 +194,7 @@ function voiceToolDefinitions() {
       type: "function",
       name: "control_frame",
       description:
-        "Control an online display: switch tabs, close a page, go back, idle, reload, stop the assistant, retry a service, or show a message. Call only when requested.",
+        "Control an online display: switch tabs, close a page, go back, idle, reload, stop the assistant, or retry a service. Call only when requested.",
       parameters: {
         type: "object",
         properties: {
@@ -173,16 +209,13 @@ function voiceToolDefinitions() {
               "stop_assistant",
               "retry_context",
               "retry_calendar",
-              "retry_camera",
-              "show_message"
+              "retry_camera"
             ],
           },
           view: {
             type: "string",
             enum: ["home", "today", "media", "news", "alarm"],
           },
-          title: { type: "string" },
-          text: { type: "string" },
         },
         required: ["action"],
       },
@@ -614,7 +647,7 @@ function voiceInstructions() {
     "Only make claims supported by search sources. Keep speech concise and place details and sources in Dynamic UI. Never invent missing facts.",
     "Every Dynamic UI link must copy an absolute HTTP(S) URL exactly from a tool result. Never use #, relative paths, or invented URLs. If no real source URL exists, omit the link and do not create an Open details button.",
     "For alarms or Spotify, use the appropriate tool. Call manage_alarms with action list when an ID is needed; edit or delete only when explicitly requested. ALWAYS call spotify_now_playing when asked what is playing. Use spotify_search to search, spotify_play_search to find and play, spotify_queue_search to queue, and spotify_library for top, recent, or saved music. Use spotify_control for volume, seek, shuffle, and repeat. Use spotify_devices to list players. To select or switch players, call spotify_select_player with deviceId or deviceName; if missing or ambiguous, call spotify_devices then request_followup instead of guessing. For relative alarms such as five minutes from now, pass relativeMinutes and never calculate HH:MM yourself. Pass time only for an explicit clock time. Confirm briefly after the tool completes.",
-    "Use get_frame_status for display, camera, and service status. Use control_frame only for an explicitly requested display action. Use manage_notifications for the notification center and mutate notifications only when explicitly requested. Use get_news_feed for the default RSS feed and search_news for topical searches. Use get_lyrics for a specific song; if the current track is unknown, call spotify_now_playing first. Never request, read, or expose tokens, API keys, OAuth credentials, or WebRTC signaling.",
+    "Use get_frame_status for display, camera, and service status. Use control_frame only for an explicitly requested display action. When the user explicitly says announce, announcement, broadcast, or asks the frame to say something aloud, use send_broadcast. A broadcast opens the full-screen broadcast presentation and reads only its required title aloud; its description is optional. For any ordinary request to notify, remind, or send a message that does not explicitly ask for an announcement or broadcast, use manage_notifications with action create so it appears in the Notification Center instead. Never call both send_broadcast and manage_notifications for the same request. For broadcasts and created notifications, choose the most semantically appropriate allowed icon; do not ask the user to choose an icon unless they explicitly care. Use manage_notifications for other Notification Center actions and mutate notifications only when explicitly requested. Use get_news_feed for the default RSS feed and search_news for topical searches. Use get_lyrics for a specific song; if the current track is unknown, call spotify_now_playing first. Never request, read, or expose tokens, API keys, OAuth credentials, or WebRTC signaling.",
     "If a tool returns an error, state it briefly instead of pretending the action succeeded.",
     "The default frame timezone is " +
     FRAME_TIMEZONE +
@@ -1733,12 +1766,14 @@ async function executeVoiceTool(name, args, context) {
       };
     }
     if (action === "create") {
+      const title = cleanExternalText(args.title || "", 180);
+      if (!title) throw new Error("Notification title is required");
       const item = cleanFrameNotification({
         type: "assistant",
-        title: args.title || "Assistant notification",
+        title,
         body: args.body || "",
         priority: args.priority,
-        icon: "assistant",
+        icon: normalizeFrameIcon(args.icon, "info"),
       });
       upsertFrameNotifications(item);
       return { kind: "action", ok: true, item, message: "Notification created" };
@@ -1764,6 +1799,24 @@ async function executeVoiceTool(name, args, context) {
       kind: "action",
       ok: true,
       message: action === "read" ? "Notification marked as read" : "Notification dismissed",
+    };
+  }
+  if (name === "send_broadcast") {
+    if (!remoteStatusPayload().online) throw new Error("Display is offline");
+    const title = cleanExternalText(args.title || "", 160),
+      description = cleanExternalText(args.description || "", 2000),
+      icon = normalizeFrameIcon(args.icon, "announcement");
+    if (!title) throw new Error("Broadcast title is required");
+    const command = noteRemoteCommand("show_message", {
+      title,
+      text: description,
+      icon,
+    });
+    return {
+      kind: "action",
+      ok: true,
+      command,
+      message: "Broadcast sent",
     };
   }
   if (name === "get_frame_status") {
@@ -1800,7 +1853,6 @@ async function executeVoiceTool(name, args, context) {
         "retry_context",
         "retry_calendar",
         "retry_camera",
-        "show_message",
       ];
     if (!allowed.includes(action)) throw new Error("Invalid display action");
     if (!remoteStatusPayload().online) throw new Error("Display is offline");
@@ -1810,11 +1862,6 @@ async function executeVoiceTool(name, args, context) {
       if (!["home", "today", "media", "news", "alarm"].includes(view))
         throw new Error("A valid tab is required");
       extra.view = view;
-    }
-    if (action === "show_message") {
-      extra.title = cleanExternalText(args.title || "Message from assistant", 160);
-      extra.text = cleanExternalText(args.text || "", 2000);
-      if (!extra.text) throw new Error("Display message content is required");
     }
     if (action === "retry_context") ambientContextCache.clear();
     if (action === "retry_calendar") {

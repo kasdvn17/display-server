@@ -81,11 +81,19 @@
       voiceShell.classList.add("show");
       voiceShell.setAttribute("aria-hidden", "false");
     }
+    if (voiceClose) {
+      voiceClose.setAttribute(
+        "aria-label",
+        tr("CLOSE_ASSISTANT", "Close assistant"),
+      );
+      voiceClose.setAttribute("title", tr("CLOSE_ASSISTANT", "Close assistant"));
+    }
     if (voiceButton) voiceButton.classList.add("active");
   }
   function hideAssistantPage() {
     if (assistantPage) {
       assistantPage.classList.remove("show");
+      assistantPage.classList.remove("broadcast-page");
       assistantPage.setAttribute("aria-hidden", "true");
     }
   }
@@ -138,6 +146,11 @@
       u.lang = frameLocale();
       u.rate = 0.96;
       window.speechSynthesis.speak(u);
+    } catch (_) {}
+  }
+  function stopVoiceNotice() {
+    try {
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
     } catch (_) {}
   }
   function finishVoiceSessionKeepUi() {
@@ -326,6 +339,20 @@
             dynamicLink(url, tr("PROFILE", "Hồ sơ")) +
             "</div>"
           : "") +
+        "</div></div>"
+      );
+    if (type === "broadcast")
+      return (
+        '<div class="dynamic-broadcast ' +
+        (text ? "has-description" : "no-description") +
+        '"><div class="dynamic-broadcast-signal" aria-hidden="true">' +
+        frameIconSvg(widget.icon || "announcement") +
+        '</div><div class="dynamic-broadcast-copy"><div class="dynamic-broadcast-kicker">' +
+        tr("BROADCAST", "Broadcast") +
+        '</div><div class="dynamic-broadcast-title">' +
+        (title || tr("REMOTE_MESSAGE", "Remote message")) +
+        "</div>" +
+        (text ? '<div class="dynamic-broadcast-text">' + text + "</div>" : "") +
         "</div></div>"
       );
     var body = '<div class="dynamic-widget-body">' + head;
@@ -566,6 +593,10 @@
       data.kind !== "dynamic_ui"
     )
       return;
+    assistantPage.classList.toggle(
+      "broadcast-page",
+      data.presentation === "broadcast",
+    );
     assistantPage.classList.add("show");
     assistantPage.setAttribute("aria-hidden", "false");
     assistantPageKicker.textContent = data.kicker || tr("NEST_ASSISTANT", "Trợ lý Nest");
@@ -694,6 +725,7 @@
     }
     closeVoiceInput();
     stopVoicePlayback();
+    stopVoiceNotice();
     if (voiceSocket) {
       try {
         voiceSocket.close(1000, "done");

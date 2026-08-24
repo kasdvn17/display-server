@@ -68,6 +68,8 @@
   "ASK_GEMINI": "Hỏi Gemini",
   "OPTIONAL_TITLE_PLACEHOLDER": "Tiêu đề (không bắt buộc)",
   "MESSAGE_PLACEHOLDER": "Nhập nội dung gửi tới màn hình…",
+  "TITLE_PLACEHOLDER": "Tiêu đề",
+  "DESCRIPTION_OPTIONAL_PLACEHOLDER": "Mô tả (không bắt buộc)",
   "MARK_ALL_READ": "Đánh dấu đã đọc",
   "DIAGNOSTICS": "Chẩn đoán",
   "ADD": "Thêm",
@@ -444,6 +446,7 @@
   "CONNECTED": "Đã kết nối",
   "CONNECTING": "Đang kết nối…",
   "ENTER_CONTENT": "Hãy nhập nội dung",
+  "ENTER_TITLE": "Hãy nhập tiêu đề",
   "ENTER_TOKEN": "Hãy nhập token",
   "ERROR_COUNT": "{COUNT} lỗi",
   "GEMINI_PROCESSING": "Gemini đang xử lý",
@@ -487,5 +490,8 @@
   "RAIN_PERCENT": "Khả năng mưa {COUNT}%",
   "ADD_CALENDAR_URL": "Thêm FRAME_CALENDAR_ICS_URL",
   "DESTINATION": "Điểm đến",
-  "ALARM_COUNT_ZERO": "0 báo thức"
+  "ALARM_COUNT_ZERO": "0 báo thức",
+  "BROADCAST": "Phát thông báo",
+  "BROADCAST_CLOSE_HINT": "Nhấn × để dừng đọc và đóng thông báo",
+  "BROADCAST_CLOSE": "Dừng đọc và đóng thông báo"
 }

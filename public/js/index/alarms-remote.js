@@ -625,30 +625,46 @@
     }).catch(function () {});
   }
   function showRemoteMessage(command) {
+    var broadcastTitle =
+      String(command.title || "").trim() ||
+      tr("REMOTE_MESSAGE", "Remote message");
     showVoiceShell();
+    if (voiceClose) {
+      voiceClose.setAttribute(
+        "aria-label",
+        tr("BROADCAST_CLOSE", "Stop speaking and close broadcast"),
+      );
+      voiceClose.setAttribute(
+        "title",
+        tr("BROADCAST_CLOSE", "Stop speaking and close broadcast"),
+      );
+    }
     setVoiceState(
       "idle",
-      tr("REMOTE", "Từ xa"),
-      command.title || tr("REMOTE_MESSAGE", "Tin nhắn từ xa"),
-      tr("PRESS_CLOSE_RETURN", "Nhấn × để quay lại trang trước"),
+      tr("BROADCAST", "Broadcast"),
+      broadcastTitle,
+      tr("BROADCAST_CLOSE_HINT", "Press × to stop speaking and close"),
     );
     showAssistantPage({
       kind: "dynamic_ui",
-      kicker: tr("REMOTE", "Từ xa"),
-      title: command.title || tr("REMOTE_MESSAGE", "Tin nhắn từ xa"),
+      presentation: "broadcast",
+      kicker: tr("BROADCAST", "Broadcast"),
+      title: broadcastTitle,
       subtitle: tr("SENT_TO_DISPLAY", "Được gửi tới màn hình này"),
       layout: { columns: 12, gap: 14, density: "comfortable" },
       widgets: [
         {
-          type: "callout",
+          type: "broadcast",
           span: 12,
           order: 0,
           emphasis: "hero",
-          title: command.title || tr("NOTIFICATIONS", "Thông báo"),
+          title: broadcastTitle,
           text: command.text || "",
+          icon: command.icon || "announcement",
         },
       ],
     });
+    speakVoiceNotice(broadcastTitle);
   }
   function performRemoteCommand(command) {
     var action = String((command && command.action) || "");

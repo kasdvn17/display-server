@@ -223,6 +223,40 @@ function writeFrameState(state) {
   fs.renameSync(tmp, FRAME_STATE_FILE);
 }
 
+const FRAME_ICON_NAMES = [
+  "info",
+  "announcement",
+  "bell",
+  "reminder",
+  "calendar",
+  "alarm",
+  "weather",
+  "rain",
+  "sun",
+  "uv",
+  "moon",
+  "air",
+  "wind",
+  "commute",
+  "route",
+  "music",
+  "spotify",
+  "home",
+  "camera",
+  "phone",
+  "person",
+  "success",
+  "warning",
+  "error",
+  "food",
+  "package",
+];
+
+function normalizeFrameIcon(value, fallback = "info") {
+  const icon = String(value || "").trim().toLowerCase();
+  return FRAME_ICON_NAMES.includes(icon) ? icon : fallback;
+}
+
 function cleanFrameNotification(input) {
   const now = new Date().toISOString();
   const rawId = String((input && input.id) || "").trim();
@@ -245,7 +279,7 @@ function cleanFrameNotification(input) {
       .trim()
       .slice(0, 180),
     body: String((input && input.body) || "").trim().slice(0, 800),
-    icon: String((input && input.icon) || "info").trim().slice(0, 40),
+    icon: normalizeFrameIcon(input && input.icon, "info"),
     action: String((input && input.action) || "").trim().slice(0, 100),
     createdAt: String((input && input.createdAt) || now),
     updatedAt: now,

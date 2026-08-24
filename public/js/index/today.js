@@ -110,6 +110,25 @@
     else if (name === "alarm")
       body =
         '<circle cx="12" cy="13" r="7"/><path d="M12 9v4l2.5 1.5M5.5 4.5 3.5 7M18.5 4.5l2 2.5"/>';
+    else if (name === "announcement")
+      body =
+        '<path d="M4 10v4h3l8 4V6l-8 4H4Z"/><path d="M7 14l1.5 5h3M18 9a5 5 0 0 1 0 6M20 6.5a8.5 8.5 0 0 1 0 11"/>';
+    else if (name === "success")
+      body = '<circle cx="12" cy="12" r="8.5"/><path d="m8 12 2.6 2.6L16.5 9"/>';
+    else if (name === "warning")
+      body = '<path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5m0 3v.1"/>';
+    else if (name === "home")
+      body = '<path d="m4 10 8-6 8 6v10h-5v-6H9v6H4V10Z"/>';
+    else if (name === "camera")
+      body = '<rect x="4" y="7" width="13" height="11" rx="2.5"/><path d="m17 10 3-2v9l-3-2"/>';
+    else if (name === "phone")
+      body = '<path d="M7 3h3l1.5 4-2 1.5a14 14 0 0 0 6 6l1.5-2 4 1.5v3c0 2-1.5 3.5-3.5 3.3C10.2 19.6 4.4 13.8 3.7 6.5 3.5 4.5 5 3 7 3Z"/>';
+    else if (name === "person")
+      body = '<circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/>';
+    else if (name === "food")
+      body = '<path d="M7 3v7m-3-7v4a3 3 0 0 0 6 0V3M7 10v11M16 3v18M16 3c3 2 4 5 4 8h-4"/>';
+    else if (name === "package")
+      body = '<path d="m4 7 8-4 8 4v10l-8 4-8-4V7Z"/><path d="m4 7 8 4 8-4M12 11v10"/>';
     else if (name === "moon")
       body = '<path d="M20 15.1A8 8 0 0 1 8.9 4 8.1 8.1 0 1 0 20 15.1Z"/>';
     else if (name === "error")

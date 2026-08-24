@@ -164,9 +164,10 @@ app.post("/remote/control", requireRemoteControl, (req, res) => {
         extra.routineId = routineId;
       }
       if (action === "show_message") {
-        extra.title = String(body.title || "Message from Remote").trim().slice(0, 160);
+        extra.title = String(body.title || "").trim().slice(0, 160);
         extra.text = String(body.text || body.message || "").trim().slice(0, 2000);
-        if (!extra.text) return res.status(400).json({ error: "Message content is required" });
+        extra.icon = normalizeFrameIcon(body.icon, "announcement");
+        if (!extra.title) return res.status(400).json({ error: "Message title is required" });
       }
       if (action === "assistant_query") {
         extra.text = String(body.text || body.message || "").trim().slice(0, 2000);
