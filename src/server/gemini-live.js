@@ -613,10 +613,10 @@ function voiceInstructions() {
     "Dùng get_frame_status để kiểm tra frame/camera/service. Chỉ dùng control_frame khi người dùng yêu cầu rõ một thao tác trên màn hình. Dùng manage_notifications cho notification center; chỉ tạo, đánh dấu hoặc bỏ thông báo khi người dùng yêu cầu rõ, còn action list là chỉ đọc. Dùng get_news_feed cho nguồn RSS mặc định và search_news cho truy vấn tin theo chủ đề. Dùng get_lyrics khi người dùng muốn lời một bài cụ thể; nếu đang phát và chưa biết tên bài, gọi spotify_now_playing trước. Không bao giờ yêu cầu, đọc hoặc tiết lộ token, API key, OAuth credential hay WebRTC signaling.",
     "Nếu tool trả lỗi, nói rõ ngắn gọn thay vì giả vờ đã thực hiện.",
     "Thời gian mặc định theo múi giờ của frame: " +
-    FRAME_TIMEZONE +
-    ". Thời điểm hiện tại khi bắt đầu phiên là " +
-    frameNow +
-    ".",
+      FRAME_TIMEZONE +
+      ". Thời điểm hiện tại khi bắt đầu phiên là " +
+      frameNow +
+      ".",
   ].join(" ");
 }
 
@@ -841,9 +841,9 @@ async function getVoiceDirections(args, context) {
   )
     throw new Error("Không tìm thấy tuyến đường phù hợp");
   const rawSteps =
-    route.legs && route.legs[0] && Array.isArray(route.legs[0].steps)
-      ? route.legs[0].steps
-      : [],
+      route.legs && route.legs[0] && Array.isArray(route.legs[0].steps)
+        ? route.legs[0].steps
+        : [],
     steps = rawSteps
       .filter((x) => x && Number(x.distance) >= 1)
       .slice(0, 14)
@@ -1210,8 +1210,8 @@ function extractHometownFromIntro(text) {
   );
   return m
     ? cleanExternalText(m[1], 90)
-      .replace(/\s+(?:ông|bà|anh|chị)\b.*$/i, "")
-      .trim()
+        .replace(/\s+(?:ông|bà|anh|chị)\b.*$/i, "")
+        .trim()
     : "";
 }
 
@@ -1349,18 +1349,18 @@ function normalizeRecipeEntry(value, kind, index) {
   }
   if (kind === "ingredient") {
     const amount = cleanExternalText(
-      value.amount || value.quantity || value.qty || "",
-      80,
-    ),
+        value.amount || value.quantity || value.qty || "",
+        80,
+      ),
       unit = cleanExternalText(value.unit || "", 80);
     const name = cleanExternalText(
       value.ingredient ||
-      value.name ||
-      value.title ||
-      value.value ||
-      value.text ||
-      value.detail ||
-      "",
+        value.name ||
+        value.title ||
+        value.value ||
+        value.text ||
+        value.detail ||
+        "",
       300,
     );
     return [amount, unit, name]
@@ -1370,17 +1370,17 @@ function normalizeRecipeEntry(value, kind, index) {
       .trim();
   }
   const title = cleanExternalText(
-    value.title || value.label || value.name || "",
-    180,
-  ),
+      value.title || value.label || value.name || "",
+      180,
+    ),
     detail = cleanExternalText(
       value.instruction ||
-      value.description ||
-      value.detail ||
-      value.text ||
-      value.value ||
-      value.step ||
-      "",
+        value.description ||
+        value.detail ||
+        value.text ||
+        value.value ||
+        value.step ||
+        "",
       kind === "step" ? 900 : 400,
     );
   if (kind === "step") {
@@ -1400,10 +1400,10 @@ function normalizeRecipeEntry(value, kind, index) {
 
 function normalizeRecipeList(value, kind, max) {
   const input = Array.isArray(value)
-    ? value
-    : typeof value === "string"
-      ? value.split(/\r?\n+/)
-      : [],
+      ? value
+      : typeof value === "string"
+        ? value.split(/\r?\n+/)
+        : [],
     seen = new Set(),
     out = [];
   for (let i = 0; i < input.length && out.length < max; i++) {
@@ -1471,20 +1471,20 @@ async function getSpotifyLibraryForVoice() {
     top:
       settled[0].status === "fulfilled"
         ? (((settled[0].value || {}).items || [])
-          .map(spotifyTrackToResult)
-          .filter(Boolean))
+            .map(spotifyTrackToResult)
+            .filter(Boolean))
         : [],
     recent:
       settled[1].status === "fulfilled"
         ? (((settled[1].value || {}).items || [])
-          .map((entry) => spotifyTrackToResult(entry && entry.track))
-          .filter(Boolean))
+            .map((entry) => spotifyTrackToResult(entry && entry.track))
+            .filter(Boolean))
         : [],
     saved:
       settled[2].status === "fulfilled"
         ? (((settled[2].value || {}).items || [])
-          .map((entry) => spotifyTrackToResult(entry && entry.track))
-          .filter(Boolean))
+            .map((entry) => spotifyTrackToResult(entry && entry.track))
+            .filter(Boolean))
         : [],
   };
   spotifyPersonalCache = {
@@ -1497,15 +1497,15 @@ async function getSpotifyLibraryForVoice() {
 
 async function searchSpotifyTracksForVoice(query, limit = 10) {
   const q = String(query || "").trim(),
-    take = Math.max(1, Math.min(10, Math.round(Number(limit) || 10))),
+    take = Math.max(1, Math.min(10, Math.round(Number(limit) || 10)),
     key = `spotify:${q.toLocaleLowerCase("vi")}`,
     cached = musicSearchCache.get(key);
   if (!q) throw new Error("Thiếu nội dung tìm kiếm Spotify");
   if (cached && cached.expires > Date.now())
     return (cached.payload.results || []).slice(0, take);
   const data = await spotifyApi("/search", {
-    query: { q, type: "track", limit: Math.max(take, 10) },
-  }),
+      query: { q, type: "track", limit: Math.max(take, 10) },
+    }),
     results = (((data || {}).tracks || {}).items || [])
       .map(spotifyTrackToResult)
       .filter(Boolean);
@@ -1542,7 +1542,7 @@ async function getConfiguredNewsForVoice(limit) {
         summary: cleanExternalText(entry.contentSnippet || entry.summary || "", 500),
         image: safePublicMediaUrl(
           (entry.enclosure && entry.enclosure.url) ||
-          firstHtmlImage(entry.content || entry.contentSnippet || ""),
+            firstHtmlImage(entry.content || entry.contentSnippet || ""),
         ),
       };
     })
@@ -1679,19 +1679,19 @@ async function executeVoiceTool(name, args, context) {
     if (!["enable", "disable", "update"].includes(action))
       throw new Error("Thao tác báo thức không hợp lệ");
     const changes = action === "enable"
-      ? { enabled: true }
-      : action === "disable"
-        ? { enabled: false }
-        : {
-          ...(args.time !== undefined ? { time: args.time } : {}),
-          ...(args.label !== undefined ? { label: args.label } : {}),
-          ...(args.repeatDays !== undefined
-            ? { repeatDays: args.repeatDays }
-            : {}),
-          ...(args.confirmCount !== undefined
-            ? { confirmCount: args.confirmCount }
-            : {}),
-        },
+        ? { enabled: true }
+        : action === "disable"
+          ? { enabled: false }
+          : {
+              ...(args.time !== undefined ? { time: args.time } : {}),
+              ...(args.label !== undefined ? { label: args.label } : {}),
+              ...(args.repeatDays !== undefined
+                ? { repeatDays: args.repeatDays }
+                : {}),
+              ...(args.confirmCount !== undefined
+                ? { confirmCount: args.confirmCount }
+                : {}),
+            },
       data = cleanAlarmInput(changes, items[index]);
     items[index] = {
       ...items[index],
@@ -2061,9 +2061,9 @@ async function executeVoiceTool(name, args, context) {
       };
     }
     const clientSpotify =
-      context && context.clientSpotify && typeof context.clientSpotify === "object"
-        ? context.clientSpotify
-        : {},
+        context && context.clientSpotify && typeof context.clientSpotify === "object"
+          ? context.clientSpotify
+          : {},
       track = playback && playback.item,
       device = playback && playback.device,
       wasPlaying = !!clientSpotify.wasPlaying,
@@ -2077,8 +2077,9 @@ async function executeVoiceTool(name, args, context) {
       track: track || null,
       device: device || null,
       message: track
-        ? `${isPlaying ? "Đang phát" : "Đang tạm dừng"} ${track.title}${track.artist ? ` của ${track.artist}` : ""
-        }${device && device.name ? ` trên ${device.name}` : ""}`
+        ? `${isPlaying ? "Đang phát" : "Đang tạm dừng"} ${track.title}${
+            track.artist ? ` của ${track.artist}` : ""
+          }${device && device.name ? ` trên ${device.name}` : ""}`
         : "Spotify hiện không phát nội dung nào",
     };
   }
@@ -2163,8 +2164,9 @@ async function executeVoiceTool(name, args, context) {
       message:
         target.id === currentDeviceId
           ? `Spotify đã ở trên ${target.name}`
-          : `Đã chuyển Spotify sang ${target.name}${isPlaying ? " và tiếp tục phát" : ""
-          }`,
+          : `Đã chuyển Spotify sang ${target.name}${
+              isPlaying ? " và tiếp tục phát" : ""
+            }`,
     };
   }
   if (name === "get_calendar") {

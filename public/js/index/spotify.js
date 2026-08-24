@@ -312,7 +312,7 @@
   function initSpotifySdkPlayer() {
     if (!window.Spotify || spotifyPlayer || !spotifyConnected) return;
     spotifyPlayer = new Spotify.Player({
-      name: "Nest Frame · iPad",
+      name: SPOTIFY_BROWSER_DEVICE_NAME,
       getOAuthToken: function (cb) {
         spotifyAccessToken()
           .then(cb)
@@ -1466,7 +1466,7 @@
         )
           spotifyDevices.unshift({
             id: spotifyLocalDeviceId,
-            name: "Nest Frame · iPad",
+            name: SPOTIFY_BROWSER_DEVICE_NAME,
             type: "Máy tính",
             isActive: false,
             isRestricted: false,
@@ -1613,6 +1613,8 @@
     spotifyFetch("/spotify/status", { cache: "no-store" })
       .then(function (status) {
         spotifyConfigured = !!status.configured;
+        if (status.deviceName)
+          SPOTIFY_BROWSER_DEVICE_NAME = String(status.deviceName);
         showSpotifyConnectedUI(!!status.connected);
         if (!status.configured) {
           if (spotifyConnectCard) {

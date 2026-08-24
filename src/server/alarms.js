@@ -1,7 +1,7 @@
 // ---------------- Alarm persistence ----------------
 // Alarm definitions live in a JSON file beside the server by default. Disabled
 // alarms remain in the file and are always returned to the client.
-const MAX_ALARM_CONFIRMATIONS = 5;
+const MAX_ALARM_CONFIRMATIONS = ALARM_MAX_CONFIRMATIONS;
 
 // Remote control API. Keep this token secret; the display itself never needs it.
 // POST /remote/control accepts alarm commands from another device/service.
@@ -291,4 +291,3 @@ app.post("/alarms/:id/trigger", (req, res) => {
   });
   res.json(items[index]);
 });
-

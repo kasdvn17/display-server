@@ -23,6 +23,9 @@
     pendingCandidates = [],
     epoch = 0,
     ending = false;
+  var CAMERA_POLL_VISIBLE_MS = 650,
+    CAMERA_POLL_HIDDEN_MS = 1800,
+    CAMERA_CONNECT_TIMEOUT_MS = 30000;
   try {
     tokenInput.value = localStorage.getItem("nestframe-camera-token") || "";
     nameInput.value =
@@ -34,10 +37,17 @@
     })
     .then(function (data) {
       var vars = (data && data.themeVariables) || {},
+        timing = (data && data.timing) || {},
         root = document.documentElement.style;
       Object.keys(vars).forEach(function (key) {
         if (/^--theme-/.test(key)) root.setProperty(key, String(vars[key]));
       });
+      if (isFinite(Number(timing.cameraPollVisibleMs)))
+        CAMERA_POLL_VISIBLE_MS = Number(timing.cameraPollVisibleMs);
+      if (isFinite(Number(timing.cameraPollHiddenMs)))
+        CAMERA_POLL_HIDDEN_MS = Number(timing.cameraPollHiddenMs);
+      if (isFinite(Number(timing.cameraConnectTimeoutMs)))
+        CAMERA_CONNECT_TIMEOUT_MS = Number(timing.cameraConnectTimeoutMs);
     })
     .catch(function () {});
   function showError(value) {
@@ -177,7 +187,7 @@
       function () {
         poll(myEpoch);
       },
-      document.hidden ? 1800 : 650,
+      document.hidden ? CAMERA_POLL_HIDDEN_MS : CAMERA_POLL_VISIBLE_MS,
     );
   }
   function poll(myEpoch) {
@@ -313,7 +323,7 @@
         connectTimer = setTimeout(function () {
           if (myEpoch === epoch && !stage.classList.contains("live"))
             fail("Màn hình không trả lời trong vòng 30 giây");
-        }, 30000);
+        }, CAMERA_CONNECT_TIMEOUT_MS);
       })
       .catch(function (err) {
         if (myEpoch === epoch)

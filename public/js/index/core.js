@@ -57,7 +57,8 @@
   var idleArt = document.getElementById("idle-art");
   var idleSong = document.getElementById("idle-song");
   var idleArtist = document.getElementById("idle-artist");
-  var IDLE_AFTER_MS = 90 * 1000;
+  var IDLE_AFTER_MS = 90000;
+  var CLIENT_FETCH_TIMEOUT_MS = 15000;
   var idleTimer = 0;
   var idleActive = false;
   var lastInteractionAt = Date.now();
@@ -169,20 +170,21 @@
     });
   resetIdleTimer();
 
-  var TIMEZONE = "Asia/Bangkok"; // replaced by the server bootstrap when configured
+  var TIMEZONE = "Asia/Ho_Chi_Minh"; // replaced by the server bootstrap when configured
   var IMMICH_PUBLIC_URL = "";
+  var SPOTIFY_BROWSER_DEVICE_NAME = "Nest Frame · iPad";
   var hasGsap = typeof gsap !== "undefined";
   function fetchFrameJson(url, init, timeoutMs) {
     init = init || {};
     var controller =
-      typeof AbortController !== "undefined" ? new AbortController() : null,
+        typeof AbortController !== "undefined" ? new AbortController() : null,
       timer = controller
         ? setTimeout(
-          function () {
-            controller.abort();
-          },
-          Math.max(500, Number(timeoutMs) || 15000),
-        )
+            function () {
+              controller.abort();
+            },
+            Math.max(500, Number(timeoutMs) || CLIENT_FETCH_TIMEOUT_MS),
+          )
         : 0;
     if (controller) init.signal = controller.signal;
     return fetch(url, init)
@@ -218,6 +220,9 @@
     data = data || {};
     if (data.timezone) TIMEZONE = String(data.timezone);
     IMMICH_PUBLIC_URL = String(data.immichPublicUrl || "");
+    SPOTIFY_BROWSER_DEVICE_NAME = String(
+      data.spotifyDeviceName || SPOTIFY_BROWSER_DEVICE_NAME,
+    );
     var vars = data.themeVariables || {},
       style = document.documentElement.style;
     Object.keys(vars).forEach(function (key) {
@@ -226,6 +231,18 @@
     var timing = data.timing || {};
     if (isFinite(Number(timing.ambientRefreshMs)))
       AMBIENT_CONTEXT_REFRESH_MS = Number(timing.ambientRefreshMs);
+    if (isFinite(Number(timing.idleTimeoutMs)))
+      IDLE_AFTER_MS = Number(timing.idleTimeoutMs);
+    if (isFinite(Number(timing.requestTimeoutMs)))
+      CLIENT_FETCH_TIMEOUT_MS = Number(timing.requestTimeoutMs);
+    if (isFinite(Number(timing.noticeDurationMs)))
+      AMBIENT_NOTICE_DURATION_MS = Number(timing.noticeDurationMs);
+    if (isFinite(Number(timing.noticeCycleMs)))
+      AMBIENT_NOTICE_CYCLE_MS = Number(timing.noticeCycleMs);
+    if (isFinite(Number(timing.photoHistorySize)))
+      PHOTO_HISTORY_MAX_OLD = Number(timing.photoHistorySize);
+    if (isFinite(Number(timing.alarmConfirmIntervalMs)))
+      ALARM_CONFIRM_INTERVAL_MS = Number(timing.alarmConfirmIntervalMs);
     if (typeof IMMICH === "object" && IMMICH) {
       if (isFinite(Number(timing.photoIntervalMs)))
         IMMICH.intervalMs = Number(timing.photoIntervalMs);
@@ -238,6 +255,33 @@
       isFinite(Number(timing.newsRefreshMs))
     )
       AMBIENT.newsRefreshMs = Number(timing.newsRefreshMs);
+    if (typeof AMBIENT === "object" && AMBIENT) {
+      if (isFinite(Number(timing.newsChance)))
+        AMBIENT.newsChance = Number(timing.newsChance);
+      if (isFinite(Number(timing.newsDurationMs)))
+        AMBIENT.newsDurationMs = Number(timing.newsDurationMs);
+    }
+    if (isFinite(Number(timing.spotifyPollLocalSdkMs)))
+      SPOTIFY_POLL_LOCAL_SDK_MS = Number(timing.spotifyPollLocalSdkMs);
+    if (isFinite(Number(timing.spotifyPollRemoteActiveMs)))
+      SPOTIFY_POLL_REMOTE_ACTIVE_MS = Number(timing.spotifyPollRemoteActiveMs);
+    if (isFinite(Number(timing.spotifyPollIdleMs)))
+      SPOTIFY_POLL_IDLE_MS = Number(timing.spotifyPollIdleMs);
+    if (isFinite(Number(timing.spotifyPollHiddenMs)))
+      SPOTIFY_POLL_HIDDEN_MS = Number(timing.spotifyPollHiddenMs);
+    if (isFinite(Number(timing.spotifyLyricSyncLeadSeconds)))
+      LYRIC_SYNC_LEAD_SECONDS = Number(timing.spotifyLyricSyncLeadSeconds);
+    if (isFinite(Number(timing.spotifyLyricSeekPrerollSeconds)))
+      LYRIC_SEEK_PREROLL_SECONDS = Number(
+        timing.spotifyLyricSeekPrerollSeconds,
+      );
+    if (isFinite(Number(timing.geminiProcessingTimeoutMs)))
+      VOICE_PROCESSING_TIMEOUT_MS = Number(timing.geminiProcessingTimeoutMs);
+    if (isFinite(Number(timing.geminiToolTimeoutMs)))
+      VOICE_TOOL_TIMEOUT_MS = Number(timing.geminiToolTimeoutMs);
+    if (isFinite(Number(timing.geminiFollowupWaitMs)))
+      VOICE_FOLLOWUP_WAIT_MS = Number(timing.geminiFollowupWaitMs);
+    resetIdleTimer();
     return data;
   }
   var frameBootstrapPromise = fetchFrameJson(
@@ -250,4 +294,3 @@
       console.warn("Frame bootstrap unavailable; using defaults.", err);
       return {};
     });
-})();

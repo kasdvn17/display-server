@@ -66,7 +66,7 @@ module.exports = Object.freeze({
 
   FRAME_CALENDAR_ICS_URL: text("FRAME_CALENDAR_ICS_URL"),
   FRAME_CALENDAR_NAME: text("FRAME_CALENDAR_NAME", "Lịch") || "Lịch",
-  FRAME_TIMEZONE: timezone("FRAME_TIMEZONE", "Asia/Bangkok"),
+  FRAME_TIMEZONE: timezone("FRAME_TIMEZONE", "Asia/Ho_Chi_Minh"),
   FRAME_CALENDAR_LOOKAHEAD_HOURS: number(
     "FRAME_CALENDAR_LOOKAHEAD_HOURS",
     48,
@@ -77,7 +77,8 @@ module.exports = Object.freeze({
     "FRAME_HIDDEN_ASSETS_FILE",
     ".frame-hidden-assets.json",
   ),
-  FRAME_CONFIG_FILE: path.join(PROJECT_ROOT, "public", "frame-config.json"),
+  FRAME_CONFIG_FILE: file("FRAME_CONFIG_FILE", "public/frame-config.json"),
+  FRAME_THEME_PRIMARY_COLOR: text("FRAME_THEME_PRIMARY_COLOR"),
   FRAME_STATE_FILE: file("FRAME_STATE_FILE", ".frame-state.json"),
   FRAME_MORNING_BRIEF_START_HOUR,
   FRAME_MORNING_BRIEF_END_HOUR: number(
@@ -97,6 +98,44 @@ module.exports = Object.freeze({
     10 * 60 * 1000,
     60 * 1000,
     60 * 60 * 1000,
+  ),
+  FRAME_IDLE_TIMEOUT_MS: number("FRAME_IDLE_TIMEOUT_MS", 90000, 10000, 3600000),
+  FRAME_REQUEST_TIMEOUT_MS: number(
+    "FRAME_REQUEST_TIMEOUT_MS",
+    15000,
+    1000,
+    120000,
+  ),
+  FRAME_AMBIENT_NOTICE_DURATION_MS: number(
+    "FRAME_AMBIENT_NOTICE_DURATION_MS",
+    11000,
+    1000,
+    120000,
+  ),
+  FRAME_AMBIENT_NOTICE_CYCLE_MS: number(
+    "FRAME_AMBIENT_NOTICE_CYCLE_MS",
+    36000,
+    5000,
+    600000,
+  ),
+  FRAME_NEWS_CHANCE: number("FRAME_NEWS_CHANCE", 0.32, 0, 1),
+  FRAME_NEWS_DURATION_MS: number(
+    "FRAME_NEWS_DURATION_MS",
+    14000,
+    1000,
+    300000,
+  ),
+  FRAME_PHOTO_HISTORY_SIZE: number(
+    "FRAME_PHOTO_HISTORY_SIZE",
+    10,
+    0,
+    100,
+  ),
+  ALARM_CONFIRM_INTERVAL_MS: number(
+    "ALARM_CONFIRM_INTERVAL_MS",
+    300000,
+    10000,
+    3600000,
   ),
   FRAME_LATITUDE: coordinate("FRAME_LATITUDE", -90, 90),
   FRAME_LONGITUDE: coordinate("FRAME_LONGITUDE", -180, 180),
@@ -122,6 +161,7 @@ module.exports = Object.freeze({
   NOMINATIM_EMAIL: text("NOMINATIM_EMAIL"),
 
   ALARMS_FILE: file("ALARMS_FILE", "alarms.json"),
+  ALARM_MAX_CONFIRMATIONS: number("ALARM_MAX_CONFIRMATIONS", 5, 1, 20),
   REMOTE_CONTROL_TOKEN: text("REMOTE_CONTROL_TOKEN"),
 
   FRAME_POOL_REFRESH_MS: number(
@@ -152,19 +192,49 @@ module.exports = Object.freeze({
   SPOTIFY_TOKEN_FILE: file("SPOTIFY_TOKEN_FILE", ".spotify-token.json"),
   SPOTIFY_DEVICE_NAME:
     text("SPOTIFY_DEVICE_NAME", "Nest Frame · iPad") || "Nest Frame · iPad",
-  SPOTIFY_SCOPES: [
-    "streaming",
-    "user-read-private",
-    "user-read-email",
-    "user-read-playback-state",
-    "user-read-currently-playing",
-    "user-modify-playback-state",
-    "user-read-recently-played",
-    "user-top-read",
-    "user-library-read",
-    "playlist-read-private",
-    "playlist-read-collaborative",
-  ].join(" "),
+  SPOTIFY_POLL_LOCAL_SDK_MS: number(
+    "SPOTIFY_POLL_LOCAL_SDK_MS",
+    60000,
+    5000,
+    900000,
+  ),
+  SPOTIFY_POLL_REMOTE_ACTIVE_MS: number(
+    "SPOTIFY_POLL_REMOTE_ACTIVE_MS",
+    15000,
+    5000,
+    900000,
+  ),
+  SPOTIFY_POLL_IDLE_MS: number(
+    "SPOTIFY_POLL_IDLE_MS",
+    60000,
+    5000,
+    1800000,
+  ),
+  SPOTIFY_POLL_HIDDEN_MS: number(
+    "SPOTIFY_POLL_HIDDEN_MS",
+    300000,
+    10000,
+    3600000,
+  ),
+  SPOTIFY_LYRIC_SYNC_LEAD_SECONDS: number(
+    "SPOTIFY_LYRIC_SYNC_LEAD_SECONDS",
+    0.35,
+    0,
+    5,
+  ),
+  SPOTIFY_LYRIC_SEEK_PREROLL_SECONDS: number(
+    "SPOTIFY_LYRIC_SEEK_PREROLL_SECONDS",
+    0.18,
+    0,
+    5,
+  ),
+  SPOTIFY_SCOPES: text(
+    "SPOTIFY_SCOPES",
+    "streaming user-read-private user-read-email user-read-playback-state user-read-currently-playing user-modify-playback-state user-read-recently-played user-top-read user-library-read playlist-read-private playlist-read-collaborative",
+  )
+    .split(/[\s,]+/)
+    .filter(Boolean)
+    .join(" "),
 
   CAMERA_REMOTE_TOKEN: text("CAMERA_REMOTE_TOKEN"),
   CAMERA_STUN_URL: text(
@@ -178,9 +248,54 @@ module.exports = Object.freeze({
     30000,
     Number(process.env.CAMERA_CALL_TTL_MS || 90000),
   ),
+  CAMERA_POLL_VISIBLE_MS: number("CAMERA_POLL_VISIBLE_MS", 650, 250, 10000),
+  CAMERA_POLL_HIDDEN_MS: number("CAMERA_POLL_HIDDEN_MS", 1800, 500, 30000),
+  CAMERA_CONNECT_TIMEOUT_MS: number(
+    "CAMERA_CONNECT_TIMEOUT_MS",
+    30000,
+    5000,
+    180000,
+  ),
+
+  REMOTE_REFRESH_INTERVAL_MS: number(
+    "REMOTE_REFRESH_INTERVAL_MS",
+    5000,
+    1000,
+    300000,
+  ),
+  REMOTE_TOAST_DURATION_MS: number(
+    "REMOTE_TOAST_DURATION_MS",
+    1900,
+    500,
+    30000,
+  ),
+  REMOTE_DEFAULT_ALARM_OFFSET_MINUTES: number(
+    "REMOTE_DEFAULT_ALARM_OFFSET_MINUTES",
+    5,
+    1,
+    1440,
+  ),
 
   GEMINI_API_KEY: text("GEMINI_API_KEY"),
   GEMINI_LIVE_MODEL:
     text("GEMINI_LIVE_MODEL", "gemini-3.1-flash-live-preview") ||
     "gemini-3.1-flash-live-preview",
+  GEMINI_PROCESSING_TIMEOUT_MS: number(
+    "GEMINI_PROCESSING_TIMEOUT_MS",
+    35000,
+    5000,
+    180000,
+  ),
+  GEMINI_TOOL_TIMEOUT_MS: number(
+    "GEMINI_TOOL_TIMEOUT_MS",
+    22000,
+    3000,
+    120000,
+  ),
+  GEMINI_FOLLOWUP_WAIT_MS: number(
+    "GEMINI_FOLLOWUP_WAIT_MS",
+    12000,
+    3000,
+    60000,
+  ),
 });

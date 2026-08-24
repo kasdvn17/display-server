@@ -1,16 +1,30 @@
 (function () {
   "use strict";
 
+  var REMOTE_REFRESH_INTERVAL_MS = 5000,
+    REMOTE_TOAST_DURATION_MS = 1900,
+    REMOTE_DEFAULT_ALARM_OFFSET_MINUTES = 5;
+
   fetch("/frame/bootstrap", { cache: "no-store" })
     .then(function (response) {
       return response.ok ? response.json() : {};
     })
     .then(function (data) {
-      var variables = (data && data.themeVariables) || {};
+      var variables = (data && data.themeVariables) || {},
+        timing = (data && data.timing) || {};
       Object.keys(variables).forEach(function (key) {
         if (/^--theme-/.test(key))
           document.documentElement.style.setProperty(key, String(variables[key]));
       });
+      if (isFinite(Number(timing.remoteRefreshIntervalMs)))
+        REMOTE_REFRESH_INTERVAL_MS = Number(timing.remoteRefreshIntervalMs);
+      if (isFinite(Number(timing.remoteToastDurationMs)))
+        REMOTE_TOAST_DURATION_MS = Number(timing.remoteToastDurationMs);
+      if (isFinite(Number(timing.remoteDefaultAlarmOffsetMinutes)))
+        REMOTE_DEFAULT_ALARM_OFFSET_MINUTES = Number(
+          timing.remoteDefaultAlarmOffsetMinutes,
+        );
+      scheduleRemoteRefresh();
     })
     .catch(function () {});
 
@@ -77,7 +91,7 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function () {
       toastElement.classList.remove("show");
-    }, 1900);
+    }, REMOTE_TOAST_DURATION_MS);
   }
 
   function api(method, body) {
@@ -440,7 +454,9 @@
     confirmCount = 1;
     daysElement.querySelectorAll(".chip").forEach(function (chip) { chip.classList.remove("active"); });
     confirmationsElement.querySelectorAll(".chip").forEach(function (chip) { chip.classList.toggle("active", chip.textContent === "1"); });
-    var date = new Date(Date.now() + 5 * 60000);
+    var date = new Date(
+      Date.now() + REMOTE_DEFAULT_ALARM_OFFSET_MINUTES * 60000,
+    );
     timeInput.value = String(date.getHours()).padStart(2, "0") + ":" + String(date.getMinutes()).padStart(2, "0");
     labelInput.value = "";
     modalBackdrop.classList.add("show");
@@ -466,9 +482,13 @@
       .then(function () { submit.disabled = false; });
   };
 
+  function scheduleRemoteRefresh() {
+    clearInterval(refreshTimer);
+    refreshTimer = setInterval(function () {
+      if (token && !controls.hidden)
+        refresh({ quiet: true }).catch(function () {});
+    }, REMOTE_REFRESH_INTERVAL_MS);
+  }
   if (token) refresh().catch(function () {});
-  clearInterval(refreshTimer);
-  refreshTimer = setInterval(function () {
-    if (token && !controls.hidden) refresh({ quiet: true }).catch(function () {});
-  }, 5000);
+  scheduleRemoteRefresh();
 })();

@@ -1,7 +1,17 @@
 {
   "name": "immich-smart-display",
   "version": "1.7.0",
+  "description": "A self-hosted Immich smart display with Spotify Premium, Gemini Live, weather, calendar, alarms and remote control.",
   "private": true,
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kasdvn17/display-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kasdvn17/display-server/issues"
+  },
+  "homepage": "https://github.com/kasdvn17/display-server#readme",
   "type": "commonjs",
   "scripts": {
     "start": "node server.js"

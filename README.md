@@ -5,6 +5,12 @@ It combines an Immich photo frame with weather, news, calendars, alarms,
 Spotify playback, synchronized lyrics, Gemini Live, remote control, and a
 peer-to-peer camera intercom.
 
+> [!IMPORTANT]
+> The current Media player uses the Spotify Web Playback SDK and therefore
+> **requires an active Spotify Premium account**. A future version using
+> SoundCloud is planned, but SoundCloud playback is not included in this
+> release.
+
 ## Contents
 
 - [Features](#features)
@@ -57,8 +63,6 @@ peer-to-peer camera intercom.
 
 ### Media — Spotify Premium
 
-> **This feature is for Spotify Premium users only, due to Spotify's restrictions with Spotify Connect feature. I'm planning on making a SoundCloud version, but not in this version.**
-
 - Native Spotify catalog search
 - Spotify Connect device discovery and switching
 - Automatic recovery to the active, local browser, or first available player
@@ -72,6 +76,9 @@ peer-to-peer camera intercom.
 - Tap a timed lyric line to seek to that position
 - Server-side caching, request coalescing, and `Retry-After` cooldown handling
   to reduce Spotify API usage
+
+Spotify is the only music provider in this version. SoundCloud support will be
+provided in a later release.
 
 ### Alarms, remote control, and camera
 
@@ -123,17 +130,23 @@ The default display URL is:
 http://localhost:8080/
 ```
 
+From another device on the same network, replace `localhost` with the server's
+LAN address, for example `http://192.168.1.100:8080/`.
+
 ## Configuration
 
 All runtime configuration is read from `.env`. Start with
 [`.env.example`](./.env.example), which documents every supported option.
+Display timing, Spotify polling, Gemini timeouts, alarm confirmation, camera
+polling, remote refresh and theme color can all be tuned there without editing
+JavaScript source files.
 
 ### Minimum Immich configuration
 
 ```env
 PORT=8080
 IMMICH_URL=https://photos.example.com
-IMMICH_API_KEY=replace_me
+IMMICH_API_KEY=your_immich_api_key
 IMMICH_PUBLIC_URL=https://photos.example.com
 ```
 

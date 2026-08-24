@@ -593,20 +593,44 @@ function readFrameConfig() {
 app.get("/frame/bootstrap", (req, res) => {
   const config = readFrameConfig(),
     primary =
-      config &&
-      config.theme &&
-      (config.theme.primaryColor || config.theme.primary);
+      FRAME_THEME_PRIMARY_COLOR ||
+      (config &&
+        config.theme &&
+        (config.theme.primaryColor || config.theme.primary));
   res.setHeader("Cache-Control", "private, max-age=60");
   res.json({
     timezone: FRAME_TIMEZONE,
     immichPublicUrl: IMMICH_PUBLIC_URL,
+    spotifyDeviceName: SPOTIFY_DEVICE_NAME,
     themeVariables: buildThemeVariables(primary),
     timing: {
       ambientRefreshMs: AMBIENT_CONTEXT_REFRESH_MS,
       photoIntervalMs: FRAME_PHOTO_INTERVAL_MS,
       poolRefreshMs: FRAME_POOL_REFRESH_MS,
       newsRefreshMs: FRAME_NEWS_REFRESH_MS,
+      idleTimeoutMs: FRAME_IDLE_TIMEOUT_MS,
+      requestTimeoutMs: FRAME_REQUEST_TIMEOUT_MS,
+      noticeDurationMs: FRAME_AMBIENT_NOTICE_DURATION_MS,
+      noticeCycleMs: FRAME_AMBIENT_NOTICE_CYCLE_MS,
+      newsChance: FRAME_NEWS_CHANCE,
+      newsDurationMs: FRAME_NEWS_DURATION_MS,
+      photoHistorySize: FRAME_PHOTO_HISTORY_SIZE,
+      alarmConfirmIntervalMs: ALARM_CONFIRM_INTERVAL_MS,
+      spotifyPollLocalSdkMs: SPOTIFY_POLL_LOCAL_SDK_MS,
+      spotifyPollRemoteActiveMs: SPOTIFY_POLL_REMOTE_ACTIVE_MS,
+      spotifyPollIdleMs: SPOTIFY_POLL_IDLE_MS,
+      spotifyPollHiddenMs: SPOTIFY_POLL_HIDDEN_MS,
+      spotifyLyricSyncLeadSeconds: SPOTIFY_LYRIC_SYNC_LEAD_SECONDS,
+      spotifyLyricSeekPrerollSeconds: SPOTIFY_LYRIC_SEEK_PREROLL_SECONDS,
+      geminiProcessingTimeoutMs: GEMINI_PROCESSING_TIMEOUT_MS,
+      geminiToolTimeoutMs: GEMINI_TOOL_TIMEOUT_MS,
+      geminiFollowupWaitMs: GEMINI_FOLLOWUP_WAIT_MS,
+      cameraPollVisibleMs: CAMERA_POLL_VISIBLE_MS,
+      cameraPollHiddenMs: CAMERA_POLL_HIDDEN_MS,
+      cameraConnectTimeoutMs: CAMERA_CONNECT_TIMEOUT_MS,
+      remoteRefreshIntervalMs: REMOTE_REFRESH_INTERVAL_MS,
+      remoteToastDurationMs: REMOTE_TOAST_DURATION_MS,
+      remoteDefaultAlarmOffsetMinutes: REMOTE_DEFAULT_ALARM_OFFSET_MINUTES,
     },
   });
 });
-
