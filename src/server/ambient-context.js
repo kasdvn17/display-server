@@ -601,6 +601,7 @@ app.get("/frame/bootstrap", (req, res) => {
   res.json({
     language: FRAME_LANGUAGE,
     timezone: FRAME_TIMEZONE,
+    serverTime: Date.now(),
     immichPublicUrl: IMMICH_PUBLIC_URL,
     spotifyDeviceName: SPOTIFY_DEVICE_NAME,
     themeVariables: buildThemeVariables(primary),

@@ -371,7 +371,7 @@
               '<div class="dynamic-forecast-item"><small>' +
               escVoice(x.time || x.date || x.label || "") +
               "</small><strong>" +
-              escVoice(x.value || x.title || "—") +
+              escVoice(x.value || x.title || "-") +
               "</strong><span>" +
               escVoice(x.detail || x.subtitle || "") +
               "</span></div>"

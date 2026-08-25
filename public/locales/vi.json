@@ -1,5 +1,5 @@
 {
-  "DOCUMENT_TITLE": "Màn hình thông minh — Nest Frame",
+  "DOCUMENT_TITLE": "Màn hình thông minh - Nest Frame",
   "REMOTE_DOCUMENT_TITLE": "Điều khiển Nest Frame",
   "CAMERA_DOCUMENT_TITLE": "Camera Nest Frame",
   "APP_SUBTITLE": "Màn hình thông minh",
@@ -140,8 +140,8 @@
   "SPOTIFY_SEARCHING": "Đang tìm trên Spotify…",
   "SPOTIFY_RESULTS": "Kết quả Spotify",
   "SPOTIFY_SEARCH_FAILED": "Không thể tìm kiếm trên Spotify",
-  "SPOTIFY_SESSION_EXPIRED": "Phiên Spotify đã hết hạn — hãy kết nối lại",
-  "SPOTIFY_RETRY_LATER": "Spotify đang giới hạn yêu cầu — hãy thử lại sau",
+  "SPOTIFY_SESSION_EXPIRED": "Phiên Spotify đã hết hạn. Hãy kết nối lại",
+  "SPOTIFY_RETRY_LATER": "Spotify đang giới hạn yêu cầu. Hãy thử lại sau",
   "SPOTIFY_LYRICS_TIMING_WARNING": "Thời gian lời bài hát có thể lệch so với bản thu này",
   "SPOTIFY_UNSYNCED": "Chưa đồng bộ",
   "SPOTIFY_FINDING_LYRICS": "Đang tìm lời bài hát…",

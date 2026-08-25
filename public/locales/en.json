@@ -1,5 +1,5 @@
 {
-  "DOCUMENT_TITLE": "Smart display — Nest Frame",
+  "DOCUMENT_TITLE": "Smart display - Nest Frame",
   "REMOTE_DOCUMENT_TITLE": "Nest Frame Remote",
   "CAMERA_DOCUMENT_TITLE": "Nest Frame Camera",
   "APP_SUBTITLE": "Smart display",
@@ -140,8 +140,8 @@
   "SPOTIFY_SEARCHING": "Searching Spotify…",
   "SPOTIFY_RESULTS": "Spotify results",
   "SPOTIFY_SEARCH_FAILED": "Unable to search Spotify",
-  "SPOTIFY_SESSION_EXPIRED": "Spotify session expired — reconnect",
-  "SPOTIFY_RETRY_LATER": "Spotify is rate limiting requests — try again later",
+  "SPOTIFY_SESSION_EXPIRED": "Spotify session expired. Reconnect to continue",
+  "SPOTIFY_RETRY_LATER": "Spotify is rate limiting requests. Try again later",
   "SPOTIFY_LYRICS_TIMING_WARNING": "Lyrics timing may differ from this recording",
   "SPOTIFY_UNSYNCED": "Not synchronized",
   "SPOTIFY_FINDING_LYRICS": "Finding lyrics…",

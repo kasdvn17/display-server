@@ -183,7 +183,7 @@
       ready: remoteT("SPOTIFY_READY", "Ready"), setup: remoteT("NOT_ENABLED", "Not enabled"), live: remoteT("LIVE", "Live"),
       connecting: remoteT("CONNECTING", "Connecting"), error: remoteT("HAS_ERROR", "Error"),
     };
-    return labels[value] || String(value || "—");
+    return labels[value] || String(value || "-");
   }
 
   function readableAction(value) {
@@ -346,7 +346,7 @@
     renderAlarms(data.alarms);
     lastCommand.textContent = data.lastCommand
       ? readableAction(data.lastCommand.action) + " · " + relativeTime(data.lastCommand.at)
-      : "—";
+      : "-";
   }
 
   function refresh(options) {

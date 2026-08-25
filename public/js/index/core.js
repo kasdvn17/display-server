@@ -193,9 +193,25 @@
   resetIdleTimer();
 
   var TIMEZONE = "Asia/Ho_Chi_Minh"; // replaced by the server bootstrap when configured
+  var FRAME_CLOCK_BASE_MS = Date.now();
+  var FRAME_CLOCK_BASE_MONOTONIC =
+    typeof performance !== "undefined" && performance.now
+      ? performance.now()
+      : 0;
   var IMMICH_PUBLIC_URL = "";
   var SPOTIFY_BROWSER_DEVICE_NAME = "Nest Frame · iPad";
   var hasGsap = typeof gsap !== "undefined";
+  function frameNow() {
+    if (
+      FRAME_CLOCK_BASE_MONOTONIC &&
+      typeof performance !== "undefined" &&
+      performance.now
+    )
+      return new Date(
+        FRAME_CLOCK_BASE_MS + performance.now() - FRAME_CLOCK_BASE_MONOTONIC,
+      );
+    return new Date();
+  }
   function fetchFrameJson(url, init, timeoutMs) {
     init = init || {};
     var controller =
@@ -243,6 +259,13 @@
   function applyServerBootstrap(data) {
     data = data || {};
     if (data.timezone) TIMEZONE = String(data.timezone);
+    if (Number.isFinite(Number(data.serverTime))) {
+      FRAME_CLOCK_BASE_MS = Number(data.serverTime);
+      FRAME_CLOCK_BASE_MONOTONIC =
+        typeof performance !== "undefined" && performance.now
+          ? performance.now()
+          : 0;
+    }
     IMMICH_PUBLIC_URL = String(data.immichPublicUrl || "");
     SPOTIFY_BROWSER_DEVICE_NAME = String(
       data.spotifyDeviceName || SPOTIFY_BROWSER_DEVICE_NAME,

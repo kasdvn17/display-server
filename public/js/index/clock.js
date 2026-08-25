@@ -3,14 +3,11 @@
     clockTimer = 0;
   function resetClockFormatters() {
     clockFormatters = {
-      hour: new Intl.DateTimeFormat(frameLocale(), {
+      clock: new Intl.DateTimeFormat("en-US", {
         timeZone: TIMEZONE,
-        hour: "2-digit",
-        hour12: false,
-      }),
-      minute: new Intl.DateTimeFormat(frameLocale(), {
-        timeZone: TIMEZONE,
+        hour: "numeric",
         minute: "2-digit",
+        hour12: true,
       }),
       date: new Intl.DateTimeFormat(frameLocale(), {
         timeZone: TIMEZONE,
@@ -18,24 +15,22 @@
         month: "short",
         day: "numeric",
       }),
-      hour24: new Intl.DateTimeFormat(frameLocale(), {
-        timeZone: TIMEZONE,
-        hour: "numeric",
-        hour12: false,
-      }),
     };
   }
   function getParts() {
-    var now = new Date();
+    var now = frameNow();
     if (!clockFormatters) resetClockFormatters();
-    var hourFmt = clockFormatters.hour;
-    var hour = "12";
-    var hp = hourFmt.formatToParts(now);
+    var hour = 0,
+      minute = "00",
+      dayPeriod = "";
+    var hp = clockFormatters.clock.formatToParts(now);
     for (var i = 0; i < hp.length; i++) {
-      if (hp[i].type === "hour") hour = hp[i].value;
+      if (hp[i].type === "hour") hour = parseInt(hp[i].value, 10) || 0;
+      if (hp[i].type === "minute") minute = pad(parseInt(hp[i].value, 10));
+      if (hp[i].type === "dayPeriod") dayPeriod = hp[i].value.toUpperCase();
     }
-
-    var minute = pad(parseInt(clockFormatters.minute.format(now), 10));
+    if (dayPeriod === "PM" && hour < 12) hour += 12;
+    if (dayPeriod === "AM" && hour === 12) hour = 0;
 
     var dateFmt = clockFormatters.date;
     var dp = dateFmt.formatToParts(now);
@@ -47,12 +42,10 @@
       if (dp[j].type === "month") month = dp[j].value;
       if (dp[j].type === "day") day = dp[j].value;
     }
-    var hourFmt24 = clockFormatters.hour24;
-    var greetHour = parseInt(hourFmt24.format(now), 10);
     return {
-      time: hour + ":" + minute,
+      time: pad(hour) + ":" + minute,
       date: dateFmt.format(now).toUpperCase(),
-      greetHour: greetHour,
+      greetHour: hour,
     };
   }
 
@@ -74,7 +67,10 @@
   function scheduleClock() {
     clearTimeout(clockTimer);
     updateClock();
-    clockTimer = setTimeout(scheduleClock, 60050 - (Date.now() % 60000));
+    clockTimer = setTimeout(
+      scheduleClock,
+      60050 - (frameNow().getTime() % 60000),
+    );
   }
 
   frameBootstrapPromise.then(function () {

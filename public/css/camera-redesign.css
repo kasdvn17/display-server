@@ -1,0 +1,250 @@
+/* Cinematic call surface with a single ruby accent. */
+:root {
+  --camera-bg: #0b0c0e;
+  --camera-surface: rgba(20, 21, 24, 0.96);
+  --camera-text: #f2f0ed;
+  --camera-muted: rgba(242, 240, 237, 0.6);
+  --camera-line: rgba(242, 240, 237, 0.13);
+  --camera-line-strong: rgba(242, 240, 237, 0.22);
+  --camera-accent: #d5525b;
+  --camera-accent-rgb: 213, 82, 91;
+  --theme-primary: var(--camera-accent);
+  --theme-rgb: var(--camera-accent-rgb);
+  --text: var(--camera-text);
+  --muted: var(--camera-muted);
+  --border: var(--camera-line);
+}
+
+html,
+body {
+  background: var(--camera-bg);
+  color: var(--camera-text);
+  font-family:
+    "SF Pro Display",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+:where(button, a, input, textarea, select):focus-visible {
+  outline: 2px solid var(--camera-accent);
+  outline-offset: 3px;
+}
+
+.brand,
+.call-state,
+.error,
+.hint {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.stage {
+  place-items: center start;
+  padding-left: max(8vw, env(safe-area-inset-left));
+  background:
+    linear-gradient(90deg, rgba(var(--camera-accent-rgb), 0.09), transparent 38%),
+    linear-gradient(150deg, #121317, var(--camera-bg) 68%);
+}
+
+.stage::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 8vw;
+  width: min(32vw, 420px);
+  height: 100%;
+  border-left: 1px solid var(--camera-line);
+  border-right: 1px solid var(--camera-line);
+  background:
+    linear-gradient(180deg, rgba(var(--camera-accent-rgb), 0.2), transparent 30%),
+    rgba(255, 255, 255, 0.018);
+  pointer-events: none;
+}
+
+.panel {
+  width: min(480px, calc(100% - 36px));
+  padding: 26px;
+  border: 1px solid var(--camera-line-strong);
+  border-left: 3px solid var(--camera-accent);
+  border-radius: 18px;
+  background: var(--camera-surface);
+  box-shadow: 0 26px 72px rgba(4, 5, 7, 0.38);
+  -webkit-backdrop-filter: blur(22px) saturate(105%);
+  backdrop-filter: blur(22px) saturate(105%);
+}
+
+.brand {
+  align-items: flex-start;
+  margin-bottom: 22px;
+}
+
+.mark {
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(var(--camera-accent-rgb), 0.24);
+  border-radius: 12px;
+  background: rgba(var(--camera-accent-rgb), 0.11);
+  color: var(--camera-accent);
+}
+
+.brand strong {
+  color: var(--camera-text);
+  font-size: 22px;
+  font-weight: 620;
+  letter-spacing: -0.45px;
+}
+
+.brand span {
+  color: var(--camera-muted);
+}
+
+.form {
+  gap: 15px;
+}
+
+.label {
+  margin-bottom: 7px;
+  color: var(--camera-muted);
+  font-size: 10px;
+  letter-spacing: 0.07em;
+}
+
+.field {
+  height: 50px;
+  border: 1px solid var(--camera-line);
+  border-radius: 12px;
+  background: #101115;
+  color: var(--camera-text);
+}
+
+.field::placeholder {
+  color: rgba(242, 240, 237, 0.42);
+}
+
+.field:focus {
+  border-color: rgba(var(--camera-accent-rgb), 0.62);
+  box-shadow: 0 0 0 3px rgba(var(--camera-accent-rgb), 0.11);
+}
+
+.share {
+  color: var(--camera-muted);
+}
+
+.share input {
+  accent-color: var(--camera-accent);
+}
+
+.button {
+  height: 50px;
+  border-radius: 12px;
+  background: var(--camera-accent);
+  color: #fff;
+  font-weight: 680;
+}
+
+.button.end {
+  color: #fff;
+  border-color: rgba(var(--camera-accent-rgb), 0.32);
+  background: rgba(var(--camera-accent-rgb), 0.72);
+}
+
+.hint {
+  color: var(--camera-muted);
+  line-height: 1.5;
+}
+
+.error {
+  border-radius: 12px;
+  color: #ffd9dc;
+  background: rgba(var(--camera-accent-rgb), 0.1);
+  border-color: rgba(var(--camera-accent-rgb), 0.24);
+}
+
+.stage.live .panel {
+  left: max(24px, env(safe-area-inset-left));
+  bottom: max(24px, env(safe-area-inset-bottom));
+  transform: none;
+  min-width: min(440px, calc(100% - 48px));
+  border-radius: 18px;
+  background: rgba(15, 16, 19, 0.88);
+}
+
+.stage.live::before {
+  opacity: 0;
+}
+
+.shade {
+  background:
+    linear-gradient(90deg, rgba(5, 6, 8, 0.42), transparent 46%),
+    linear-gradient(180deg, rgba(5, 6, 8, 0.28), transparent 34%, rgba(5, 6, 8, 0.56));
+}
+
+.dot,
+.stage.live .dot {
+  background: var(--camera-accent);
+  box-shadow: none;
+}
+
+.local-video {
+  top: max(20px, env(safe-area-inset-top));
+  right: max(20px, env(safe-area-inset-right));
+  border: 1px solid var(--camera-line-strong);
+  border-radius: 16px;
+  box-shadow: 0 18px 48px rgba(4, 5, 7, 0.34);
+}
+
+@media (max-width: 700px) {
+  .stage {
+    place-items: center;
+    padding: max(16px, env(safe-area-inset-top))
+      max(16px, env(safe-area-inset-right))
+      max(16px, env(safe-area-inset-bottom))
+      max(16px, env(safe-area-inset-left));
+  }
+
+  .stage::before {
+    right: 0;
+    width: 32vw;
+  }
+
+  .panel {
+    width: min(480px, 100%);
+    padding: 21px;
+  }
+
+  .stage.live .panel {
+    left: 16px;
+    right: 16px;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    width: auto;
+    min-width: 0;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .panel,
+  .stage.live .panel {
+    background: #16171b;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .panel,
+  .stage.calling .callbar,
+  .stage.live .callbar {
+    animation: none;
+  }
+}

@@ -162,7 +162,7 @@
       var blocked = new Error(
         spotifyT(
           "SPOTIFY_RETRY_LATER",
-          "Spotify đang giới hạn yêu cầu — hãy thử lại sau",
+          "Spotify đang giới hạn yêu cầu. Hãy thử lại sau",
         ),
       );
       blocked.status = 429;
@@ -909,12 +909,12 @@
         if (err && err.status === 401)
           message = spotifyT(
             "SPOTIFY_SESSION_EXPIRED",
-            "Phiên Spotify đã hết hạn — hãy kết nối lại",
+            "Phiên Spotify đã hết hạn. Hãy kết nối lại",
           );
         else if (err && err.status === 429)
           message = spotifyT(
             "SPOTIFY_RETRY_LATER",
-            "Spotify đang giới hạn yêu cầu — hãy thử lại sau",
+            "Spotify đang giới hạn yêu cầu. Hãy thử lại sau",
           );
         musicSearchResults.innerHTML = "";
         var status = document.createElement("div");
